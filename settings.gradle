@@ -1,0 +1,5 @@
+rootProject.name = 'CampusRideBackend'
+include 'Infrastructure'
+include 'Domain'
+include 'Application'
+include 'API'
