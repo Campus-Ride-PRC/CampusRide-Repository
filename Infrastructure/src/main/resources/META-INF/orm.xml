@@ -48,14 +48,9 @@
             <basic name="vehicleColor">
                 <column name="vehicleColor"/>
             </basic>
-            <basic name="userId">
-                <column name="userId" nullable="false"/>
-            </basic>
-            <many-to-one name="user" target-entity="campus.ride.api.entity.User">
-                <join-column name="userId"
-                             referenced-column-name="id"
-                             insertable="false"
-                             updatable="false"/>
+            <many-to-one name="user" target-entity="campus.ride.entities.User">
+                <join-column name="user_id"
+                             referenced-column-name="id"/>
             </many-to-one>
         </attributes>
     </entity>

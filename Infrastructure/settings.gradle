@@ -1,0 +1,6 @@
+rootProject.name = 'Infrastructure'
+include ':Application'
+include ':Domain'
+
+project(':Application').projectDir = file('../Application')
+project(':Domain').projectDir = file('../Domain')

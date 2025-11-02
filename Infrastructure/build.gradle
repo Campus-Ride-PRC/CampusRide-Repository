@@ -5,6 +5,12 @@ plugins {
 group = 'campus.ride'
 version = '1.0-SNAPSHOT'
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(23)
+    }
+}
+
 repositories {
     mavenCentral()
 }
@@ -12,6 +18,14 @@ repositories {
 dependencies {
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
+
+    // Spring Data JPA for repository implementations
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa:3.2.0'
+    
+    // Domain entities dependency
+    implementation project(':Domain')
+    // Application layer contracts
+    implementation project(':Application')
 }
 
 test {

@@ -1,5 +1,6 @@
 package campus.ride.contracts;
 
+import campus.ride.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
