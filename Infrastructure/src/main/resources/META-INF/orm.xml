@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns="http://xmlns.jcp.org/xml/ns/persistence/orm"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm
+                 http://xmlns.jcp.org/xml/ns/persistence/orm_2_2.xsd"
+                 version="2.2">
+
+    <!-- User Entity Mapping -->
+    <entity class="campus.ride.entities.User">
+        <table name="users"/>
+        <attributes>
+            <id name="id">
+                <generated-value strategy="IDENTITY"/>
+            </id>
+            <basic name="email">
+                <column name="email" nullable="false"/>
+            </basic>
+            <basic name="password">
+                <column name="password" nullable="false"/>
+            </basic>
+            <basic name="phoneNumber">
+                <column name="phoneNumber"/>
+            </basic>
+            <basic name="firstName">
+                <column name="firstName"/>
+            </basic>
+            <basic name="lastName">
+                <column name="lastName"/>
+            </basic>
+            <basic name="faculty">
+                <column name="faculty"/>
+            </basic>
+        </attributes>
+    </entity>
+
+    <entity class="campus.ride.entities.Vehicle">
+        <table name="vehicle"/>
+        <attributes>
+            <id name="id">
+                <generated-value strategy="IDENTITY"/>
+            </id>
+            <basic name="vehicleModel">
+                <column name="vehicleModel"/>
+            </basic>
+            <basic name="vehicleLicencePlate">
+                <column name="vehicleLicencePlate"/>
+            </basic>
+            <basic name="vehicleColor">
+                <column name="vehicleColor"/>
+            </basic>
+            <basic name="userId">
+                <column name="userId" nullable="false"/>
+            </basic>
+            <many-to-one name="user" target-entity="campus.ride.api.entity.User">
+                <join-column name="userId"
+                             referenced-column-name="id"
+                             insertable="false"
+                             updatable="false"/>
+            </many-to-one>
+        </attributes>
+    </entity>
+
+</entity-mappings>
