@@ -1,6 +1,0 @@
-rootProject.name = 'API'
-include ':Application'
-include ':Infrastructure'
-
-project(':Application').projectDir = file('../Application')
-project(':Infrastructure').projectDir = file('../Infrastructure')

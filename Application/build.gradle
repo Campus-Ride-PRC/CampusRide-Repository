@@ -7,7 +7,7 @@ version = '1.0-SNAPSHOT'
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(23)
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
@@ -18,11 +18,9 @@ repositories {
 dependencies {
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
-
-    // Spring Data for repository contracts
-    implementation 'org.springframework.data:spring-data-jpa:3.2.0'
     
-    // Domain entities dependency
+    implementation 'org.springframework:spring-context:6.1.0'
+    
     implementation project(':Domain')
 }
 

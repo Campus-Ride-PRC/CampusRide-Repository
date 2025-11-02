@@ -1,4 +1,0 @@
-rootProject.name = 'Application'
-include ':Domain'
-
-project(':Domain').projectDir = file('../Domain')

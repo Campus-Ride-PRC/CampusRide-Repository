@@ -5,7 +5,6 @@
                  http://xmlns.jcp.org/xml/ns/persistence/orm_2_2.xsd"
                  version="2.2">
 
-    <!-- User Entity Mapping -->
     <entity class="campus.ride.entities.User">
         <table name="users"/>
         <attributes>
