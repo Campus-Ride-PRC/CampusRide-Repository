@@ -11,8 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
-
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
@@ -28,16 +26,12 @@ public class UserController {
     @PostMapping("/email")
     public ResponseEntity<UserResponseDto> findByEmail(@RequestBody EmailRequestDto request) {
         logger.info("Received request to find user by email");
+        logger.debug("Searching for user with email: {}", request.getEmail());
         
-        String sanitizedEmail = request.getEmail() != null ? request.getEmail().trim() : null;
-        logger.debug("Searching for user with email: {}", sanitizedEmail);
+        UserResponseDto user = userService.findByEmail(request.getEmail());
         
-        Optional<UserResponseDto> userOptional = userService.findByEmail(sanitizedEmail);
-        
-        logger.info("User found with email: {}", sanitizedEmail);
-        return userOptional
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+        logger.info("User found with email: {}", request.getEmail());
+        return ResponseEntity.ok(user);
     }
 
     @PostMapping
