@@ -5,6 +5,8 @@ import campus.ride.transfer.dtos.user.CreateUserRequestDto;
 import campus.ride.transfer.dtos.user.EmailRequestDto;
 import campus.ride.transfer.dtos.user.UserResponseDto;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +17,8 @@ import java.util.Optional;
 @RequestMapping("/api/user")
 public class UserController {
 
+    private static final Logger logger = LogManager.getLogger(UserController.class);
+    
     private final UserService userService;
 
     public UserController(UserService userService) {
@@ -23,12 +27,14 @@ public class UserController {
 
     @PostMapping("/email")
     public ResponseEntity<UserResponseDto> findByEmail(@RequestBody EmailRequestDto request) {
+        logger.info("Received request to find user by email");
+        
         String sanitizedEmail = request.getEmail() != null ? request.getEmail().trim() : null;
-        if (sanitizedEmail == null || sanitizedEmail.isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
-
+        logger.debug("Searching for user with email: {}", sanitizedEmail);
+        
         Optional<UserResponseDto> userOptional = userService.findByEmail(sanitizedEmail);
+        
+        logger.info("User found with email: {}", sanitizedEmail);
         return userOptional
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
@@ -36,18 +42,12 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<UserResponseDto> createUser(@RequestBody CreateUserRequestDto request) {
-        if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
-        if (request.getPassword() == null || request.getPassword().isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        try {
-            UserResponseDto createdUser = userService.createUser(request);
-            return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        logger.info("Received request to create new user");
+        logger.debug("Creating user with email: {}", request.getEmail());
+        
+        UserResponseDto createdUser = userService.createUser(request);
+        
+        logger.info("Successfully created user with email: {}", createdUser.getEmail());
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
     }
 }
