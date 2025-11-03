@@ -1,6 +1,7 @@
 package campus.ride.api.controller;
 
 import campus.ride.interfaces.UserService;
+import campus.ride.transfer.dtos.EmailRequestDto;
 import campus.ride.transfer.dtos.UserResponseDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/user")
 public class UserController {
 
     private final UserService userService;
@@ -18,9 +19,9 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping("/email/{email}")
-    public ResponseEntity<UserResponseDto> findByEmail(@PathVariable String email) {
-        String sanitizedEmail = email != null ? email.trim() : null;
+    @PostMapping("/email")
+    public ResponseEntity<UserResponseDto> findByEmail(@RequestBody EmailRequestDto request) {
+        String sanitizedEmail = request.getEmail() != null ? request.getEmail().trim() : null;
         if (sanitizedEmail == null || sanitizedEmail.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
