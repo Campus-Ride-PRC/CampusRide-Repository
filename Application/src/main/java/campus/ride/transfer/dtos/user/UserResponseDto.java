@@ -1,4 +1,4 @@
-package campus.ride.transfer.dtos;
+package campus.ride.transfer.dtos.user;
 
 public class UserResponseDto {
     private Integer id;
