@@ -1,42 +1,44 @@
 plugins {
-    id 'java'
     id 'application'
-    id 'org.springframework.boot' version '3.3.5'
-    id 'io.spring.dependency-management' version '1.1.6'
+    id 'org.springframework.boot' version '3.5.7'
+    id 'io.spring.dependency-management' version '1.1.7'
 }
 
-group = 'campus.ride'
-version = '1.0-SNAPSHOT'
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+description = 'demo'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
 
 repositories {
     mavenCentral()
 }
 
+configurations {
+    all {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+        exclude group: 'org.apache.logging.log4j', module: 'log4j-to-slf4j'
+    }
+}
+
 dependencies {
-    // Dependency on the Application module for service interfaces/beans
-    implementation project(':Application')
-    implementation project(':Infrastructure')
-
-    // Spring Web for REST controllers, JSON (Jackson), and embedded server
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-
-    // Spring Data JPA runtime support (Hibernate, entity manager, etc.)
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-log4j2'
+    
+    runtimeOnly 'org.postgresql:postgresql'
+    
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
-    // Bean validation (Jakarta Validation API + Hibernate Validator)
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
-
-    // Enable proxying for @Async
     implementation 'org.springframework.boot:spring-boot-starter-aop'
-
-    // Swagger/OpenAPI UI via springdoc
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
 
-    // JDBC driver for PostgreSQL
-    runtimeOnly 'org.postgresql:postgresql:42.7.4'
-
-    // Testing with JUnit Jupiter and Spring Boot test utilities
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation project(':Application')
+    implementation project(':Infrastructure')
 }
 
 test {
@@ -45,4 +47,8 @@ test {
 
 application {
     mainClass='campus.ride.ApiApplication'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
 }
