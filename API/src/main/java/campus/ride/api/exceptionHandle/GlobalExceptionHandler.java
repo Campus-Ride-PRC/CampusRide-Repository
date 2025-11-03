@@ -1,6 +1,6 @@
 package campus.ride.api.exceptionHandle;
 
-import campus.ride.api.dto.ErrorResponse;
+import campus.ride.api.errorDto.ErrorResponse;
 import campus.ride.exception.BadRequestException;
 import campus.ride.exception.BusinessException;
 import campus.ride.exception.ResourceNotFoundException;

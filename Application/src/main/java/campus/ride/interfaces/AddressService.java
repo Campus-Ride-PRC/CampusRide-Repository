@@ -1,9 +1,9 @@
 package campus.ride.interfaces;
 
-import campus.ride.Address;
-
 import java.util.concurrent.CompletableFuture;
 
+import campus.ride.transfer.dtos.address.AddressDto;
+
 public interface AddressService {
-    CompletableFuture<Address> getOrCreate(String street, String number, String neighborhood, String locationName);
+    CompletableFuture<AddressDto> getOrCreate(String street, String number, String neighborhood, String locationName);
 }

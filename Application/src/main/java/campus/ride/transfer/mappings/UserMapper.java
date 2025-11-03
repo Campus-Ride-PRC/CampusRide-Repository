@@ -14,6 +14,7 @@ public class UserMapper {
         return new UserResponseDto(
             user.getId(),
             user.getEmail(),
+            user.getAddress(),
             user.getPhoneNumber(),
             user.getFirstName(),
             user.getLastName(),
@@ -26,9 +27,8 @@ public class UserMapper {
             return null;
         }
         
-        User user = new User();
+        User user = new User(dto.getEmail(), null);
         user.setId(dto.getId());
-        user.setEmail(dto.getEmail());
         user.setPhoneNumber(dto.getPhoneNumber());
         user.setFirstName(dto.getFirstName());
         user.setLastName(dto.getLastName());
@@ -42,9 +42,7 @@ public class UserMapper {
             return null;
         }
         
-        User user = new User();
-        user.setEmail(dto.getEmail());
-        user.setPassword(dto.getPassword());
+        User user = new User(dto.getEmail(), dto.getPassword());
         user.setPhoneNumber(dto.getPhoneNumber());
         user.setFirstName(dto.getFirstName());
         user.setLastName(dto.getLastName());

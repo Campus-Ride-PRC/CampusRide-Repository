@@ -1,9 +1,9 @@
 package campus.ride.interfaces;
 
-import campus.ride.Vehicle;
+import campus.ride.transfer.dtos.vehicle.VehicleDto;
 
 import java.util.concurrent.CompletableFuture;
 
 public interface VehicleService {
-    CompletableFuture<Vehicle> getOrCreate(String model, String plate, String color);
+    CompletableFuture<VehicleDto> getOrCreate(String model, String plate, String color);
 }

@@ -1,14 +1,14 @@
 package campus.ride.useCases;
 
-import campus.ride.contracts.Drive.DriveQueryRepository;
-import campus.ride.contracts.Drive.DriveRow;
-import campus.ride.contracts.Drive.DriveRepository;
-import campus.ride.Address;
-import campus.ride.Drive;
-import campus.ride.dtos.Drive.DriveCardDTO;
-import campus.ride.dtos.Drive.DriveDTO;
-import campus.ride.dtos.Drive.DriveMapper;
+import campus.ride.entities.Address;
+import campus.ride.entities.Drive;
+import campus.ride.contracts.drive.DriveQueryRepository;
+import campus.ride.contracts.drive.DriveRepository;
+import campus.ride.contracts.drive.DriveRow;
 import campus.ride.interfaces.DriveService;
+import campus.ride.transfer.dtos.drive.DriveCardDto;
+import campus.ride.transfer.dtos.drive.DriveDto;
+import campus.ride.transfer.mappings.DriveMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.data.domain.Page;
@@ -38,8 +38,8 @@ public class DriveServiceImpl implements DriveService {
     @Override
     @Async
     @Transactional(readOnly = true)
-    public CompletableFuture<Page<DriveDTO>> getAllAsync(Pageable pageable) {
-        Page<DriveDTO> page = driveRepo.findAll(pageable).map(DriveMapper::toDto);
+    public CompletableFuture<Page<DriveDto>> getAllAsync(Pageable pageable) {
+        Page<DriveDto> page = driveRepo.findAll(pageable).map(DriveMapper::toDto);
         return CompletableFuture.completedFuture(page);
     }
 
@@ -47,7 +47,7 @@ public class DriveServiceImpl implements DriveService {
     @Override
     @Async
     @Transactional(readOnly = true)
-    public CompletableFuture<DriveDTO> getByIdAsync(Long id) {
+    public CompletableFuture<DriveDto> getByIdAsync(Long id) {
         Drive d = driveRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Drive not found: " + id));
         return CompletableFuture.completedFuture(DriveMapper.toDto(d));
@@ -57,7 +57,7 @@ public class DriveServiceImpl implements DriveService {
     @Override
     @Async
     @Transactional
-    public CompletableFuture<DriveDTO> addAsync(DriveDTO dto) {
+    public CompletableFuture<DriveDto> addAsync(DriveDto dto) {
         Address from = mustFindAddress(dto.getFromAddressId());
         Address to   = mustFindAddress(dto.getToAddressId());
 
@@ -79,7 +79,7 @@ public class DriveServiceImpl implements DriveService {
     @Override
     @Async
     @Transactional
-    public CompletableFuture<DriveDTO> updateAsync(Long id, DriveDTO dto) {
+    public CompletableFuture<DriveDto> updateAsync(Long id, DriveDto dto) {
         Drive d = driveRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Drive not found: " + id));
 
@@ -113,10 +113,10 @@ public class DriveServiceImpl implements DriveService {
     @Override
     @Async
     @Transactional(readOnly = true)
-    public CompletableFuture<Page<DriveCardDTO>> getDriverCardsAsync(Pageable pageable) {
+    public CompletableFuture<Page<DriveCardDto>> getDriverCardsAsync(Pageable pageable) {
         Page<DriveRow> rows = driveQueryRepo.findAllBy(pageable);
-        Page<DriveCardDTO> page = rows.map(r ->
-                new DriveCardDTO(
+        Page<DriveCardDto> page = rows.map(r ->
+                new DriveCardDto(
                         r.getId(), r.getTime(), r.getPrice(),
                         r.getFrom_LocationName(), r.getFrom_Neighborhood(),
                         r.getTo_LocationName(),   r.getTo_Neighborhood(),

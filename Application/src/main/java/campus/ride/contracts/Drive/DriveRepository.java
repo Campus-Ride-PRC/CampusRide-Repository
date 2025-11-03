@@ -1,10 +1,10 @@
-package campus.ride.contracts.Drive;
+package campus.ride.contracts.drive;
 
-import campus.ride.Drive;
-import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
+import campus.ride.entities.Drive;
 
 public interface DriveRepository {
     Page<Drive> findAll(Pageable pageable);

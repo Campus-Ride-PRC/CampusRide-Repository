@@ -1,4 +1,4 @@
-package campus.ride.contracts.Drive;
+package campus.ride.contracts.drive;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

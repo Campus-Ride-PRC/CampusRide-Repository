@@ -4,5 +4,4 @@ include 'API'
 include 'Application'
 include 'Domain'
 include 'Infrastructure'
-include 'Contracts'
 

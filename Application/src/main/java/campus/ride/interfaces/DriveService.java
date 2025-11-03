@@ -1,19 +1,20 @@
 package campus.ride.interfaces;
 
-import campus.ride.dtos.Drive.DriveDTO;
-import campus.ride.dtos.Drive.DriveCardDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
+import campus.ride.transfer.dtos.drive.DriveCardDto;
+import campus.ride.transfer.dtos.drive.DriveDto;
 
 import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
 
 public interface DriveService {
-    CompletableFuture<Page<DriveDTO>> getAllAsync(Pageable pageable);
-    CompletableFuture<DriveDTO> getByIdAsync(Long id);
-    CompletableFuture<DriveDTO> addAsync(DriveDTO dto);
-    CompletableFuture<DriveDTO> updateAsync(Long id, DriveDTO dto);
+    CompletableFuture<Page<DriveDto>> getAllAsync(Pageable pageable);
+    CompletableFuture<DriveDto> getByIdAsync(Long id);
+    CompletableFuture<DriveDto> addAsync(DriveDto dto);
+    CompletableFuture<DriveDto> updateAsync(Long id, DriveDto dto);
     CompletableFuture<Void> deleteAsync(Long id);
 
-    CompletableFuture<Page<DriveCardDTO>> getDriverCardsAsync(Pageable pageable);
+    CompletableFuture<Page<DriveCardDto>> getDriverCardsAsync(Pageable pageable);
 }

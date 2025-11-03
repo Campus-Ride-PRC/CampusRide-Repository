@@ -1,7 +1,8 @@
-package campus.ride.contracts.Address;
+package campus.ride.contracts.address;
 
-import campus.ride.Address;
 import java.util.Optional;
+
+import campus.ride.entities.Address;
 
 public interface AddressRepository {
     Address save(Address a);
