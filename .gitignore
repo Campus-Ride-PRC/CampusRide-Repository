@@ -94,4 +94,3 @@ keystore.*
 # API specific
 **/API/**/.gitignore
 **/API/**/.gitattributes
-**/API/**/build.gradle
