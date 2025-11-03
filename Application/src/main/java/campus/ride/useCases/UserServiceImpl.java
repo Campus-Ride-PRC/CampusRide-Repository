@@ -27,7 +27,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<UserResponseDto> findByEmail(String email) {
+    public UserResponseDto findByEmail(String email) {
         logger.debug("Finding user by email: {}", email);
         
         if (email == null || email.trim().isEmpty()) {
@@ -37,14 +37,13 @@ public class UserServiceImpl implements UserService {
         
         Optional<User> userOptional = userRepository.findByEmail(email.trim());
         
-        if (userOptional.isPresent()) {
-            logger.debug("User found in repository for email: {}", email);
-        } else {
+        if (userOptional.isEmpty()) {
             logger.debug("No user found in repository for email: {}", email);
             throw new ResourceNotFoundException("User not found with email: " + email);
         }
         
-        return userOptional.map(UserMapper::toDto);
+        logger.debug("User found in repository for email: {}", email);
+        return UserMapper.toDto(userOptional.get());
     }
 
     @Override
