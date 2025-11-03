@@ -5,6 +5,7 @@ import campus.ride.transfer.dtos.user.CreateUserRequestDto;
 import campus.ride.transfer.dtos.user.EmailRequestDto;
 import campus.ride.transfer.dtos.user.UserResponseDto;
 
+import campus.ride.transfer.dtos.user.VerificationRequestDto;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
@@ -34,14 +35,24 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    @PostMapping
-    public ResponseEntity<UserResponseDto> createUser(@RequestBody CreateUserRequestDto request) {
-        logger.info("Received request to create new user");
-        logger.debug("Creating user with email: {}", request.getEmail());
-        
-        UserResponseDto createdUser = userService.createUser(request);
-        
-        logger.info("Successfully created user with email: {}", createdUser.getEmail());
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
+    @PostMapping("/register")
+    public ResponseEntity<String> registerUser(@RequestBody CreateUserRequestDto request) {
+       logger.info("Received request to register new user");
+        logger.debug("Registering user with email: {}", request.getEmail());
+
+        String message = userService.registerUser(request);
+
+        logger.info("Successfully sent verification code for email: {}", request.getEmail());
+        return ResponseEntity.ok(message);
+    }
+
+    @PostMapping("/verify")
+    public ResponseEntity<UserResponseDto> verifyUSer(@RequestBody VerificationRequestDto request){
+        logger.info("Received request to verify user");
+        logger.debug("Verifying user with email: {}", request.getEmail());
+
+        UserResponseDto user = userService.verifyUser(request);
+        logger.info("User verified with email: {}", request.getEmail());
+        return ResponseEntity.status(HttpStatus.CREATED).body(user);
     }
 }
