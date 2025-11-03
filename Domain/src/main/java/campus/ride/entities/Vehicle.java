@@ -1,10 +1,25 @@
 package campus.ride.entities;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "vehicle")
 public class Vehicle {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    
+    @Column(name = "vehicleModel")
     private String vehicleModel;
+    
+    @Column(name = "vehicleLicencePlate")
     private String vehicleLicencePlate;
+    
+    @Column(name = "vehicleColor")
     private String vehicleColor;
+    
+    @ManyToOne
+    @JoinColumn(name = "userId", nullable = false)
     private User user;
 
     public Vehicle() {

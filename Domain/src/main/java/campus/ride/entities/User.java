@@ -1,12 +1,30 @@
 package campus.ride.entities;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "users")
 public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
+    
+    @Column(name = "password", nullable = false)
     private String password;
+    
+    @Column(name = "phoneNumber")
     private String phoneNumber;
+    
+    @Column(name = "firstName")
     private String firstName;
+    
+    @Column(name = "lastName")
     private String lastName;
+    
+    @Column(name = "faculty")
     private String faculty;
 
     public User() {

@@ -21,6 +21,9 @@ dependencies {
 
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa:3.2.0'
     
+    // Log4j2 API (implementation comes from API module)
+    implementation 'org.apache.logging.log4j:log4j-api:2.21.1'
+    
     implementation project(':Domain')
     implementation project(':Application')
 }
