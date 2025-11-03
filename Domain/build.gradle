@@ -5,6 +5,12 @@ plugins {
 group = 'campus.ride'
 version = '1.0-SNAPSHOT'
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
 repositories {
     mavenCentral()
 }
@@ -12,6 +18,8 @@ repositories {
 dependencies {
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
+    
+    implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
 }
 
 test {
