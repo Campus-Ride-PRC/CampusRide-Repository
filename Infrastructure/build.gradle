@@ -10,6 +10,15 @@ repositories {
 }
 
 dependencies {
+    implementation project(':Domain')
+    implementation project(':Application')
+
+    // Spring Data JPA API needed for JpaRepository
+    implementation 'org.springframework.data:spring-data-jpa:3.3.4'
+
+    compileOnly 'jakarta.persistence:jakarta.persistence-api:3.1.0'
+    annotationProcessor 'jakarta.persistence:jakarta.persistence-api:3.1.0'
+
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 }
