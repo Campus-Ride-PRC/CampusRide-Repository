@@ -63,6 +63,8 @@ public class DriveController {
         return driveService.getAllAsync(pageable);
     }
 
+
+
     @Operation(
             summary = "Get drive by ID",
             description = "Retrieves detailed information about a specific drive"
@@ -81,6 +83,8 @@ public class DriveController {
         return driveService.getByIdAsync(id).thenApply(ResponseEntity::ok);
     }
 
+
+    
     @Operation(
             summary = "Get drive cards",
             description = "Retrieves a paginated list of drive summary cards for display"
