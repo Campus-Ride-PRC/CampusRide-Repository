@@ -87,7 +87,7 @@ public class UserServiceImpl implements UserService {
                 request.getFaculty()
         );
         verificationCache.put(email, pendingData);
-        emailService.sendVerificationEmail(email, verificationCode);
+        emailService.sendVerificationEmail(email, verificationCode, request.getFirstName(), request.getLastName());
 
         logger.info("Successfully sent verification code to: {}", email);
         return "Registration successful. Please check your email (or console) to verify.";
