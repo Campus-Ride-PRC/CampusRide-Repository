@@ -33,7 +33,7 @@ public class User {
     private String lastName;
     private String faculty;
 
-    protected User() {}
+    public User() {}
 
     public User(String email, String password) {
         this.email = email;

@@ -55,15 +55,6 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Register in progress",
-                    content = @Content(String.class)
-            ),
-            @ApiResponse(responseCode = "400", description = "Invalid user data"),
-            @ApiResponse(responseCode = "409", description = "User already exists")
-    })
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody CreateUserRequestDto request) {
        logger.info("Received request to register new user");
