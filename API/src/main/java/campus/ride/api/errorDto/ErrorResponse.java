@@ -1,4 +1,4 @@
-package campus.ride.api.dto;
+package campus.ride.api.errorDto;
 
 import java.time.LocalDateTime;
 

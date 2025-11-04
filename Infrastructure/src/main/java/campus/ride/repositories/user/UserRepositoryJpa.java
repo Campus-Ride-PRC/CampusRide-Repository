@@ -1,6 +1,6 @@
-package campus.ride.repositories;
+package campus.ride.repositories.user;
 
-import campus.ride.contracts.UserRepository;
+import campus.ride.contracts.user.UserRepository;
 import campus.ride.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

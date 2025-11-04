@@ -1,8 +1,10 @@
 package campus.ride.transfer.dtos.user;
+import campus.ride.entities.Address;
 
 public class UserResponseDto {
-    private Integer id;
+    private Long id;
     private String email;
+    private String address;
     private String phoneNumber;
     private String firstName;
     private String lastName;
@@ -11,20 +13,21 @@ public class UserResponseDto {
     public UserResponseDto() {
     }
 
-    public UserResponseDto(Integer id, String email, String phoneNumber, String firstName, String lastName, String faculty) {
+    public UserResponseDto(Long id, String email, Address address, String phoneNumber, String firstName, String lastName, String faculty) {
         this.id = id;
         this.email = email;
+        this.address = address != null ? address.toString() : null;
         this.phoneNumber = phoneNumber;
         this.firstName = firstName;
         this.lastName = lastName;
         this.faculty = faculty;
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -38,6 +41,14 @@ public class UserResponseDto {
 
     public String getPhoneNumber() {
         return phoneNumber;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public void setPhoneNumber(String phoneNumber) {
