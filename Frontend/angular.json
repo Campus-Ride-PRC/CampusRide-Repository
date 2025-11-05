@@ -109,7 +109,11 @@
                 "output": "assets"
               }
             ],
-            "styles": ["src/global.scss", "src/theme/variables.scss"],
+            "styles": [
+              "src/styles.scss",
+              "src/global.scss",
+              "src/theme/variables.scss"
+          ],
             "scripts": []
           },
           "configurations": {
