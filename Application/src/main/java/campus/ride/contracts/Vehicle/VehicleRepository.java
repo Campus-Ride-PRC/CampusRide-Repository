@@ -1,4 +1,4 @@
-package campus.ride.contracts.vehicle;
+package campus.ride.contracts.Vehicle;
 
 import campus.ride.entities.Vehicle;
 import java.util.Optional;
