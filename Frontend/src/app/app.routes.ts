@@ -10,6 +10,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/authentication/register/email/email.page').then((m) => m.EmailPage),
   },
   {
+    path: 'register/password',
+    loadComponent: () => import('./pages/authentication/register/password/password.page').then((m) => m.PasswordPage),
+  },
+  {
     path: '',
     redirectTo: 'welcome',
     pathMatch: 'full',

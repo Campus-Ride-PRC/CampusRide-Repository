@@ -14,7 +14,8 @@ import { FormsModule, NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/f
     }
   ],
   template: `
-    <div class="flex flex-col items-center">
+  <div class="flex justify-center w-full">
+    <div [style.width]="width" [ngClass]="customClass">
       <label *ngIf="label" class="block text-[14px] font-medium text-gray-300 mb-2">
         {{ label }}
       </label>
@@ -24,19 +25,18 @@ import { FormsModule, NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/f
         [disabled]="disabled"
         [(ngModel)]="value"
         (blur)="onTouched()"
-        [style.width]="width"
         [style.height]="height"
         class="w-full bg-[#2a2a2c] text-[#e0e0e0] rounded-[16px] px-[10px] py-3 text-[16px]
          focus:outline-none focus:ring-2 focus:ring-[#e0e0e0]
          disabled:opacity-50 disabled:cursor-not-allowed
          placeholder:text-gray-500 border-2 border-[#e0e0e0]"
-        [ngClass]="customClass"
       />
       <p *ngIf="errorMessage" class="text-red-400 text-[12px] mt-1">
         {{ errorMessage }}
       </p>
     </div>
-  `
+  </div>
+`
 })
 export class TextInputComponent implements ControlValueAccessor {
   @Input() type: string = 'text';

@@ -1,27 +1,24 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
-import { Router, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { PrimaryButtonComponent } from '../../../../shared/components/buttons/primary-button.component';
 import { FormsModule } from '@angular/forms';
 import { TextInputComponent } from 'src/app/shared/components/text-input/text-input.component';
 
 @Component({
-  selector: 'app-register-email',
+  selector: 'app-register-password',
   standalone: true,
   imports: [CommonModule, IonicModule, RouterModule, PrimaryButtonComponent, FormsModule, TextInputComponent],
-  templateUrl: './email.page.html',
-  styleUrls: ['./email.page.scss'],
+  templateUrl: './password.page.html',
+  styleUrls: ['./password.page.scss'],
 })
-export class EmailPage {
-  email: string = '';
-
-  constructor(private router: Router) {}
+export class PasswordPage {
+  password: string = '';
+  passwordConfirm: string = '';
 
   onContinue() {
-    // TODO: Implement email validation and navigation to next register step
-    console.log('Continue with email registration clicked: ', this.email);
-
-    this.router.navigate(['/register/password']);
+    // TODO: Implement password validation and navigation to next register step
+    console.log('Continue with password registration clicked: ', this.password);
   }
 }
