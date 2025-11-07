@@ -1,8 +1,7 @@
 package campus.ride.repositories.vehicle;
 
 import campus.ride.entities.Vehicle;
-import campus.ride.contracts.vehicle.VehicleRepository;
-
+import campus.ride.contracts.Vehicle.VehicleRepository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

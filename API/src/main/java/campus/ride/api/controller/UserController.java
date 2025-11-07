@@ -55,7 +55,7 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    @PostMapping("/register")
+    @PostMapping("/register/create")
     public ResponseEntity<String> registerUser(@RequestBody CreateUserRequestDto request) {
        logger.info("Received request to register new user");
         logger.debug("Registering user with email: {}", request.getEmail());
@@ -66,7 +66,7 @@ public class UserController {
         return ResponseEntity.ok(message);
     }
     
-    @PostMapping("/verify")
+    @PostMapping("/register/verify")
     public ResponseEntity<UserResponseDto> verifyUSer(@RequestBody VerificationRequestDto request){
         logger.info("Received request to verify user");
         logger.debug("Verifying user with email: {}", request.getEmail());

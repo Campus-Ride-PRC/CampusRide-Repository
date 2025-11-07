@@ -2,9 +2,9 @@ package campus.ride.useCases;
 
 import campus.ride.entities.Address;
 import campus.ride.entities.Drive;
-import campus.ride.contracts.drive.DriveQueryRepository;
-import campus.ride.contracts.drive.DriveRepository;
-import campus.ride.contracts.drive.DriveRow;
+import campus.ride.contracts.Drive.DriveQueryRepository;
+import campus.ride.contracts.Drive.DriveRepository;
+import campus.ride.contracts.Drive.DriveRow;
 import campus.ride.interfaces.DriveService;
 import campus.ride.transfer.dtos.drive.DriveCardDto;
 import campus.ride.transfer.dtos.drive.DriveDto;

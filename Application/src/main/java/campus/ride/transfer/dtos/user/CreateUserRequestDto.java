@@ -1,17 +1,19 @@
 package campus.ride.transfer.dtos.user;
 
+import campus.ride.entities.Faculty;
+
 public class CreateUserRequestDto {
     private String email;
     private String password;
     private String phoneNumber;
     private String firstName;
     private String lastName;
-    private String faculty;
+    private Faculty faculty;
 
     public CreateUserRequestDto() {
     }
 
-    public CreateUserRequestDto(String email, String password, String phoneNumber, String firstName, String lastName, String faculty) {
+    public CreateUserRequestDto(String email, String password, String phoneNumber, String firstName, String lastName, Faculty faculty) {
         this.email = email;
         this.password = password;
         this.phoneNumber = phoneNumber;
@@ -60,11 +62,11 @@ public class CreateUserRequestDto {
         this.lastName = lastName;
     }
 
-    public String getFaculty() {
+    public Faculty getFaculty() {
         return faculty;
     }
 
-    public void setFaculty(String faculty) {
+    public void setFaculty(Faculty faculty) {
         this.faculty = faculty;
     }
 }

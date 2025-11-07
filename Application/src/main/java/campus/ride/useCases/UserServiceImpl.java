@@ -1,6 +1,8 @@
 package campus.ride.useCases;
 
+import campus.ride.contracts.faculty.FacultyRepository;
 import campus.ride.contracts.user.UserRepository;
+import campus.ride.entities.Faculty;
 import campus.ride.entities.User;
 import campus.ride.exception.BadRequestException;
 import campus.ride.exception.ResourceNotFoundException;
@@ -17,6 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.Optional;
 
 @Service
@@ -28,16 +32,19 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final Cache verificationCache;
+    private final FacultyRepository facultyRepository;
 
     public UserServiceImpl(UserRepository userRepository,
                              PasswordEncoder passwordEncoder,
                              EmailService emailService,
-                             CacheManager cacheManager) {
+                             CacheManager cacheManager,
+                             FacultyRepository facultyRepository) {
 
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
         this.verificationCache = cacheManager.getCache("verificationCache");
+        this.facultyRepository = facultyRepository;
     }
 
     @Override
@@ -94,6 +101,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserResponseDto verifyUser(VerificationRequestDto request) {
         String email = request.getEmail().trim();
         logger.info("Attempting to verify user with email: {}", email);
@@ -107,14 +115,22 @@ public class UserServiceImpl implements UserService {
             throw new BadRequestException("Invalid verification code.");
         }
 
+        if (pendingData.getFaculty() == null || pendingData.getFaculty().getId() == null) {
+            throw new IllegalStateException("Datele de înregistrare sunt corupte. Nu s-a găsit nicio facultate.");
+        }
+        Long facultyId = pendingData.getFaculty().getId();
+
+        Faculty facultyReala = facultyRepository.findById(facultyId)
+                .orElseThrow(() -> new ResourceNotFoundException("Faculty with ID " + facultyId + " was not found."));
+
         User user = new User();
         user.setEmail(email);
         user.setPassword(pendingData.getHashedPassword());
         user.setPhoneNumber(pendingData.getPhoneNumber());
         user.setFirstName(pendingData.getFirstName());
         user.setLastName(pendingData.getLastName());
-        user.setFaculty(pendingData.getFaculty());
 
+        user.setFaculty(facultyReala);
         User savedUser = userRepository.save(user);
         verificationCache.evict(email);
 
@@ -128,10 +144,10 @@ public class UserServiceImpl implements UserService {
         private String phoneNumber;
         private String firstName;
         private String lastName;
-        private String faculty;
+        private Faculty faculty;
 
         public PendingUserData(String hashedPassword, String verificationCode, String phoneNumber,
-                                 String firstName, String lastName, String faculty) {
+                                 String firstName, String lastName, Faculty faculty) {
             this.hashedPassword = hashedPassword;
             this.verificationCode = verificationCode;
             this.phoneNumber = phoneNumber;
@@ -145,7 +161,7 @@ public class UserServiceImpl implements UserService {
         public String getPhoneNumber() { return phoneNumber; }
         public String getFirstName() { return firstName; }
         public String getLastName() { return lastName; }
-        public String getFaculty() { return faculty; }
+        public Faculty getFaculty() { return faculty; }
     }
 
     private String generateVerificationCode() {

@@ -45,7 +45,7 @@ public class EmailService implements campus.ride.interfaces.EmailService {
 
             helper.setFrom(fromEmail);
             helper.setTo(toEmail);
-            helper.setSubject("CampusRide - Codul tău de verificare");
+            helper.setSubject("CampusRide - Verification code");
 
             helper.setText(htmlBody, true);
 

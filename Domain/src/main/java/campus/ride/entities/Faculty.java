@@ -1,8 +1,10 @@
 package campus.ride.entities;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
+@Table(name = "faculties")
 public class Faculty {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -10,6 +12,7 @@ public class Faculty {
 
     @OneToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "address_id", nullable = true)
+    @JsonIgnore
     private Address address;
 
     @Column
