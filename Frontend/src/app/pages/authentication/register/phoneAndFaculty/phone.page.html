@@ -28,13 +28,15 @@
         </div>
 
         <div class="mt-[12px] mb-[24px] pt-[12px] w-full">
-            <app-text-input
-                type="text"
-                placeholder="Enter your faculty"
-                [(ngModel)]="faculty"
+            <app-dropdown
+                placeholder="Select your faculty"
+                [options]="faculties"
+                [(ngModel)]="selectedFaculty"
                 width="80%"
-                customClass="w-full">
-            </app-text-input>
+                dropdownMaxHeight="340px"
+                optionHeight="40px"
+            >
+            </app-dropdown>
         </div>
 
         <div class="text-center pt-[24px] mb-4 w-full flex flex-col items-center">
