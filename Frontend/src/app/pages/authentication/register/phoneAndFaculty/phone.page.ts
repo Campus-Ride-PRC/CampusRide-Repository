@@ -35,6 +35,6 @@ export class PhonePage {
 
   onContinue() {
     // TODO: Implement phone number validation and navigation to next register step
-    this.router.navigate(['/register/result']);
+    this.router.navigate(['/register/verify']);
   }
 }

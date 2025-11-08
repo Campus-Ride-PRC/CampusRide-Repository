@@ -18,6 +18,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/authentication/register/phoneAndFaculty/phone.page').then((m) => m.PhonePage),
   },
   {
+    path: 'register/verify',
+    loadComponent: () => import('./pages/authentication/register/code-validation/code-validation.page').then((m) => m.CodeValidationPage),
+  },
+  {
     path: 'register/result',
     loadComponent: () => import('./pages/authentication/register/result/result.page').then((m) => m.ResultPage),
   },
