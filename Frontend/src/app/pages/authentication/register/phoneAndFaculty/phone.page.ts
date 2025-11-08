@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { PrimaryButtonComponent } from 'src/app/shared/components/buttons/primary-button.component';
 import { TextInputComponent } from 'src/app/shared/components/text-input/text-input.component';
@@ -15,6 +15,8 @@ import { DropdownComponent, DropdownOption } from 'src/app/shared/components/tex
   styleUrls: ['./phone.page.scss'],
 })
 export class PhonePage {
+  constructor(private router: Router) {}
+
   phoneNumber: string = '';
   selectedFaculty: string = '';
 
@@ -33,7 +35,6 @@ export class PhonePage {
 
   onContinue() {
     // TODO: Implement phone number validation and navigation to next register step
-    console.log('Continue with phone number registration clicked: ', this.phoneNumber);
-    console.log('Continue with faculty registration clicked: ', this.selectedFaculty);
+    this.router.navigate(['/register/result']);
   }
 }

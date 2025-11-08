@@ -18,6 +18,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/authentication/register/phoneAndFaculty/phone.page').then((m) => m.PhonePage),
   },
   {
+    path: 'register/result',
+    loadComponent: () => import('./pages/authentication/register/result/result.page').then((m) => m.ResultPage),
+  },
+  {
     path: '',
     redirectTo: 'welcome',
     pathMatch: 'full',
