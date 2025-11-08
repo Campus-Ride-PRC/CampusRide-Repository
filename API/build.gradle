@@ -46,7 +46,7 @@ test {
 }
 
 application {
-    mainClass='campus.ride.ApiApplication'
+    mainClass='campus.ride.api.ApiApplication'
 }
 
 tasks.named('test') {
