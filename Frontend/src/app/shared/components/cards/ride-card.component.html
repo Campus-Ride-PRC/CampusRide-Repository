@@ -1,0 +1,79 @@
+<div class="ride-card" (click)="onCardClick()">
+  <div class="user-section">
+    <div class="avatar-container">
+      <img [src]="userAvatar" [alt]="userName" class="avatar" />
+    </div>
+    <div class="user-info">
+      <div class="user-name">{{ userName }}</div>
+      <div class="rating">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g clip-path="url(#clip0_248_288)">
+            <path d="M7.68332 1.52997C7.71254 1.47094 7.75767 1.42126 7.81362 1.38652C7.86958 1.35178 7.93413 1.33337 7.99999 1.33337C8.06585 1.33337 8.1304 1.35178 8.18635 1.38652C8.24231 1.42126 8.28744 1.47094 8.31666 1.52997L9.85666 4.6493C9.95811 4.85461 10.1079 5.03224 10.2931 5.16694C10.4783 5.30164 10.6934 5.38938 10.92 5.42264L14.364 5.92664C14.4292 5.93609 14.4906 5.96362 14.541 6.0061C14.5914 6.04859 14.6289 6.10434 14.6493 6.16704C14.6697 6.22975 14.6722 6.29691 14.6564 6.36093C14.6406 6.42495 14.6072 6.48327 14.56 6.5293L12.0693 8.95464C11.9051 9.1147 11.7822 9.31229 11.7112 9.53039C11.6403 9.74849 11.6234 9.98056 11.662 10.2066L12.25 13.6333C12.2615 13.6985 12.2545 13.7657 12.2297 13.8271C12.2048 13.8885 12.1633 13.9417 12.1097 13.9806C12.0561 14.0196 11.9926 14.0426 11.9266 14.0472C11.8605 14.0518 11.7945 14.0378 11.736 14.0066L8.65732 12.388C8.45447 12.2815 8.22878 12.2258 7.99966 12.2258C7.77054 12.2258 7.54484 12.2815 7.34199 12.388L4.26399 14.0066C4.20554 14.0376 4.13959 14.0515 4.07362 14.0468C4.00766 14.0421 3.94433 14.019 3.89085 13.9801C3.83737 13.9412 3.79588 13.8881 3.77109 13.8268C3.74631 13.7655 3.73923 13.6984 3.75066 13.6333L4.33799 10.2073C4.37679 9.98112 4.35998 9.7489 4.28901 9.53067C4.21805 9.31243 4.09506 9.11474 3.93066 8.95464L1.43999 6.52997C1.39239 6.48399 1.35865 6.42557 1.34263 6.36135C1.32661 6.29714 1.32895 6.22972 1.34938 6.16676C1.3698 6.10381 1.4075 6.04786 1.45817 6.00529C1.50885 5.96272 1.57046 5.93524 1.63599 5.92597L5.07932 5.42264C5.30616 5.38964 5.52158 5.30201 5.70704 5.16729C5.89251 5.03258 6.04246 4.85482 6.14399 4.6493L7.68332 1.52997Z" stroke="#CAC8C8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </g>
+          <defs>
+            <clipPath id="clip0_248_288">
+              <rect width="16" height="16" fill="white"/>
+            </clipPath>
+          </defs>
+        </svg>
+        <span class="rating-value">{{ rating }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="location-section">
+    <div class="location-info">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M16.6667 8.33329C16.6667 12.4941 12.0508 16.8275 10.5008 18.1658C10.3564 18.2744 10.1807 18.3331 10 18.3331C9.81934 18.3331 9.64357 18.2744 9.49918 18.1658C7.94918 16.8275 3.33334 12.4941 3.33334 8.33329C3.33334 6.56518 4.03572 4.86949 5.28596 3.61925C6.53621 2.36901 8.2319 1.66663 10 1.66663C11.7681 1.66663 13.4638 2.36901 14.7141 3.61925C15.9643 4.86949 16.6667 6.56518 16.6667 8.33329Z" stroke="#CAC8C8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M10 10.8334C11.3807 10.8334 12.5 9.71409 12.5 8.33337C12.5 6.95266 11.3807 5.83337 10 5.83337C8.61929 5.83337 7.5 6.95266 7.5 8.33337C7.5 9.71409 8.61929 10.8334 10 10.8334Z" stroke="#CAC8C8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div class="location-details">
+        <div class="location-label">From</div>
+        <div class="location-value">{{ fromLocation }}</div>
+      </div>
+    </div>
+
+    <div class="location-info">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M16.6667 8.33329C16.6667 12.4941 12.0508 16.8275 10.5008 18.1658C10.3564 18.2744 10.1807 18.3331 10 18.3331C9.81934 18.3331 9.64357 18.2744 9.49918 18.1658C7.94918 16.8275 3.33334 12.4941 3.33334 8.33329C3.33334 6.56518 4.03572 4.86949 5.28596 3.61925C6.53621 2.36901 8.2319 1.66663 10 1.66663C11.7681 1.66663 13.4638 2.36901 14.7141 3.61925C15.9643 4.86949 16.6667 6.56518 16.6667 8.33329Z" stroke="#CAC8C8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M10 10.8334C11.3807 10.8334 12.5 9.71409 12.5 8.33337C12.5 6.95266 11.3807 5.83337 10 5.83337C8.61929 5.83337 7.5 6.95266 7.5 8.33337C7.5 9.71409 8.61929 10.8334 10 10.8334Z" stroke="#CAC8C8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div class="location-details">
+        <div class="location-label">Destination</div>
+        <div class="location-value">{{ toLocation }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="departure-section">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <g clip-path="url(#clip0_248_324)">
+        <path d="M9.99999 18.3333C14.6024 18.3333 18.3333 14.6023 18.3333 9.99996C18.3333 5.39759 14.6024 1.66663 9.99999 1.66663C5.39762 1.66663 1.66666 5.39759 1.66666 9.99996C1.66666 14.6023 5.39762 18.3333 9.99999 18.3333Z" stroke="#CAC8C8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M10 5V10L13.3333 11.6667" stroke="#CAC8C8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+      <defs>
+        <clipPath id="clip0_248_324">
+          <rect width="20" height="20" fill="white"/>
+        </clipPath>
+      </defs>
+    </svg>
+    <div class="departure-details">
+      <div class="departure-label">Departure</div>
+      <div class="departure-value">{{ departureTime }}</div>
+    </div>
+  </div>
+
+  <div class="footer-section">
+    <div class="seats-info">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M13.3333 17.5V15.8333C13.3333 14.9493 12.9821 14.1014 12.357 13.4763C11.7319 12.8512 10.884 12.5 9.99999 12.5H4.99999C4.11593 12.5 3.26809 12.8512 2.64297 13.4763C2.01785 14.1014 1.66666 14.9493 1.66666 15.8333V17.5" stroke="#00C36C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M13.3333 2.60669C14.0481 2.792 14.6812 3.20941 15.1331 3.79341C15.585 4.37741 15.8302 5.09493 15.8302 5.83336C15.8302 6.57178 15.585 7.28931 15.1331 7.8733C14.6812 8.4573 14.0481 8.87471 13.3333 9.06002" stroke="#00C36C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M18.3333 17.4999V15.8333C18.3328 15.0947 18.087 14.3773 17.6345 13.7935C17.182 13.2098 16.5485 12.7929 15.8333 12.6083" stroke="#00C36C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M7.49999 9.16667C9.34094 9.16667 10.8333 7.67428 10.8333 5.83333C10.8333 3.99238 9.34094 2.5 7.49999 2.5C5.65904 2.5 4.16666 3.99238 4.16666 5.83333C4.16666 7.67428 5.65904 9.16667 7.49999 9.16667Z" stroke="#00C36C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="seats-available">{{ seatsAvailable }}</span>
+      <span class="seats-text">of {{ totalSeats }} seats left</span>
+    </div>
+    <div class="price">{{ price }}</div>
+  </div>
+</div>

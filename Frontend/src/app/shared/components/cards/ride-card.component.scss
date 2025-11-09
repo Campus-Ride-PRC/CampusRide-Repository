@@ -1,0 +1,208 @@
+.ride-card {
+  position: relative;
+  width: 372px;
+  height: 232px;
+  border-radius: 30px;
+  background: #2A2A2C;
+  box-shadow: -2px 0 2px 0 rgba(255, 255, 255, 0.20),
+              2px 0 2px 0 rgba(255, 255, 255, 0.20),
+              0 2px 2px 0 rgba(255, 255, 255, 0.20),
+              0 -2px 2px 0 rgba(255, 255, 255, 0.20);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+}
+
+.user-section {
+  position: absolute;
+  left: 25px;
+  top: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.avatar-container {
+  width: 48px;
+  height: 48px;
+  border-radius: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50px;
+  flex-shrink: 0;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-left: 10px;
+}
+
+.user-name {
+  color: #FFF;
+  font-family: 'Roboto', -apple-system, Roboto, Helvetica, sans-serif;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 24px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 249px;
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 20px;
+}
+
+.rating-value {
+  color: #FFF;
+  font-family: 'Inter', -apple-system, Roboto, Helvetica, sans-serif;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+.location-section {
+  position: absolute;
+  left: 25px;
+  top: 73px;
+  display: flex;
+  gap: 25px;
+}
+
+.location-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+
+  svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+}
+
+.location-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.location-label {
+  color: #9E9E9E;
+  font-family: 'Inter', -apple-system, Roboto, Helvetica, sans-serif;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+.location-value {
+  color: #EDEDED;
+  font-family: 'Inter', -apple-system, Roboto, Helvetica, sans-serif;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 24px;
+}
+
+.departure-section {
+  position: absolute;
+  left: 25px;
+  top: 127px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+
+  svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+}
+
+.departure-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.departure-label {
+  color: #9E9E9E;
+  font-family: 'Inter', -apple-system, Roboto, Helvetica, sans-serif;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+.departure-value {
+  color: #EDEDED;
+  font-family: 'Inter', -apple-system, Roboto, Helvetica, sans-serif;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 24px;
+}
+
+.footer-section {
+  position: absolute;
+  left: 25px;
+  top: 181px;
+  width: 322px;
+  height: 45px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0 9px 0;
+  border-top: 1px solid #CCC;
+}
+
+.seats-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+.seats-available {
+  color: #00C36C;
+  font-family: 'Inter', -apple-system, Roboto, Helvetica, sans-serif;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.seats-text {
+  color: #9E9E9E;
+  font-family: 'Inter', -apple-system, Roboto, Helvetica, sans-serif;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+.price {
+  color: #FFF;
+  font-family: 'Inter', -apple-system, Roboto, Helvetica, sans-serif;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 28px;
+  text-align: right;
+}
