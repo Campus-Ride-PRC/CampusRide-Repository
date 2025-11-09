@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public class DriveCreateRequest {
     private String fromStreet;
@@ -19,6 +20,10 @@ public class DriveCreateRequest {
     private BigDecimal price;
     private LocalDate day;     // separate day
 
+    @Schema(
+            type = "string",
+            pattern = "HH:mm[:ss]"
+    )
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm[:ss]")
     private LocalTime hour; // separate hour
 
