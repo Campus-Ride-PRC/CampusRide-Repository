@@ -13,7 +13,7 @@ public class FacultyMapper {
     }
 
     public static FacultyResponseDto toDto(Faculty faculty){
-        return new FacultyResponseDto(faculty.getName());
+        return new FacultyResponseDto(faculty.getId(), faculty.getName());
     }
 
     public static List<FacultyResponseDto> toDtoList(List<Faculty> faculties){
