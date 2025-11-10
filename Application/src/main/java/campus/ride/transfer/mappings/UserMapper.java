@@ -1,5 +1,6 @@
 package campus.ride.transfer.mappings;
 
+import campus.ride.entities.Faculty;
 import campus.ride.entities.User;
 import campus.ride.transfer.dtos.user.CreateUserRequestDto;
 import campus.ride.transfer.dtos.user.UserResponseDto;
@@ -46,7 +47,7 @@ public class UserMapper {
         user.setPhoneNumber(dto.getPhoneNumber());
         user.setFirstName(dto.getFirstName());
         user.setLastName(dto.getLastName());
-        user.setFaculty(dto.getFaculty());
+        user.setFaculty(FacultyMapper.toEntity(dto.getFaculty()));
         
         return user;
     }
