@@ -18,7 +18,7 @@ public class FacultyMapper {
 
     public static List<FacultyResponseDto> toDtoList(List<Faculty> faculties){
         return faculties.stream()
-                .map(FacultyMapper::toDto) // Echivalent cu .map(faculty -> toDto(faculty))
+                .map(FacultyMapper::toDto)
                 .collect(Collectors.toList());
     }
 }

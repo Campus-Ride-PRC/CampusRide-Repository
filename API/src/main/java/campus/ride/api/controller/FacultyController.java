@@ -39,7 +39,7 @@ public class FacultyController {
                     description = "Faculties found successfully",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = FacultyResponseDto.class)))
             ),
-            @ApiResponse(responseCode = "404", description = "Faculties not found"), // Poti scoate asta daca o lista goala e un 200 ok
+            @ApiResponse(responseCode = "404", description = "Faculties not found"),
     })
     @GetMapping("/faculties")
     public ResponseEntity<List<FacultyResponseDto>> findAllFaculties() {
