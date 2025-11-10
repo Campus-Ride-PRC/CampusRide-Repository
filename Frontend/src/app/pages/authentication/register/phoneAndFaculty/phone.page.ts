@@ -48,11 +48,12 @@ export class PhonePage implements OnInit {
   }
 
   onContinue() {
-  if (!this.phoneNumber) {
+  if (!this.phoneNumber || this.phoneNumber.length < 9) {
     this.toastController.create({
-      message: 'Please enter a phone number.',
+      message: 'Please enter a valid phone number.',
       duration: 2000,
-      color: 'danger'
+      color: 'danger',
+      position: 'bottom'
     }).then(toast => toast.present());
     return;
   }

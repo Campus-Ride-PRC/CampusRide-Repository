@@ -34,6 +34,16 @@ export class PasswordPage {
       return;
     }
 
+    if(this.password.length < 8) {
+      this.toastController.create({
+        message: 'Password must be at least 8 characters.',
+        duration: 2000,
+        color: 'danger',
+        position: 'bottom'
+      }).then(toast => toast.present());
+      return;
+    }
+
     this.authService.setPassword(this.password);
     this.router.navigate(['/register/phone']);
   }

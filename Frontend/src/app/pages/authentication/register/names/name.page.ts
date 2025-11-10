@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, ToastController } from '@ionic/angular';
 import { Router, RouterModule } from '@angular/router';
 import { PrimaryButtonComponent } from '../../../../shared/components/buttons/primary-button.component';
 import { FormsModule } from '@angular/forms';
@@ -21,9 +21,28 @@ export class NamePage {
   constructor(
     private router: Router,
     private authService: AuthService,
+    private toastController: ToastController
 ) {}
 
   onContinue() {
+    if (!this.firstName || !this.lastName) {
+      this.toastController.create({
+        message: 'Please enter both first and last names.',
+        duration: 2000,
+        position: 'bottom'
+      }).then(toast => toast.present());
+      return;
+    }
+
+    if(this.firstName.length < 3 || this.lastName.length < 3) {
+      this.toastController.create({
+        message: 'First and last names must be at least 3 characters.',
+        duration: 2000,
+        position: 'bottom'
+      }).then(toast => toast.present());
+      return;
+    }
+
     this.authService.setFirstName(this.firstName);
     this.authService.setLastName(this.lastName);
     
