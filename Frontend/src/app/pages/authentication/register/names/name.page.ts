@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule, ToastController } from '@ionic/angular';
+import { IonicModule } from '@ionic/angular';
 import { Router, RouterModule } from '@angular/router';
 import { PrimaryButtonComponent } from '../../../../shared/components/buttons/primary-button.component';
 import { FormsModule } from '@angular/forms';
@@ -8,33 +8,25 @@ import { TextInputComponent } from 'src/app/shared/components/text-input/text-in
 import { AuthService } from 'src/app/core/services/auth.service';
 
 @Component({
-  selector: 'app-register-password',
+  selector: 'app-register-name',
   standalone: true,
   imports: [CommonModule, IonicModule, RouterModule, PrimaryButtonComponent, FormsModule, TextInputComponent],
-  templateUrl: './password.page.html',
-  styleUrls: ['./password.page.scss'],
+  templateUrl: './name.page.html',
+  styleUrls: ['./name.page.scss'],
 })
-export class PasswordPage {
-  password: string = '';
-  passwordConfirm: string = '';
+export class NamePage {
+  firstName: string = '';
+  lastName: string = '';
 
   constructor(
     private router: Router,
     private authService: AuthService,
-    private toastController: ToastController
-  ) {}
+) {}
 
   onContinue() {
-    if (this.password !== this.passwordConfirm) {
-      this.toastController.create({
-        message: 'Passwords do not match.',
-        duration: 2000,
-        color: 'danger'
-      }).then(toast => toast.present());
-      return;
-    }
-
-    this.authService.setPassword(this.password);
-    this.router.navigate(['/register/phone']);
+    this.authService.setFirstName(this.firstName);
+    this.authService.setLastName(this.lastName);
+    
+    this.router.navigate(['/register/email']);
   }
 }

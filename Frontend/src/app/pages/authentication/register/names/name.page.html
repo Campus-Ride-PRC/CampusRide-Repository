@@ -10,33 +10,27 @@
         </div>
 
         <div class="text-center font-[16px] mt-[24px] px-[24px]">
-          <p class="text-[20px] font-[600] text-gray-300">What's your phone number for others to reach you?</p>
+          <p class="text-[20px] font-[600] text-gray-300">Let's find more about you. What's your name?</p>
         </div>
 
-        <div class="mt-[12px] mb-[12px] pt-[12px] w-full">
+        <div class="mt-[6px] mb-[12px] pt-[4px] w-full">
             <app-text-input
-                type="tel"
-                placeholder="Enter your phone number"
-                [(ngModel)]="phoneNumber"
+                type="text"
+                placeholder="Enter your first name"
+                [(ngModel)]="firstName"
                 width="80%"
                 customClass="w-full">
             </app-text-input>
         </div>
 
-        <div class="text-center font-[16px] mt-[6px] px-[24px]">
-          <p class="text-[20px] font-[600] text-gray-300">Where do you study?</p>
-        </div>
-
-        <div class="mt-[12px] mb-[24px] pt-[12px] w-full">
-            <app-dropdown
-                placeholder="Select your faculty"
-                [options]="facultiesDropdown"
-                [(ngModel)]="selectedFacultyId"
+        <div class="mt-[6px] mb-[24px] pt-[4px] w-full">
+            <app-text-input
+                type="text"
+                placeholder="Enter your last name"
+                [(ngModel)]="lastName"
                 width="80%"
-                dropdownMaxHeight="340px"
-                optionHeight="40px"
-            >
-            </app-dropdown>
+                customClass="w-full">
+            </app-text-input>
         </div>
 
         <div class="text-center pt-[24px] mb-4 w-full flex flex-col items-center">
@@ -51,9 +45,9 @@
       </div>
     </div>
 
-    <div class="flex justify-center py-8 mb-[32px] px-[4px]">
-      <p class="text-center text-[16px] font-[500] text-gray-400 px-[8px]">
-        Your information will only be visible to verified students
+    <div class="flex justify-center py-8 mb-[32px]">
+      <p class="text-center text-[16px] font-[500] text-gray-400">
+        Use at least 8 characters, including letters, numbers, and symbols. 
       </p>
     </div>
 

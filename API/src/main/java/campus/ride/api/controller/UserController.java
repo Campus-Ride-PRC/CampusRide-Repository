@@ -55,6 +55,20 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
+    @PostMapping("/exists")
+    public ResponseEntity<Boolean> userExists(@RequestBody EmailRequestDto request) {
+        logger.info("Received request to find user by email with email: {}", request.getEmail());
+
+        try{
+            var user = userService.findByEmail(request.getEmail());
+            logger.info("Already existing user found with email: {}", request.getEmail());
+            return ResponseEntity.status(HttpStatus.OK).body(true);
+        }catch (Exception e){
+            logger.info("User not found with email: {}", request.getEmail());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(false);
+        }
+    }
+
     @PostMapping("/register/create")
     public ResponseEntity<String> registerUser(@RequestBody CreateUserRequestDto request) {
        logger.info("Received request to register new user");
