@@ -8,4 +8,5 @@ import java.util.Optional;
 public interface FacultyRepository {
     Optional<Faculty> findById(Long id);
     List<Faculty> findAll();
+
 }
