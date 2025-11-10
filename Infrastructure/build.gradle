@@ -16,22 +16,23 @@ repositories {
 }
 
 dependencies {
+    implementation platform('org.springframework.boot:spring-boot-dependencies:3.3.5')
+
+    // Layer dependencies
     implementation project(':Domain')
     implementation project(':Application')
 
-    implementation 'org.springframework.data:spring-data-jpa:3.3.4'
+    // Use Boot-managed starter for JPA (removes explicit version mismatch)
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
-    compileOnly 'jakarta.persistence:jakarta.persistence-api:3.1.0'
-    annotationProcessor 'jakarta.persistence:jakarta.persistence-api:3.1.0'
+    // Jakarta persistence API if annotations are used directly
+    compileOnly 'jakarta.persistence:jakarta.persistence-api'
+
+    // Logging API
+    implementation 'org.apache.logging.log4j:log4j-api'
 
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
-
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa:3.2.0'    
-    implementation 'org.apache.logging.log4j:log4j-api:2.21.1'
-    
-    implementation project(':Domain')
-    implementation project(':Application')
 }
 
 test {
