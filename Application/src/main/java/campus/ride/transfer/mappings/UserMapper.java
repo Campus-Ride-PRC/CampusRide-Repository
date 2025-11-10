@@ -18,7 +18,7 @@ public class UserMapper {
             user.getPhoneNumber(),
             user.getFirstName(),
             user.getLastName(),
-            user.getFaculty()
+            FacultyMapper.toDto(user.getFaculty())
         );
     }
 
@@ -32,7 +32,7 @@ public class UserMapper {
         user.setPhoneNumber(dto.getPhoneNumber());
         user.setFirstName(dto.getFirstName());
         user.setLastName(dto.getLastName());
-        user.setFaculty(dto.getFaculty());
+        user.setFaculty(FacultyMapper.toEntity(dto.getFaculty()));
         
         return user;
     }

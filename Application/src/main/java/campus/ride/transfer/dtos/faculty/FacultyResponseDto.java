@@ -1,8 +1,11 @@
 package campus.ride.transfer.dtos.faculty;
 
+import campus.ride.transfer.dtos.address.AddressDto;
+
 public class FacultyResponseDto {
     private Long id;
     private String name;
+    private AddressDto address;
 
     public FacultyResponseDto() {
     }
@@ -25,5 +28,13 @@ public class FacultyResponseDto {
     }
     public void setName(String name) {
         this.name = name;
+    }
+
+    public AddressDto getAddress() {
+        return address;
+    }
+
+    public void setAddress(AddressDto address) {
+        this.address = address;
     }
 }
