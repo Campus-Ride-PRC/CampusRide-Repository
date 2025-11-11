@@ -25,7 +25,7 @@ public class OpenApiConfig {
     @Bean
     public OpenAPI campusRideOpenAPI() {
         Server localServer = new Server();
-        localServer.setUrl("http://localhost:8080");
+        localServer.setUrl("http://localhost:8080"); // ex: 192.168.0.19 - your ip address for network testing
         localServer.setDescription("Local Development Server");
 
         Contact contact = new Contact();

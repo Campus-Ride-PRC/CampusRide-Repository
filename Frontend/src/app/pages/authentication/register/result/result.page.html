@@ -12,25 +12,23 @@
           <p class="text-[20px] font-[500] text-gray-300 mb-4">Your campus. Your ride. Your way.</p>
         </div>
 
-        <img src="assets/pages/authentication/start_image.png" alt="CampusRide" class="w-full max-w-[480px] mx-auto mb-4" />
+        <img src="assets/pages/authentication/success_image.png" alt="CampusRide" class="w-full max-w-[480px] mx-auto mb-4" />
 
-        <div class="text-center mt-2 mb-4 w-full flex flex-col items-center">
-          <p class="text-[20px] font-[500] mb-3">Back on campus? Let's ride!</p>
+        <div class="text-center mt-2 mb-4 w-full flex flex-col items-center pt-[12px]">
           <app-primary-button 
             label="Log in" 
             [hasBorder]="true"
             width="180px"
-            (onClick)="onLogin()">
+            (onClick)="onLoginPressed()">
           </app-primary-button>
         </div>
 
       </div>
     </div>
 
-    <!-- Textul lipit de baza ecranului -->
     <div class="flex justify-center py-8 mb-[32px]">
       <p class="text-[16px] font-[500] text-gray-400">
-        Don't have an account? <a routerLink="/register/name" class="text-white font-medium hover:underline">Sign up</a>
+        Ready for your first ride?
       </p>
     </div>
 

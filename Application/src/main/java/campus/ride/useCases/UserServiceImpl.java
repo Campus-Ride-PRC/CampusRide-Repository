@@ -12,6 +12,7 @@ import campus.ride.interfaces.UserService;
 import campus.ride.transfer.dtos.user.CreateUserRequestDto;
 import campus.ride.transfer.dtos.user.UserResponseDto;
 import campus.ride.transfer.dtos.user.VerificationRequestDto;
+import campus.ride.transfer.mappings.FacultyMapper;
 import campus.ride.transfer.mappings.UserMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -91,7 +92,7 @@ public class UserServiceImpl implements UserService {
                 request.getPhoneNumber(),
                 request.getFirstName(),
                 request.getLastName(),
-                request.getFaculty()
+                FacultyMapper.toEntity(request.getFaculty())
         );
         verificationCache.put(email, pendingData);
         emailService.sendVerificationEmail(email, verificationCode, request.getFirstName(), request.getLastName());
@@ -108,6 +109,7 @@ public class UserServiceImpl implements UserService {
 
         PendingUserData pendingData = verificationCache.get(email, PendingUserData.class);
 
+        logger.info("Received code = {}, backend code = {}", request.getVerificationCode(), pendingData.getVerificationCode());
         if (pendingData == null) {
             throw new BadRequestException("Invalid or expired verification code.");
         }

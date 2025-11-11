@@ -1,6 +1,6 @@
 package campus.ride.transfer.dtos.user;
 import campus.ride.entities.Address;
-import campus.ride.entities.Faculty;
+import campus.ride.transfer.dtos.faculty.FacultyResponseDto;
 
 public class UserResponseDto {
     private Long id;
@@ -9,19 +9,19 @@ public class UserResponseDto {
     private String phoneNumber;
     private String firstName;
     private String lastName;
-    private Faculty faculty;
+    private FacultyResponseDto facultyDto;
 
     public UserResponseDto() {
     }
 
-    public UserResponseDto(Long id, String email, Address address, String phoneNumber, String firstName, String lastName, Faculty faculty) {
+    public UserResponseDto(Long id, String email, Address address, String phoneNumber, String firstName, String lastName, FacultyResponseDto faculty) {
         this.id = id;
         this.email = email;
         this.address = address != null ? address.toString() : null;
         this.phoneNumber = phoneNumber;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.faculty = faculty;
+        this.facultyDto = faculty;
     }
 
     public Long getId() {
@@ -72,11 +72,11 @@ public class UserResponseDto {
         this.lastName = lastName;
     }
 
-    public Faculty getFaculty() {
-        return faculty;
+    public FacultyResponseDto getFaculty() {
+        return facultyDto;
     }
 
-    public void setFaculty(Faculty faculty) {
-        this.faculty = faculty;
+    public void setFaculty(FacultyResponseDto faculty) {
+        this.facultyDto = faculty;
     }
 }
