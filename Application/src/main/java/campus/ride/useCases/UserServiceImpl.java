@@ -165,7 +165,7 @@ public class UserServiceImpl implements UserService {
     public List<UserResponseDto> getAllUsers() {
         return userRepository.findAll()
                 .stream()
-                .map(user -> new UserResponseDto(user.getId(), user.getEmail(), user.getAddress(), user.getPhoneNumber(), user.getFirstName(), user.getLastName(), user.getFaculty()))
+                .map(user -> new UserResponseDto(user.getId(), user.getEmail(), user.getAddress(), user.getPhoneNumber(), user.getFirstName(), user.getLastName(), FacultyMapper.toDto(user.getFaculty())))
                 .collect(Collectors.toList());
     }
 
