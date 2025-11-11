@@ -13,7 +13,6 @@ import { RouterModule } from '@angular/router';
 })
 export class WelcomePage {
   onLogin() {
-    // Handle login navigation
     console.log('Login clicked');
   }
 
