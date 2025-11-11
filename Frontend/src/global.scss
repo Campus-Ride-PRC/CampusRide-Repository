@@ -25,3 +25,13 @@
   --ion-text-color: #E0E0E0;
 }
 
+ion-toolbar {
+  --background: #1e1e1e !important;
+  background: #1e1e1e !important;
+}
+
+body[theme='dark'] ion-toolbar {
+  --background: #1e1e1e !important;
+  background: #1e1e1e !important;
+  color: #fff;
+}

@@ -8,7 +8,7 @@ import { IonHeader, IonToolbar } from '@ionic/angular/standalone';
   imports: [CommonModule, IonHeader, IonToolbar],
   template: `
     <ion-header class="ion-no-border">
-      <ion-toolbar class="bg-[#1a1a1a]">
+      <ion-toolbar class="bg-[#1e1e1e]">
         <div class="flex items-center gap-4 pe-4 ps-[20px]">
           <!-- Modern Menu Icon -->
           <span 
