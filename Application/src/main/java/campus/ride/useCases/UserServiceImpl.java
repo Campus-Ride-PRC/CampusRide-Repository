@@ -22,7 +22,9 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -138,6 +140,33 @@ public class UserServiceImpl implements UserService {
 
         logger.info("Successfully verified and created user with ID: {}", savedUser.getId());
         return UserMapper.toDto(savedUser);
+    }
+
+    @Override
+    public UserResponseDto login(String email, String password) {
+        logger.info("Attempting login for email: {}", email);
+
+        if (email == null || email.trim().isEmpty() || password == null || password.isEmpty()) {
+            throw new BadRequestException("Email and password are required");
+        }
+
+        Optional<User> userOptional = userRepository.findByEmailAndPassword(email.trim(), password);
+
+        if (userOptional.isEmpty() || !userOptional.get().getPassword().equals(password)) {
+            logger.warn("Invalid login attempt for email: {}", email);
+            throw new ResourceNotFoundException("Invalid email or password");
+        }
+
+        logger.info("Login successful for email: {}", email);
+        return UserMapper.toDto(userOptional.get());
+    }
+
+    @Override
+    public List<UserResponseDto> getAllUsers() {
+        return userRepository.findAll()
+                .stream()
+                .map(user -> new UserResponseDto(user.getId(), user.getEmail(), user.getAddress(), user.getPhoneNumber(), user.getFirstName(), user.getLastName(), FacultyMapper.toDto(user.getFaculty())))
+                .collect(Collectors.toList());
     }
 
     private static class PendingUserData implements java.io.Serializable {

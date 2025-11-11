@@ -12,13 +12,14 @@ public final class VehicleMapper {
                 entity.getId(),
                 entity.getVehicleModel(),
                 entity.getVehicleLicencePlate(),
-                entity.getVehicleColor()
+                entity.getVehicleColor(),
+                entity.getUser() != null ? entity.getUser().getId() : null
         );
     }
 
     public static Vehicle toEntity(VehicleDto dto) {
         if (dto == null) return null;
-        Vehicle v = new Vehicle(dto.getModel(), dto.getVehicleLicencePlate(), dto.getColor());
+        Vehicle v = new Vehicle(dto.getModel(), dto.getVehicleLicencePlate(), dto.getColor(), dto.getUserId());
         v.setId(dto.getId());
         return v;
     }

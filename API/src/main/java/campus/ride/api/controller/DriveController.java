@@ -84,7 +84,7 @@ public class DriveController {
     }
 
 
-    
+
     @Operation(
             summary = "Get drive cards",
             description = "Retrieves a paginated list of drive summary cards for display"
@@ -136,7 +136,7 @@ public class DriveController {
         );
 
         CompletableFuture<VehicleDto> vehicleF = vehicleService.getOrCreate(
-                req.getVehicleModel(), req.getVehicleLicencePlate(), req.getVehicleColor()
+                req.getVehicleModel(), req.getVehicleLicencePlate(), req.getVehicleColor(), req.getUserId()
         );
 
         return CompletableFuture.allOf(fromF, toF, vehicleF)
@@ -148,6 +148,8 @@ public class DriveController {
                         throw new IllegalArgumentException("From and To addresses must be different.");
                     }
 
+                    VehicleDto vehicle = vehicleF.join();
+
                     DriveDto dto = new DriveDto(
                             null,
                             from.getId(),
@@ -156,7 +158,9 @@ public class DriveController {
                             time,
                             req.getAvailableSeats(),
                             req.getTotalNoSeats(),
-                            null
+                            null,
+                            req.getUserId(),  // Driver ID
+                            vehicle.getId()   // Vehicle ID
                     );
 
                     return driveService.addAsync(dto).thenApply(ResponseEntity::ok);

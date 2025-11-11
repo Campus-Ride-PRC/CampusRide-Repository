@@ -12,13 +12,15 @@ public class DriveDto {
     private Integer availableSeats;
     private Integer totalNoSeats;
     private LocalDateTime createdAt;
+    private Long driverId;
+    private Long vehicleId;
 
     public DriveDto() {}
 
     public DriveDto(Long id, Long fromAddressId, Long toAddressId,
                     BigDecimal price, LocalDateTime time,
                     Integer availableSeats, Integer totalNoSeats,
-                    LocalDateTime createdAt) {
+                    LocalDateTime createdAt, Long driverId, Long vehicleId) {
         this.id = id;
         this.fromAddressId = fromAddressId;
         this.toAddressId = toAddressId;
@@ -27,6 +29,8 @@ public class DriveDto {
         this.availableSeats = availableSeats;
         this.totalNoSeats = totalNoSeats;
         this.createdAt = createdAt;
+        this.driverId = driverId;
+        this.vehicleId = vehicleId;
     }
 
     public Long getId() { return id; }
@@ -45,4 +49,8 @@ public class DriveDto {
     public void setTotalNoSeats(Integer totalNoSeats) { this.totalNoSeats = totalNoSeats; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public Long getDriverId() { return driverId; }
+    public void setDriverId(Long driverId) { this.driverId = driverId; }
+    public Long getVehicleId() { return vehicleId; }
+    public void setVehicleId(Long vehicleId) { this.vehicleId = vehicleId; }
 }
