@@ -5,6 +5,7 @@ import { environment } from 'src/environments/environment';
 import { UserRequest } from '../models/userRequest.model';
 import { Faculty } from '../models/faculty.model';
 import { UserVerification } from '../models/userVerification.model';
+import { UserResponse } from '../models/userResponse';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -34,6 +35,11 @@ export class AuthService {
   verifyUser(payload: UserVerification): Observable<UserRequest> {
     return this.http.post<UserRequest>(`${this.apiUrl}/register/verify`, payload);
   };
+
+  login(email: string, password: string): Observable<UserResponse> {
+    const payload = { email, password };
+    return this.http.post<UserResponse>(`${this.apiUrl}/login`, payload);
+  }
 
 
   getRegistrationData(): UserRequest {
