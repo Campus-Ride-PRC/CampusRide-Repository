@@ -19,8 +19,4 @@ export class WelcomePage {
   onLogin() {
     this.router.navigate(['/login/auth']);
   }
-
-  onRideCardClick() {
-    console.log('Ride card clicked');
-  }
 }
