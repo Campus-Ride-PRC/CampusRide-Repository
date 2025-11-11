@@ -8,26 +8,32 @@ import { SafeHtml } from '@angular/platform-browser';
   imports: [CommonModule],
   template: `
     <button 
-      [disabled]="disabled"
-      (click)="handleClick()"
-      [style.width]="width"
-      [style.height]="height"
-      [style.border-color]="hasBorder ? borderColor : 'transparent'"
-      class="bg-[#1a1a1a] text-[#e0e0e0] font-[600] rounded-[16px] text-[16px] font-medium transition-opacity hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed flex items-center border-2"
-      [ngClass]="customClass"
-      [style.justifyContent]="textAlign === 'center' ? 'center' : 'flex-start'">
+  [disabled]="disabled"
+  (click)="handleClick()"
+  (mousedown)="onPress(true)"
+  (mouseup)="onPress(false)"
+  (mouseleave)="onPress(false)"
+  (touchstart)="onPress(true)"
+  (touchend)="onPress(false)"
+  [style.width]="width"
+  [style.height]="height"
+  [style.border-color]="getBorderColor()"
+  class="bg-[#1a1a1a] text-[#e0e0e0] font-[600] rounded-[16px] text-[16px] font-medium transition-opacity hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed flex items-center border-2"
+  [ngClass]="customClass"
+  [style.justifyContent]="textAlign === 'center' ? 'center' : 'flex-start'">
 
-      <ng-container *ngIf="icon && iconPosition === 'left'">
-        <span class="mr-2" [innerHTML]="icon"></span>
-      </ng-container>
+  <ng-container *ngIf="icon && iconPosition === 'left'">
+    <span class="mr-2 pe-[8px]" [innerHTML]="icon"></span>
+  </ng-container>
 
-      {{ label }}
+  {{ label }}
 
-      <ng-container *ngIf="icon && iconPosition === 'right'">
-        <span class="ml-2" [innerHTML]="icon"></span>
-      </ng-container>
+  <ng-container *ngIf="icon && iconPosition === 'right'">
+    <span class="ml-2 ps-[8px]" [innerHTML]="icon"></span>
+  </ng-container>
 
-    </button>
+</button>
+
   `
 })
 export class PrimaryButtonComponent {
@@ -45,9 +51,25 @@ export class PrimaryButtonComponent {
 
   @Output() onClick = new EventEmitter<void>();
 
+  private _isPressed: boolean = false;
+
   handleClick() {
     if (!this.disabled) {
       this.onClick.emit();
+    }
+  }
+
+  onPress(state: boolean) {
+    this._isPressed = state;
+  }
+
+  getBorderColor(): string {
+    if (this.hasBorder) {
+      return this.borderColor;
+    } else if (this._isPressed) {
+      return this.borderColor; // border doar pe durata click-ului
+    } else {
+      return 'transparent';
     }
   }
 }

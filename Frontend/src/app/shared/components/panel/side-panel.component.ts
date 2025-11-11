@@ -32,7 +32,7 @@ interface PanelItem {
       <div class="flex flex-col h-full">
 
         <!-- Butoane principale (sus) -->
-        <div class="p-4 space-y-2 flex-1">
+        <div class="mt-[32px] p-4 space-y-2 flex-1">
           <app-primary-button
             *ngFor="let item of mainItems"
             [label]="item.label"
@@ -40,7 +40,8 @@ interface PanelItem {
             [iconPosition]="item.iconPosition || 'left'"
             [textAlign]="item.textAlign || 'start'"
             class="w-full"
-            (onClick)="onItemClick(item.id)">
+            (onClick)="onItemClick(item.id)"
+            customClass="ps-[32px]">
           </app-primary-button>
         </div>
 
@@ -53,7 +54,8 @@ interface PanelItem {
             [iconPosition]="item.iconPosition || 'left'"
             [textAlign]="item.textAlign || 'start'"
             class="w-full"
-            (onClick)="onItemClick(item.id)">
+            (onClick)="onItemClick(item.id)"
+            customClass="ps-[32px]">
           </app-primary-button>
         </div>
 
@@ -106,7 +108,7 @@ export class SidePanelComponent {
 
     this.secondaryItems = [
       { id: 'settings', label: 'Settings', icon: this.settingsIcon, iconPosition: 'left', textAlign: 'start' },
-      { id: 'logout', label: 'Log out', icon: this.logoutIcon, iconPosition: 'left', textAlign: 'center' }
+      { id: 'logout', label: 'Log out', icon: this.logoutIcon, iconPosition: 'left', textAlign: 'start' }
     ];
   }
 
