@@ -1,6 +1,17 @@
 <app-header (menuClick)="onMenuOpen()"></app-header>
 
-<ion-content>
-    
+<ion-content class="relative">
+  <div class="p-4">
+    <p class="text-white">Conținutul paginii tale aici.</p>
+  </div>
 
+  <div class="p-4">
+    <p class="text-white">Alt conținut aici.</p>
+  </div>
+
+  <!-- Panel în interiorul ion-content -->
+  <app-side-panel
+    [isOpen]="isPanelOpen"
+    (closed)="onPanelClosed()">
+  </app-side-panel>
 </ion-content>
