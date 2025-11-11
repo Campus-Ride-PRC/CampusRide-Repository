@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { PrimaryButtonComponent } from '../../../../shared/components/buttons/primary-button.component';
 import { TextInputComponent } from 'src/app/shared/components/text-input/text-input.component';
 import { AuthService } from 'src/app/core/services/auth.service'; 
+import { HomeService } from 'src/app/core/services/home.service';
 
 @Component({
   selector: 'app-login-auth',
@@ -21,6 +22,7 @@ export class AuthPage {
   constructor(
     private router: Router,
     private authService: AuthService,
+    private homeService: HomeService,
     private toastController: ToastController
   ) {}
 
@@ -44,6 +46,7 @@ export class AuthPage {
         console.log('Login successful:', user);
         this.showToast('Login successful', 'success');
 
+        this.homeService.setLoggedUser(user);
         // this.router.navigate(['/home']);
       },
       error: (err) => {
