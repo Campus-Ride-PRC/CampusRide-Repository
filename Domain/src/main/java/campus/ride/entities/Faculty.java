@@ -20,7 +20,8 @@ public class Faculty {
 
     public Faculty() {}
 
-    public Faculty(String name, Address address) {
+    public Faculty(Long id, String name, Address address) {
+        this.id = id;
         this.name = name;
         this.address = address;
     }
