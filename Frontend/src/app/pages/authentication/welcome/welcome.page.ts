@@ -17,6 +17,6 @@ export class WelcomePage {
   ) {}
 
   onLogin() {
-    this.router.navigate(['/home']);
+    this.router.navigate(['/login/auth']);
   }
 }

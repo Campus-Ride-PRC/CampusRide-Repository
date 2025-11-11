@@ -5,6 +5,9 @@ import campus.ride.exception.BadRequestException;
 import campus.ride.exception.BusinessException;
 import campus.ride.exception.ResourceNotFoundException;
 import campus.ride.exception.UserAlreadyExistsException;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -31,6 +34,8 @@ public class GlobalExceptionHandler {
     private static final Logger logger = LogManager.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(BadRequestException.class)
+    @ApiResponse(responseCode = "400", description = "Bad Request", 
+                 content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     public ResponseEntity<ErrorResponse> handleBadRequestException(
             BadRequestException ex,
             HttpServletRequest request) {

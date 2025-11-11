@@ -30,6 +30,9 @@ public class DriveCreateRequest {
     private Integer availableSeats;
     private Integer totalNoSeats;
 
+    // Driver user ID (required until authentication is implemented)
+    private Long userId;
+
     // Vehicle (not linked yet, but we store/ensure it exists)
     // dupa autorizare cand o sa avem id ul o sa putem si linkui
     private String vehicleModel;
@@ -74,4 +77,7 @@ public class DriveCreateRequest {
     public void setVehicleLicencePlate(String vehicleLicencePlate) { this.vehicleLicencePlate = vehicleLicencePlate; }
     public String getVehicleColor() { return vehicleColor; }
     public void setVehicleColor(String vehicleColor) { this.vehicleColor = vehicleColor; }
+    
+    public Long getUserId() { return userId; }
+    public void setUserId(Long userId) { this.userId = userId; }
 }

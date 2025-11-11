@@ -1,7 +1,9 @@
 package campus.ride.useCases;
 
+import campus.ride.entities.User;
 import campus.ride.entities.Vehicle;
-import campus.ride.contracts.Vehicle.VehicleRepository;
+import campus.ride.contracts.user.UserRepository;
+import campus.ride.contracts.vehicle.VehicleRepository;
 import campus.ride.interfaces.VehicleService;
 import campus.ride.transfer.dtos.vehicle.VehicleDto;
 import campus.ride.transfer.mappings.VehicleMapper;
@@ -15,21 +17,41 @@ import java.util.concurrent.CompletableFuture;
 public class VehicleServiceImpl implements VehicleService {
 
     private final VehicleRepository repo;
+    private final UserRepository userRepository;
 
-    public VehicleServiceImpl(VehicleRepository repo) {
+    public VehicleServiceImpl(VehicleRepository repo, UserRepository userRepository) {
         this.repo = repo;
+        this.userRepository = userRepository;
     }
 
     @Override
     @Async
     @Transactional
-    public CompletableFuture<VehicleDto> getOrCreate(String model, String plate, String color) {
+    public CompletableFuture<VehicleDto> getOrCreate(String model, String plate, String color, Long userId) {
+        // First, check if user already has a vehicle
+        if (userId != null) {
+            Vehicle existingVehicle = repo.findByUserId(userId).orElse(null);
+            if (existingVehicle != null) {
+                return CompletableFuture.completedFuture(VehicleMapper.toDto(existingVehicle));
+            }
+        }
+        
+        // Get the user entity if userId is provided
+        final User user;
+        if (userId != null) {
+            user = userRepository.findById(userId)
+                    .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
+        } else {
+            user = null;
+        }
+        
         Vehicle vehicle;
         if (plate != null) {
+            // Check if vehicle with this plate already exists
             vehicle = repo.findByVehicleLicencePlate(plate)
-                    .orElseGet(() -> repo.save(new Vehicle(null, model, plate, color)));
+                    .orElseGet(() -> repo.save(new Vehicle(user, model, plate, color, userId)));
         } else {
-            vehicle = repo.save(new Vehicle(null, model, null, color));
+            vehicle = repo.save(new Vehicle(user, model, null, color, userId));
         }
         return CompletableFuture.completedFuture(VehicleMapper.toDto(vehicle));
     }
