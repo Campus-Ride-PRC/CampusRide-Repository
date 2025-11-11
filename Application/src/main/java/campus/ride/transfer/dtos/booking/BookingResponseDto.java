@@ -1,0 +1,61 @@
+package campus.ride.transfer.dtos.booking;
+
+import campus.ride.enums.BookingRole;
+import campus.ride.enums.BookingStatus;
+import java.time.LocalDateTime;
+
+public class BookingResponseDto {
+    private Long driveId;
+    private Long userId;
+    private String userEmail;
+    private String userFirstName;
+    private String userLastName;
+    private BookingStatus status;
+    private BookingRole role;
+    private LocalDateTime requestedAt;
+    private LocalDateTime updatedAt;
+
+    public BookingResponseDto() {}
+
+    public BookingResponseDto(Long driveId, Long userId, String userEmail,
+                             String userFirstName, String userLastName,
+                             BookingStatus status, BookingRole role,
+                             LocalDateTime requestedAt, LocalDateTime updatedAt) {
+        this.driveId = driveId;
+        this.userId = userId;
+        this.userEmail = userEmail;
+        this.userFirstName = userFirstName;
+        this.userLastName = userLastName;
+        this.status = status;
+        this.role = role;
+        this.requestedAt = requestedAt;
+        this.updatedAt = updatedAt;
+    }
+
+    public Long getDriveId() { return driveId; }
+    public void setDriveId(Long driveId) { this.driveId = driveId; }
+
+    public Long getUserId() { return userId; }
+    public void setUserId(Long userId) { this.userId = userId; }
+
+    public String getUserEmail() { return userEmail; }
+    public void setUserEmail(String userEmail) { this.userEmail = userEmail; }
+
+    public String getUserFirstName() { return userFirstName; }
+    public void setUserFirstName(String userFirstName) { this.userFirstName = userFirstName; }
+
+    public String getUserLastName() { return userLastName; }
+    public void setUserLastName(String userLastName) { this.userLastName = userLastName; }
+
+    public BookingStatus getStatus() { return status; }
+    public void setStatus(BookingStatus status) { this.status = status; }
+
+    public BookingRole getRole() { return role; }
+    public void setRole(BookingRole role) { this.role = role; }
+
+    public LocalDateTime getRequestedAt() { return requestedAt; }
+    public void setRequestedAt(LocalDateTime requestedAt) { this.requestedAt = requestedAt; }
+
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+}

@@ -35,15 +35,16 @@ public class Vehicle {
 
     protected Vehicle() {}
 
-    public Vehicle(User user, String vehicleModel, String vehicleLicencePlate, String vehicleColor) {
+    public Vehicle(User user, String vehicleModel, String vehicleLicencePlate, String vehicleColor, Long userId) {
         this.user = user;
         this.vehicleModel = vehicleModel;
         this.vehicleLicencePlate = vehicleLicencePlate;
         this.vehicleColor = vehicleColor;
+        this.user = user;
     }
-//  this deleted after authorization
-    public Vehicle(String vehicleModel, String vehicleLicencePlate, String vehicleColor) {
-        this(null, vehicleModel, vehicleLicencePlate, vehicleColor);
+    
+    public Vehicle(String vehicleModel, String vehicleLicencePlate, String vehicleColor, Long userId) {
+        this(null, vehicleModel, vehicleLicencePlate, vehicleColor, userId);
     }
 
 

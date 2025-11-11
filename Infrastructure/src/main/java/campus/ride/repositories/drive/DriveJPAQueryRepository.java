@@ -1,7 +1,7 @@
 package campus.ride.repositories.drive;
 
-import campus.ride.contracts.Drive.DriveQueryRepository;
-import campus.ride.contracts.Drive.DriveRow;
+import campus.ride.contracts.drive.DriveQueryRepository;
+import campus.ride.contracts.drive.DriveRow;
 import campus.ride.entities.Drive;
 
 import org.springframework.data.domain.Page;

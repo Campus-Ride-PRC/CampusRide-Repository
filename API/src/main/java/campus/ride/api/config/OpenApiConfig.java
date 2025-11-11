@@ -1,19 +1,12 @@
 package campus.ride.api.config;
 
-import campus.ride.api.errorDto.ErrorResponse;
-import io.swagger.v3.core.converter.ModelConverters;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
-import io.swagger.v3.oas.models.media.Content;
-import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
-import io.swagger.v3.oas.models.responses.ApiResponse;
-import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.servers.Server;
-import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -25,7 +18,7 @@ public class OpenApiConfig {
     @Bean
     public OpenAPI campusRideOpenAPI() {
         Server localServer = new Server();
-        localServer.setUrl("http://localhost:8080"); // ex: 192.168.0.19 - your ip address for network testing
+        localServer.setUrl("http://localhost:8080");
         localServer.setDescription("Local Development Server");
 
         Contact contact = new Contact();
@@ -44,45 +37,36 @@ public class OpenApiConfig {
                 .license(license);
 
         Components components = new Components();
-        ModelConverters.getInstance().read(ErrorResponse.class).forEach(components::addSchemas);
+        
+        // Manually create ErrorResponse schema
+        Schema<?> fieldValidationErrorSchema = new Schema<>()
+                .type("object")
+                .description("Field validation error details")
+                .addProperty("field", new Schema<>().type("string").description("Name of the field that failed validation"))
+                .addProperty("rejectedValue", new Schema<>().type("object").description("The value that was rejected"))
+                .addProperty("message", new Schema<>().type("string").description("Validation error message"));
+        
+        Schema<?> arraySchema = new Schema<>()
+                .type("array")
+                .description("List of field validation errors (for validation failures)");
+        arraySchema.setItems(new Schema<>().$ref("#/components/schemas/FieldValidationError"));
+        
+        Schema<?> errorResponseSchema = new Schema<>()
+                .type("object")
+                .description("Standard error response format")
+                .addProperty("timestamp", new Schema<>().type("string").format("date-time").description("Time when the error occurred"))
+                .addProperty("status", new Schema<>().type("integer").format("int32").description("HTTP status code"))
+                .addProperty("error", new Schema<>().type("string").description("HTTP status reason phrase"))
+                .addProperty("message", new Schema<>().type("string").description("Error message"))
+                .addProperty("path", new Schema<>().type("string").description("Request path that caused the error"))
+                .addProperty("fieldErrors", arraySchema);
+        
+        components.addSchemas("FieldValidationError", fieldValidationErrorSchema);
+        components.addSchemas("ErrorResponse", errorResponseSchema);
 
         return new OpenAPI()
                 .components(components)
                 .info(info)
                 .servers(List.of(localServer));
-    }
-
-    @Bean
-    public OpenApiCustomizer globalErrorResponsesCustomizer() {
-        return openApi -> {
-            if (openApi.getPaths() == null) return;
-            openApi.getPaths().values().forEach(pathItem -> {
-                if (pathItem == null) return;
-                java.util.stream.Stream.of(
-                        pathItem.getGet(),
-                        pathItem.getPost(),
-                        pathItem.getPut(),
-                        pathItem.getDelete(),
-                        pathItem.getPatch(),
-                        pathItem.getOptions(),
-                        pathItem.getHead(),
-                        pathItem.getTrace()
-                ).filter(java.util.Objects::nonNull).forEach(operation -> {
-                    ApiResponses responses = operation.getResponses();
-                    if (responses == null) {
-                        responses = new ApiResponses();
-                        operation.setResponses(responses);
-                    }
-                    Schema<?> errorSchemaRef = new Schema<>().$ref("#/components/schemas/" + ErrorResponse.class.getSimpleName());
-                    Content errorJson = new Content().addMediaType("application/json",
-                            new MediaType().schema(errorSchemaRef));
-
-                    responses.addApiResponse("400", new ApiResponse().description("Bad Request / Validation failed").content(errorJson));
-                    responses.addApiResponse("404", new ApiResponse().description("Not Found").content(errorJson));
-                    responses.addApiResponse("409", new ApiResponse().description("Conflict").content(errorJson));
-                    responses.addApiResponse("500", new ApiResponse().description("Internal Server Error").content(errorJson));
-                });
-            });
-        };
     }
 }

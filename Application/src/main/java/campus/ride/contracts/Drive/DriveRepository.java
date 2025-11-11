@@ -1,4 +1,4 @@
-package campus.ride.contracts.Drive;
+package campus.ride.contracts.drive;
 
 import java.util.Optional;
 import org.springframework.data.domain.Page;

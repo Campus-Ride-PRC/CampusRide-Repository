@@ -5,15 +5,17 @@ public class VehicleDto {
     private String model;
     private String vehicleLicencePlate;
     private String color;
+    private Long userId;
 
     public VehicleDto() {
     }
 
-    public VehicleDto(Long id, String model, String vehicleLicencePlate, String color) {
+    public VehicleDto(Long id, String model, String vehicleLicencePlate, String color, Long userId) {
         this.id = id;
         this.model = model;
         this.vehicleLicencePlate = vehicleLicencePlate;
         this.color = color;
+        this.userId = userId;
     }
 
     public Long getId() {
@@ -46,5 +48,13 @@ public class VehicleDto {
 
     public void setColor(String color) {
         this.color = color;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 }
