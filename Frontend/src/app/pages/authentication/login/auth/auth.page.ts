@@ -34,7 +34,26 @@ export class AuthPage {
   }
 
   onContinue() {
-    console.log('Email:', this.email);
-    console.log('Password:', this.password);
+    if (!this.email || !this.password) {
+      this.showToast('Please enter email and password');
+      return;
+    }
+
+    this.authService.login(this.email, this.password).subscribe({
+      next: (user) => {
+        console.log('Login successful:', user);
+        this.showToast('Login successful', 'success');
+
+        // this.router.navigate(['/home']);
+      },
+      error: (err) => {
+        console.error(err);
+        if (err.status === 400 || err.status === 404) {
+          this.showToast('Invalid email or password');
+        } else {
+          this.showToast('Something went wrong');
+        }
+      }
+    });
   }
 }

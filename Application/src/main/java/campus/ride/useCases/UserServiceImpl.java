@@ -150,16 +150,18 @@ public class UserServiceImpl implements UserService {
             throw new BadRequestException("Email and password are required");
         }
 
-        Optional<User> userOptional = userRepository.findByEmailAndPassword(email.trim(), password);
+        User user = userRepository.findByEmail(email.trim())
+                .orElseThrow(() -> new ResourceNotFoundException("Invalid email or password"));
 
-        if (userOptional.isEmpty() || !userOptional.get().getPassword().equals(password)) {
+        if (!passwordEncoder.matches(password, user.getPassword())) {
             logger.warn("Invalid login attempt for email: {}", email);
             throw new ResourceNotFoundException("Invalid email or password");
         }
 
         logger.info("Login successful for email: {}", email);
-        return UserMapper.toDto(userOptional.get());
+        return UserMapper.toDto(user);
     }
+
 
     @Override
     public List<UserResponseDto> getAllUsers() {
