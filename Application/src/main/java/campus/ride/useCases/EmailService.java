@@ -50,7 +50,7 @@ public class EmailService implements campus.ride.interfaces.EmailService {
             helper.setText(htmlBody, true);
 
             mailSender.send(message);
-            logger.info("HTML Verification email sent to {}", toEmail);
+            logger.info("HTML Verification email sent to {} with code {}", toEmail, code);
 
         } catch (MessagingException | IOException e) {
             logger.error("Failed to send HTML email to " + toEmail, e);
