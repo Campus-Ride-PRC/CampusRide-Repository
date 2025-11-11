@@ -1,7 +1,7 @@
 package campus.ride.useCases;
 
 import campus.ride.entities.Vehicle;
-import campus.ride.contracts.vehicle.VehicleRepository;
+import campus.ride.contracts.Vehicle.VehicleRepository;
 import campus.ride.interfaces.VehicleService;
 import campus.ride.transfer.dtos.vehicle.VehicleDto;
 import campus.ride.transfer.mappings.VehicleMapper;

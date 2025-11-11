@@ -31,9 +31,12 @@ public class User {
     private String phoneNumber;
     private String firstName;
     private String lastName;
-    private String faculty;
 
-    protected User() {}
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "facultyid")
+    private Faculty faculty;
+
+    public User() {}
 
     public User(String email, String password) {
         this.email = email;
@@ -62,6 +65,6 @@ public class User {
     public String getLastName() { return lastName; }
     public void setLastName(String lastName) { this.lastName = lastName; }
 
-    public String getFaculty() { return faculty; }
-    public void setFaculty(String faculty) { this.faculty = faculty; }
+    public Faculty getFaculty() { return faculty; }
+    public void setFaculty(Faculty faculty) { this.faculty = faculty; }
 }

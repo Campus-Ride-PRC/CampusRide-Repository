@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import campus.ride.transfer.dtos.user.VerificationRequestDto;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
@@ -57,28 +58,39 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    @Operation(
-            summary = "Create new user",
-            description = "Creates a new user account with the provided information"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "201",
-                    description = "User created successfully",
-                    content = @Content(schema = @Schema(implementation = UserResponseDto.class))
-            ),
-            @ApiResponse(responseCode = "400", description = "Invalid user data"),
-            @ApiResponse(responseCode = "409", description = "User already exists")
-    })
-    @PostMapping
-    public ResponseEntity<UserResponseDto> createUser(@RequestBody CreateUserRequestDto request) {
-        logger.info("Received request to create new user");
-        logger.debug("Creating user with email: {}", request.getEmail());
-        
-        UserResponseDto createdUser = userService.createUser(request);
-        
-        logger.info("Successfully created user with email: {}", createdUser.getEmail());
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
+    @PostMapping("/exists")
+    public ResponseEntity<Boolean> userExists(@RequestBody EmailRequestDto request) {
+        logger.info("Received request to find user by email with email: {}", request.getEmail());
+
+        try{
+            var user = userService.findByEmail(request.getEmail());
+            logger.info("Already existing user found with email: {}", request.getEmail());
+            return ResponseEntity.status(HttpStatus.OK).body(true);
+        }catch (Exception e){
+            logger.info("User not found with email: {}", request.getEmail());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(false);
+        }
+    }
+
+    @PostMapping("/register/create")
+    public ResponseEntity<String> registerUser(@RequestBody CreateUserRequestDto request) {
+       logger.info("Received request to register new user");
+        logger.debug("Registering user with email: {}", request.getEmail());
+
+        String message = userService.registerUser(request);
+
+        logger.info("Successfully sent verification code for email: {}", request.getEmail());
+        return ResponseEntity.ok(message);
+    }
+    
+    @PostMapping("/register/verify")
+    public ResponseEntity<UserResponseDto> verifyUSer(@RequestBody VerificationRequestDto request){
+        logger.info("Received request to verify user");
+        logger.debug("Verifying user with email: {}", request.getEmail());
+
+        UserResponseDto user = userService.verifyUser(request);
+        logger.info("User verified with email: {}", request.getEmail());
+        return ResponseEntity.status(HttpStatus.CREATED).body(user);
     }
 
     @Operation(
