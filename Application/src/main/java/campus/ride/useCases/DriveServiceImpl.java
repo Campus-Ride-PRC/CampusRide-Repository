@@ -83,8 +83,6 @@ public class DriveServiceImpl implements DriveService {
             throw new IllegalArgumentException("From and To addresses must be different.");
         }
 
-        // Get driver - for now use a dummy ID until authentication is implemented
-        // TODO: Replace with actual authenticated user ID
         User driver = dto.getDriverId() != null 
             ? userRepository.findById(dto.getDriverId())
                 .orElseThrow(() -> new IllegalArgumentException("Driver not found: " + dto.getDriverId()))
