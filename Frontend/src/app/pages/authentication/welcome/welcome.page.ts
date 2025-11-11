@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { PrimaryButtonComponent } from '../../../shared/components/buttons/primary-button.component';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-welcome',
@@ -12,8 +12,11 @@ import { RouterModule } from '@angular/router';
   styleUrls: ['./welcome.page.scss'],
 })
 export class WelcomePage {
+  constructor(
+    private router: Router
+  ) {}
+
   onLogin() {
-    // Handle login navigation
-    console.log('Login clicked');
+    this.router.navigate(['/login/auth']);
   }
 }

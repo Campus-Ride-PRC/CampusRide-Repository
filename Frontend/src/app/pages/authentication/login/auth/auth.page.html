@@ -10,24 +10,24 @@
         </div>
 
         <div class="text-center font-[16px] mt-[24px] px-[24px]">
-          <p class="text-[20px] font-[600] text-gray-300">Let's find more about you. What's your name?</p>
+          <p class="text-[20px] font-[600] text-gray-300 mb-4">Welcome back! Use your credentials to log in!</p>
         </div>
 
-        <div class="mt-[6px] mb-[12px] pt-[4px] w-full">
+        <div class="mt-[12px] mb-[24px] pt-[12px] w-full">
             <app-text-input
-                type="text"
-                placeholder="Enter your first name"
-                [(ngModel)]="firstName"
+                type="email"
+                placeholder="Enter your email"
+                [(ngModel)]="email"
                 width="80%"
                 customClass="w-full">
             </app-text-input>
         </div>
 
-        <div class="mt-[6px] mb-[24px] pt-[4px] w-full">
+        <div class="mt-[12px] mb-[24px] pt-[12px] w-full">
             <app-text-input
-                type="text"
-                placeholder="Enter your last name"
-                [(ngModel)]="lastName"
+                type="password"
+                placeholder="Enter your password"
+                [(ngModel)]="password"
                 width="80%"
                 customClass="w-full">
             </app-text-input>
@@ -47,9 +47,10 @@
 
     <div class="flex justify-center py-8 mb-[32px]">
       <p class="text-center text-[16px] font-[500] text-gray-400">
-        Already have an account? <a routerLink="/login/auth" class="text-white font-medium hover:underline">Sign in</a>  
+        Don't have an account? <a routerLink="/register/name" class="text-white font-medium hover:underline">Sign up</a>  
       </p>
     </div>
+
   </div>
 
 </ion-content>
