@@ -15,6 +15,9 @@ public final class DriveValidator {
         require(r.getToNumber(), "toNumber");
         require(r.getToNeighborhood(), "toNeighborhood");
 
+        if (r.getUserId() == null) throw new IllegalArgumentException("userId is required");
+        if (r.getUserId() <= 0) throw new IllegalArgumentException("userId must be positive");
+
         if (r.getPrice() == null || r.getPrice().signum() <= 0) throw new IllegalArgumentException("price must be > 0");
         if (r.getDay() == null) throw new IllegalArgumentException("day is required");
         if (r.getHour() == null) throw new IllegalArgumentException("hour is required");

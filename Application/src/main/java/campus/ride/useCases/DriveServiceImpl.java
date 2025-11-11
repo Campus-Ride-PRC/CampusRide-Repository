@@ -1,10 +1,18 @@
 package campus.ride.useCases;
 
 import campus.ride.entities.Address;
+import campus.ride.entities.Booking;
 import campus.ride.entities.Drive;
-import campus.ride.contracts.Drive.DriveQueryRepository;
-import campus.ride.contracts.Drive.DriveRepository;
-import campus.ride.contracts.Drive.DriveRow;
+import campus.ride.entities.User;
+import campus.ride.entities.Vehicle;
+import campus.ride.enums.BookingRole;
+import campus.ride.enums.BookingStatus;
+import campus.ride.contracts.booking.BookingRepository;
+import campus.ride.contracts.drive.DriveQueryRepository;
+import campus.ride.contracts.drive.DriveRepository;
+import campus.ride.contracts.drive.DriveRow;
+import campus.ride.contracts.user.UserRepository;
+import campus.ride.contracts.vehicle.VehicleRepository;
 import campus.ride.interfaces.DriveService;
 import campus.ride.transfer.dtos.drive.DriveCardDto;
 import campus.ride.transfer.dtos.drive.DriveDto;
@@ -23,15 +31,25 @@ import java.util.concurrent.CompletableFuture;
 @Service
 public class DriveServiceImpl implements DriveService {
 
-    private final DriveRepository driveRepo; // domain repo (entities)
-    private final DriveQueryRepository driveQueryRepo; // query repo (projections)
+    private final DriveRepository driveRepo;
+    private final DriveQueryRepository driveQueryRepo;
+    private final BookingRepository bookingRepository;
+    private final UserRepository userRepository;
+    private final VehicleRepository vehicleRepository;
 
     @PersistenceContext
     private EntityManager em;
 
-    public DriveServiceImpl(DriveRepository driveRepo, DriveQueryRepository driveQueryRepo) {
+    public DriveServiceImpl(DriveRepository driveRepo, 
+                           DriveQueryRepository driveQueryRepo,
+                           BookingRepository bookingRepository,
+                           UserRepository userRepository,
+                           VehicleRepository vehicleRepository) {
         this.driveRepo = driveRepo;
         this.driveQueryRepo = driveQueryRepo;
+        this.bookingRepository = bookingRepository;
+        this.userRepository = userRepository;
+        this.vehicleRepository = vehicleRepository;
     }
 
 
@@ -65,13 +83,50 @@ public class DriveServiceImpl implements DriveService {
             throw new IllegalArgumentException("From and To addresses must be different.");
         }
 
-        Drive entity = DriveMapper.toEntity(dto, from, to);
+        // Get driver - for now use a dummy ID until authentication is implemented
+        // TODO: Replace with actual authenticated user ID
+        User driver = dto.getDriverId() != null 
+            ? userRepository.findById(dto.getDriverId())
+                .orElseThrow(() -> new IllegalArgumentException("Driver not found: " + dto.getDriverId()))
+            : null;
+
+        if (driver == null) {
+            throw new IllegalArgumentException("Driver ID is required");
+        }
+
+        // Get or ensure vehicle
+        Vehicle vehicle = null;
+        if (dto.getVehicleId() != null) {
+            vehicle = vehicleRepository.findById(dto.getVehicleId())
+                .orElseThrow(() -> new IllegalArgumentException("Vehicle not found: " + dto.getVehicleId()));
+        }
+
+        if (vehicle == null) {
+            throw new IllegalArgumentException("Vehicle ID is required");
+        }
+
+        Drive entity = DriveMapper.toEntity(dto, from, to, driver, vehicle);
 
         if (entity.getCreatedAt() == null) {
             entity.setCreatedAt(LocalDateTime.now());
         }
 
         Drive saved = driveRepo.save(entity);
+
+        // Create driver booking with ACCEPTED status
+        LocalDateTime now = LocalDateTime.now();
+        Booking driverBooking = new Booking(
+            saved.getId(),
+            driver.getId(),
+            saved,
+            driver,
+            BookingStatus.ACCEPTED,
+            BookingRole.DRIVER,
+            now,
+            now
+        );
+        bookingRepository.save(driverBooking);
+
         return CompletableFuture.completedFuture(DriveMapper.toDto(saved));
     }
 

@@ -1,6 +1,6 @@
 package campus.ride.repositories.drive;
 
-import campus.ride.contracts.Drive.DriveRepository;
+import campus.ride.contracts.drive.DriveRepository;
 import campus.ride.entities.Drive;
 
 import org.springframework.data.domain.Page;
