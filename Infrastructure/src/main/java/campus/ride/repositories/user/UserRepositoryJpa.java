@@ -15,3 +15,13 @@ public interface UserRepositoryJpa extends JpaRepository<User, Long>, UserReposi
     @Override
     Optional<User> findById(Long id);
 }
+
+    @Override
+    User save(User user);
+
+    @Override
+    Optional<User> findByEmailAndPassword(String email, String password);
+
+    @Override
+    java.util.List<User> findAll();
+}
