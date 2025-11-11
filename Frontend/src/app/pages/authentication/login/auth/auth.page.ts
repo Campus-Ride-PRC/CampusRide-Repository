@@ -47,7 +47,7 @@ export class AuthPage {
         this.showToast('Login successful', 'success');
 
         this.homeService.setLoggedUser(user);
-        // this.router.navigate(['/home']);
+        this.router.navigate(['/home']);
       },
       error: (err) => {
         console.error(err);
