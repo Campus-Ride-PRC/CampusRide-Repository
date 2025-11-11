@@ -13,7 +13,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -68,5 +70,32 @@ public class UserServiceImpl implements UserService {
         
         logger.info("Successfully created user with ID: {} and email: {}", savedUser.getId(), savedUser.getEmail());
         return UserMapper.toDto(savedUser);
+    }
+
+    @Override
+    public UserResponseDto login(String email, String password) {
+        logger.info("Attempting login for email: {}", email);
+
+        if (email == null || email.trim().isEmpty() || password == null || password.isEmpty()) {
+            throw new BadRequestException("Email and password are required");
+        }
+
+        Optional<User> userOptional = userRepository.findByEmailAndPassword(email.trim(), password);
+
+        if (userOptional.isEmpty() || !userOptional.get().getPassword().equals(password)) {
+            logger.warn("Invalid login attempt for email: {}", email);
+            throw new ResourceNotFoundException("Invalid email or password");
+        }
+
+        logger.info("Login successful for email: {}", email);
+        return UserMapper.toDto(userOptional.get());
+    }
+
+    @Override
+    public List<UserResponseDto> getAllUsers() {
+        return userRepository.findAll()
+                .stream()
+                .map(user -> new UserResponseDto(user.getId(), user.getEmail(), user.getAddress(), user.getPhoneNumber(), user.getFirstName(), user.getLastName(), user.getFaculty()))
+                .collect(Collectors.toList());
     }
 }
