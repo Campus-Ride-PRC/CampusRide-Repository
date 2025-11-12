@@ -1,0 +1,227 @@
+.content-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: 24px;
+}
+
+.drives-title {
+  color: #FFFFFF;
+  font-family: 'Roboto', -apple-system, Roboto, Helvetica, sans-serif;
+  font-size: 22px;
+  font-weight: 500;
+  margin: 0;
+}
+
+.add-ride-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #00C36C 0%, #00A859 100%);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 16px;
+  padding: 12px 0;
+  font-family: 'Inter', -apple-system, Roboto, Helvetica, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 195, 108, 0.25);
+  text-transform: none;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 195, 108, 0.35);
+    background: linear-gradient(135deg, #00D478 0%, #00B862 100%);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(0, 195, 108, 0.2);
+  }
+}
+
+
+.cards-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: 32px;
+}
+
+.card-item {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+
+
+
+@media (max-width: 768px) {
+  .content-wrapper {
+    padding: 20px 12px;
+  }
+
+  .header-section {
+    max-width: 100%;
+  }
+
+  .cards-container {
+    max-width: 100%;
+  }
+
+  .drives-title {
+    font-size: 20px;
+  }
+
+  .add-ride-btn {
+    padding: 8px 20px;
+    font-size: 13px;
+  }
+
+  .see-more-btn {
+    padding: 8px 28px;
+    font-size: 13px;
+  }
+}
+
+
+.ride-card {
+  position: relative;
+  width: 372px;
+  height: 272px;
+  border-radius: 30px;
+  background: #2A2A2C;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+}
+.ride-item {
+  --background: transparent;
+  --border-width: 0px;
+  --border-style: none;
+}
+
+.ride-item ion-input {
+  --background: transparent;
+}
+
+.form-footer{
+  margin-top: 24px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+ion-button{
+  --background: transparent;
+}
+.ride-item ion-select {
+  --background: transparent;        /* scoate fundalul de bază */
+  --placeholder-color: #00C36C;     /* culoarea placeholder-ului */
+  color: #00C36C;                   /* textul selectat */
+  text-align: right;                /* aliniază textul la dreapta */
+  --padding-start: 0px;             /* elimină padding-ul intern */
+}
+
+.ride-item ion-select::part(trigger) {
+  background: transparent !important;  /* scoate fundalul shadow DOM */
+  color: #00C36C;                      /* textul selectat */
+  border: none;                        /* scoate border dacă există */
+  box-shadow: none;                    /* scoate eventual shadow */
+}
+
+.ride-item ion-select::part(placeholder) {
+  color: #00C36C;                      /* culoarea placeholder-ului */
+  opacity: 1;
+}
+
+
+ion-datetime-button {
+  --color: #00C36C;          /* culoarea textului butonului */
+  --placeholder-color: #AAAAAA; /* culoarea placeholder-ului */
+}
+
+ion-datetime {
+  --background: #2A2A2C;     /* fundalul picker-ului */
+  --color: #FFFFFF;           /* textul selectat */
+  --border-radius: 16px;      /* dacă vrei colțuri rotunjite */
+}
+
+ion-datetime::part(column) {
+  color: #FFFFFF;             /* textul din coloanele picker-ului */
+}
+
+ion-datetime::part(selected) {
+  color:#00C36C;             /* culoarea valorii selectate */
+}
+
+ion-datetime::part(separator) {
+  color: #AAAAAA;             /* separatorul ":" sau "/" */
+}
+ion-datetime-button::part(native) {
+  color: #00C36C;             /* textul butonului */
+  background: transparent;    /* fundal transparent */
+}
+
+ion-datetime::part(column) {
+  color: #00C36C;             /* text în picker */
+}
+
+ion-datetime::part(selected) {
+  color: #00C36C;             /* valoare selectată */
+}
+ion-modal {
+  --background: #2A2A2C;      /* fundalul modalului */
+}
+/* Butonul care arată valoarea selectată */
+.ride-item ion-select::part(trigger) {
+  background: transparent !important;
+  color: #00C36C;        /* text selectat */
+  border: none;
+  box-shadow: none;
+}
+
+/* Placeholder */
+.ride-item ion-select::part(placeholder) {
+  color: #AAAAAA;       /* placeholder gri */
+  opacity: 1;
+}
+
+/* Lista de opțiuni (alert interface) */
+ion-alert .alert-radio-label,
+ion-alert .alert-button {
+  color: #FFFFFF !important;   /* text opțiuni alb */
+}
+
+/* Lista de opțiuni (popover interface) */
+ion-popover .popover-content {
+  color: #FFFFFF !important;
+}
+
+/* Lista de opțiuni (action sheet interface) */
+ion-action-sheet .action-sheet-button {
+  color: #FFFFFF !important;
+}
+ion-datetime-button {
+  --background: transparent;
+  --color: #00C36C;           /* textul selectat */
+  --placeholder-color: #AAAAAA;
+}

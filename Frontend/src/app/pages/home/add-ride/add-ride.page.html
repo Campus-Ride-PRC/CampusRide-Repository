@@ -1,0 +1,64 @@
+<app-header menuTitle="Add Ride" (menuClick)="onMenuOpen()"></app-header>
+<ion-content class="bg-[#1a1a1a]">
+  <div class="content-wrapper">
+    <div class="cards-container">
+      <div class="ride-card">
+        <form [formGroup]="rideForm" (ngSubmit)="submitForm()">
+          <ion-item class="ride-item">
+            <ion-label position="fixed">From</ion-label>
+            <ion-input placeholder="Enter Adress" formControlName="from"></ion-input>
+          </ion-item>
+          <ion-item class="ride-item">
+            <ion-label position="fixed">Destination</ion-label>
+            <ion-input type="text" placeholder="Enter Destination" formControlName="destination"></ion-input>
+          </ion-item>
+          <ion-item class="ride-item">
+            <ion-label position="fixed">Price</ion-label>
+            <ion-input type="text" placeholder="Enter Price" formControlName="price"></ion-input>
+          </ion-item>
+
+          <ion-item class="ride-item">
+            <ion-label >Day</ion-label>
+            <ion-datetime-button  datetime="driveDate"></ion-datetime-button>
+            <ion-modal [keepContentsMounted]="true">
+              <ng-template>
+                <ion-datetime
+                  id="driveDate"
+                  formControlName="day"
+                  presentation="date"
+                  displayFormat="MMM DD, YYYY"
+                  pickerFormat="YYYY-MM-DD" >
+                </ion-datetime>
+              </ng-template>
+            </ion-modal>
+          </ion-item>
+          <ion-item>
+            <ion-label class="ride-item">Hour</ion-label>
+            <ion-datetime-button datetime="driveHour"></ion-datetime-button>
+            <ion-modal [keepContentsMounted]="true">
+              <ng-template>
+                <ion-datetime
+                  id="driveHour"
+                  presentation="time"
+                  formControlName="hour"
+                  display-format="HH:mm"
+                  picker-format="HH:mm">
+                </ion-datetime>
+              </ng-template>
+            </ion-modal>
+          </ion-item>
+          <ion-item class="ride-item">
+            <ion-label position="fixed" >Seats</ion-label>
+            <ion-input type="number" placeholder="Enter Seats" formControlName="seats"></ion-input>
+          </ion-item>
+
+          <div class="form-footer">
+            <ion-button class="add-ride-btn" type="submit">
+              Add Ride
+            </ion-button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</ion-content>
