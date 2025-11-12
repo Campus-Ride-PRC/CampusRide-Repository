@@ -3,8 +3,6 @@ package campus.ride.interfaces;
 import campus.ride.transfer.dtos.user.CreateUserRequestDto;
 import campus.ride.transfer.dtos.user.UserResponseDto;
 import campus.ride.transfer.dtos.user.VerificationRequestDto;
-import org.springframework.stereotype.Service;
-
 
 import java.util.List;
 

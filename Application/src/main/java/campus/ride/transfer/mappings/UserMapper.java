@@ -1,6 +1,5 @@
 package campus.ride.transfer.mappings;
 
-import campus.ride.entities.Faculty;
 import campus.ride.entities.User;
 import campus.ride.transfer.dtos.user.CreateUserRequestDto;
 import campus.ride.transfer.dtos.user.UserResponseDto;

@@ -1,6 +1,5 @@
 package campus.ride.transfer.mappings;
 
-import campus.ride.entities.Address;
 import campus.ride.entities.Faculty;
 import campus.ride.transfer.dtos.faculty.FacultyResponseDto;
 

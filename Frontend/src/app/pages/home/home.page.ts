@@ -1,54 +1,114 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { RouterModule, Router } from '@angular/router';
 import { AppHeaderComponent } from 'src/app/shared/components/header/app-header.component';
 import { SidePanelComponent } from 'src/app/shared/components/panel/side-panel.component';
+import { RideCardComponent } from 'src/app/shared/components/cards/ride-card.component';
+import { DriveService } from 'src/app/core/services/drive.service';
+import { DriveCard } from 'src/app/core/models/drive-card.model';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, IonicModule, RouterModule, AppHeaderComponent, SidePanelComponent],
+  imports: [CommonModule, IonicModule, RouterModule, AppHeaderComponent, SidePanelComponent, RideCardComponent],
   templateUrl: './home.page.html',
   styleUrls: ['./home.page.scss'],
 })
-export class HomePage {
+export class HomePage implements OnInit {
   isPanelOpen = false;
+  drives: DriveCard[] = [];
+  loading = false;
+  currentPage = 0;
+  totalPages = 0;
 
-  constructor(private router: Router) {
-    console.log('HomePage initialized, isPanelOpen:', this.isPanelOpen);
+  constructor(
+    private router: Router,
+    private driveService: DriveService
+  ) {}
+
+  ngOnInit() {
+    this.loadDrives();
+  }
+
+  loadDrives() {
+    this.loading = true;
+    this.driveService.getDriveCards(this.currentPage, 10).subscribe({
+      next: (response) => {
+        this.drives = response.content;
+        this.totalPages = response.totalPages;
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error loading drives:', error);
+        this.loading = false;
+      }
+    });
+  }
+
+  getDriverName(drive: DriveCard): string {
+    return `${drive.driverFirstName} ${drive.driverLastName}`;
+  }
+
+  getFromLocation(drive: DriveCard): string {
+    return drive.fromNeighborhood || drive.fromLocationName;
+  }
+
+  getToLocation(drive: DriveCard): string {
+    return drive.toNeighborhood || drive.toLocationName;
+  }
+
+  formatDepartureTime(time: string): string {
+    const date = new Date(time);
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const isToday = date.toDateString() === today.toDateString();
+    const isTomorrow = date.toDateString() === tomorrow.toDateString();
+
+    const timeStr = date.toLocaleTimeString('en-US', { 
+      hour: 'numeric', 
+      minute: '2-digit',
+      hour12: true 
+    });
+
+    if (isToday) {
+      return `Today, ${timeStr}`;
+    } else if (isTomorrow) {
+      return `Tomorrow, ${timeStr}`;
+    } else {
+      return `${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}, ${timeStr}`;
+    }
+  }
+
+  formatPrice(price: number): string {
+    return `${price} RON`;
+  }
+
+  onCardClick(drive: DriveCard) {
+    console.log('Drive clicked:', drive);
   }
 
   onMenuOpen() {
-  console.log('Menu opened - before setting isPanelOpen to true');
-  this.isPanelOpen = true;
-  console.log('Menu opened - after setting isPanelOpen to true:', this.isPanelOpen);
-}
+    this.isPanelOpen = true;
+  }
 
-onPanelClosed() {
-  console.log('Panel closed - before setting isPanelOpen to false');
-  this.isPanelOpen = false;
-  console.log('Panel closed - after setting isPanelOpen to false:', this.isPanelOpen);
-}
+  onPanelClosed() {
+    this.isPanelOpen = false;
+  }
 
   onMenuItemClick(item: string) {
     console.log('Menu item clicked:', item);
     
     switch(item) {
       case 'home':
-        // Navigate to home
-        // this.router.navigate(['/home']);
         break;
       case 'drives':
-        // Navigate to add drives
-        // this.router.navigate(['/drives']);
         break;
       case 'settings':
-        // Navigate to settings
-        // this.router.navigate(['/settings']);
         break;
       case 'logout':
-        // Handle logout
         console.log('Logging out...');
         break;
     }

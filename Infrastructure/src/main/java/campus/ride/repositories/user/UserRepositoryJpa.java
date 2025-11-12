@@ -16,6 +16,7 @@ public interface UserRepositoryJpa extends JpaRepository<User, Long>, UserReposi
     Optional<User> findById(Long id);
 
     @Override
+    @SuppressWarnings("unchecked")
     User save(User user);
 
     @Override
