@@ -1,6 +1,4 @@
 package campus.ride.useCases;
-
-
 import campus.ride.contracts.address.AddressRepository;
 import campus.ride.entities.Address;
 import campus.ride.interfaces.AddressService;
