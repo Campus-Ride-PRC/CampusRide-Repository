@@ -1,0 +1,153 @@
+.content-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: 24px;
+}
+
+.drives-title {
+  color: #FFFFFF;
+  font-family: 'Roboto', -apple-system, Roboto, Helvetica, sans-serif;
+  font-size: 22px;
+  font-weight: 500;
+  margin: 0;
+}
+
+.add-ride-btn {
+  background: linear-gradient(135deg, #00C36C 0%, #00A859 100%);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 25px;
+  padding: 10px 24px;
+  font-family: 'Inter', -apple-system, Roboto, Helvetica, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 195, 108, 0.25);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 195, 108, 0.35);
+    background: linear-gradient(135deg, #00D478 0%, #00B862 100%);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(0, 195, 108, 0.2);
+  }
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 64px 0;
+}
+
+.spinner {
+  color: #00C36C;
+  width: 40px;
+  height: 40px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 64px 0;
+}
+
+.empty-text {
+  color: #9E9E9E;
+  font-family: 'Inter', -apple-system, Roboto, Helvetica, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+}
+
+.cards-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: 32px;
+}
+
+.card-item {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.see-more-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding: 16px 0 32px 0;
+}
+
+.see-more-btn {
+  background: transparent;
+  color: #00C36C;
+  border: 2px solid #00C36C;
+  border-radius: 25px;
+  padding: 10px 32px;
+  font-family: 'Inter', -apple-system, Roboto, Helvetica, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 195, 108, 0.15);
+
+  &:hover {
+    background: rgba(0, 195, 108, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 195, 108, 0.25);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(0, 195, 108, 0.2);
+  }
+}
+
+@media (max-width: 768px) {
+  .content-wrapper {
+    padding: 20px 12px;
+  }
+
+  .header-section {
+    max-width: 100%;
+  }
+
+  .cards-container {
+    max-width: 100%;
+  }
+
+  .drives-title {
+    font-size: 20px;
+  }
+
+  .add-ride-btn {
+    padding: 8px 20px;
+    font-size: 13px;
+  }
+
+  .see-more-btn {
+    padding: 8px 28px;
+    font-size: 13px;
+  }
+}
+

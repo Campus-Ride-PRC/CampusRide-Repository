@@ -162,7 +162,6 @@ public class DriveServiceImpl implements DriveService {
         return CompletableFuture.completedFuture(null);
     }
 
-    // carModel = null until M:N exists
     @Override
     @Async
     @Transactional(readOnly = true)
@@ -171,9 +170,11 @@ public class DriveServiceImpl implements DriveService {
         Page<DriveCardDto> page = rows.map(r ->
                 new DriveCardDto(
                         r.getId(), r.getTime(), r.getPrice(),
+                        r.getAvailableSeats(), r.getTotalNoSeats(),
                         r.getFrom_LocationName(), r.getFrom_Neighborhood(),
-                        r.getTo_LocationName(),   r.getTo_Neighborhood(),
-                        null // TODO: populate once M:N (Drive<->User/Vehicle) exists
+                        r.getTo_LocationName(), r.getTo_Neighborhood(),
+                        r.getDriver_FirstName(), r.getDriver_LastName(),
+                        r.getVehicle_Model()
                 )
         );
         return CompletableFuture.completedFuture(page);
