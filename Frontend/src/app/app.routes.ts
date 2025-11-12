@@ -34,6 +34,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/authentication/register/result/result.page').then((m) => m.ResultPage),
   },
   {
+    path: 'home',
+    loadComponent: () => import('./pages/home/home.page').then((m) => m.HomePage),
+  },
+  {
     path: '',
     redirectTo: 'welcome',
     pathMatch: 'full',

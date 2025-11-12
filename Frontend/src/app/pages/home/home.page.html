@@ -1,0 +1,17 @@
+<app-header (menuClick)="onMenuOpen()"></app-header>
+
+<ion-content class="bg-[#1a1a1a]">
+  <div class="p-4">
+    <p class="text-white">Conținutul paginii tale aici.</p>
+  </div>
+</ion-content>
+
+<!-- Wrapper cu z-index foarte mare -->
+<div class="fixed inset-0 z-[1000] pointer-events-none">
+  <app-side-panel
+    [isOpen]="isPanelOpen"
+    (closed)="onPanelClosed()"
+    (itemClicked)="onMenuItemClick($event)"
+    class="pointer-events-auto">
+  </app-side-panel>
+</div>
