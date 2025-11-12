@@ -35,9 +35,13 @@ onPanelClosed() {
     console.log('Menu item clicked:', item);
     
     switch(item) {
-      case 'profile':
-        // Navigate to profile
-        // this.router.navigate(['/profile']);
+      case 'home':
+        // Navigate to home
+        // this.router.navigate(['/home']);
+        break;
+      case 'drives':
+        // Navigate to add drives
+        // this.router.navigate(['/drives']);
         break;
       case 'settings':
         // Navigate to settings
