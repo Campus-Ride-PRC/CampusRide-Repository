@@ -1,0 +1,141 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar class="custom-toolbar">
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()" class="back-button">
+        <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title class="page-title">Ride Details</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="bg-[#1a1a1a]">
+  <div class="content-wrapper">
+    <!-- Loading State -->
+    <div *ngIf="loading" class="loading-container">
+      <ion-spinner name="crescent" class="spinner"></ion-spinner>
+      <p class="loading-text">Loading ride details...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="error && !loading" class="error-container">
+      <ion-icon name="alert-circle-outline" class="error-icon"></ion-icon>
+      <p class="error-text">{{ error }}</p>
+      <ion-button (click)="goBack()" fill="outline" class="error-button">
+        Go Back
+      </ion-button>
+    </div>
+
+    <!-- Drive Details -->
+    <div *ngIf="drive && !loading" class="details-container">
+      <!-- Driver Section -->
+      <div class="driver-section">
+        <div class="driver-header">
+          <div class="driver-avatar">
+            <img 
+              [src]="'https://api.dicebear.com/7.x/avataaars/svg?seed=' + drive.driverFirstName" 
+              [alt]="getDriverName()" 
+              class="avatar-image" 
+            />
+          </div>
+          <div class="driver-info">
+            <h2 class="driver-name">{{ getDriverName() }}</h2>
+            <div class="driver-rating">
+              <ion-icon name="star" class="star-icon"></ion-icon>
+              <span class="rating-value">4.8</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Route Section -->
+      <div class="route-section">
+        <h3 class="section-title">Route Details</h3>
+        
+        <div class="route-container">
+          <!-- From Location -->
+          <div class="location-block">
+            <div class="location-icon-wrapper from-icon">
+              <ion-icon name="location" class="location-icon"></ion-icon>
+            </div>
+            <div class="location-details">
+              <p class="location-label">From</p>
+              <p class="location-name">{{ getFromLocation() }}</p>
+            </div>
+          </div>
+
+          <!-- Route Line -->
+          <div class="route-line"></div>
+
+          <!-- To Location -->
+          <div class="location-block">
+            <div class="location-icon-wrapper to-icon">
+              <ion-icon name="location" class="location-icon"></ion-icon>
+            </div>
+            <div class="location-details">
+              <p class="location-label">Destination</p>
+              <p class="location-name">{{ getToLocation() }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trip Information -->
+      <div class="trip-info-section">
+        <h3 class="section-title">Trip Information</h3>
+        
+        <div class="info-grid">
+          <div class="info-card">
+            <ion-icon name="time-outline" class="info-icon"></ion-icon>
+            <div class="info-content">
+              <p class="info-label">Departure</p>
+              <p class="info-value">{{ formatDepartureTime() }}</p>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <ion-icon name="people-outline" class="info-icon"></ion-icon>
+            <div class="info-content">
+              <p class="info-label">Available Seats</p>
+              <p class="info-value">{{ drive.availableSeats }} of {{ drive.totalNoSeats }}</p>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <ion-icon name="car-outline" class="info-icon"></ion-icon>
+            <div class="info-content">
+              <p class="info-label">Vehicle</p>
+              <p class="info-value">
+                {{ drive.vehicleModel }}
+                <span *ngIf="drive.vehicleColor" class="vehicle-color-badge" [style.background-color]="drive.vehicleColor"></span>
+              </p>
+              <p class="info-detail" *ngIf="drive.vehicleLicencePlate">{{ drive.vehicleLicencePlate }}</p>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <ion-icon name="cash-outline" class="info-icon"></ion-icon>
+            <div class="info-content">
+              <p class="info-label">Price per Seat</p>
+              <p class="info-value price-highlight">{{ formatPrice() }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fixed Bottom Button -->
+  <div *ngIf="drive && !loading" class="bottom-action">
+    <ion-button 
+      expand="block" 
+      class="request-button"
+      (click)="onRequestRide()"
+      [disabled]="drive.availableSeats === 0 || requestingRide"
+    >
+      <ion-spinner *ngIf="requestingRide" name="crescent" slot="start"></ion-spinner>
+      <ion-icon *ngIf="!requestingRide" name="checkmark-circle-outline" slot="start"></ion-icon>
+      {{ requestingRide ? 'Requesting...' : (drive.availableSeats === 0 ? 'No Seats Available' : 'Request This Ride') }}
+    </ion-button>
+  </div>
+</ion-content>

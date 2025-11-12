@@ -7,4 +7,5 @@ export interface UserResponse {
     email: string;
     phoneNumber: string;
     faculty: Faculty;
+    token?: string;
 }

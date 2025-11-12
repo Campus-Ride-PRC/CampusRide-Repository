@@ -129,6 +129,32 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional
+    public BookingResponseDto cancelBooking(Long driveId, Long userId) {
+        BookingId bookingId = new BookingId(driveId, userId);
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new ResourceNotFoundException("Booking not found"));
+
+        if (booking.getStatus() == BookingStatus.CANCELED) {
+            throw new BadRequestException("Booking is already canceled");
+        }
+
+        // If the booking was accepted, we need to increment available seats
+        if (booking.getStatus() == BookingStatus.ACCEPTED) {
+            Drive drive = booking.getDrive();
+            drive.incrementAvailableSeats();
+            driveRepository.save(drive);
+        }
+
+        // Update booking status
+        booking.setStatus(BookingStatus.CANCELED);
+        booking.setUpdatedAt(LocalDateTime.now());
+
+        Booking updatedBooking = bookingRepository.save(booking);
+        return BookingMapper.toDto(updatedBooking);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<BookingResponseDto> getBookingsByDrive(Long driveId) {
         return bookingRepository.findByDriveId(driveId)

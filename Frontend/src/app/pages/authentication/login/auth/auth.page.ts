@@ -44,8 +44,10 @@ export class AuthPage {
     this.authService.login(this.email, this.password).subscribe({
       next: (user) => {
         console.log('Login successful:', user);
+        
         this.showToast('Login successful', 'success');
 
+        // User is already saved in the auth service
         this.homeService.setLoggedUser(user);
         this.router.navigate(['/home']);
       },

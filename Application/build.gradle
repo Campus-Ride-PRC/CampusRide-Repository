@@ -45,6 +45,11 @@ dependencies {
     implementation 'org.springframework.security:spring-security-crypto:6.3.1'
     implementation("org.springframework.boot:spring-boot-starter-mail:3.5.7")
 
+    // JWT dependencies
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.3'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.3'
+
     api project(':Domain')
 
     testImplementation platform('org.junit:junit-bom:5.10.0')

@@ -7,7 +7,6 @@ import campus.ride.contracts.vehicle.VehicleRepository;
 import campus.ride.interfaces.VehicleService;
 import campus.ride.transfer.dtos.vehicle.VehicleDto;
 import campus.ride.transfer.mappings.VehicleMapper;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +24,6 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    @Async
     @Transactional
     public CompletableFuture<VehicleDto> getOrCreate(String model, String plate, String color, Long userId) {
         // First, check if user already has a vehicle

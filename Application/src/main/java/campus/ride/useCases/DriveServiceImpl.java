@@ -16,17 +16,17 @@ import campus.ride.contracts.vehicle.VehicleRepository;
 import campus.ride.interfaces.DriveService;
 import campus.ride.transfer.dtos.drive.DriveCardDto;
 import campus.ride.transfer.dtos.drive.DriveDto;
+import campus.ride.transfer.dtos.drive.DrivePageDto;
 import campus.ride.transfer.mappings.DriveMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.concurrent.CompletableFuture;
+import java.util.List;
 
 @Service
 public class DriveServiceImpl implements DriveService {
@@ -54,28 +54,47 @@ public class DriveServiceImpl implements DriveService {
 
 
     @Override
-    @Async
     @Transactional(readOnly = true)
-    public CompletableFuture<Page<DriveDto>> getAllAsync(Pageable pageable) {
-        Page<DriveDto> page = driveRepo.findAll(pageable).map(DriveMapper::toDto);
-        return CompletableFuture.completedFuture(page);
+    public Page<DriveDto> getAll(Pageable pageable) {
+        return driveRepo.findAll(pageable).map(DriveMapper::toDto);
     }
 
 
     @Override
-    @Async
     @Transactional(readOnly = true)
-    public CompletableFuture<DriveDto> getByIdAsync(Long id) {
+    public DriveDto getById(Long id) {
         Drive d = driveRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Drive not found: " + id));
-        return CompletableFuture.completedFuture(DriveMapper.toDto(d));
+        return DriveMapper.toDto(d);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public DrivePageDto getDrivePageById(Long id) {
+        Drive d = driveRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Drive not found: " + id));
+        
+        return new DrivePageDto(
+                d.getId(),
+                d.getTime(),
+                d.getPrice(),
+                d.getAvailableSeats(),
+                d.getTotalNoSeats(),
+                d.getFrom().getLocationName(),
+                d.getFrom().getNeighborhood(),
+                d.getTo().getLocationName(),
+                d.getTo().getNeighborhood(),
+                d.getDriver().getFirstName(),
+                d.getDriver().getLastName(),
+                d.getVehicle().getVehicleModel(),
+                d.getVehicle().getVehicleLicencePlate(),
+                d.getVehicle().getVehicleColor()
+        );
+    }
 
     @Override
-    @Async
     @Transactional
-    public CompletableFuture<DriveDto> addAsync(DriveDto dto) {
+    public DriveDto add(DriveDto dto) {
         Address from = mustFindAddress(dto.getFromAddressId());
         Address to   = mustFindAddress(dto.getToAddressId());
 
@@ -125,14 +144,13 @@ public class DriveServiceImpl implements DriveService {
         );
         bookingRepository.save(driverBooking);
 
-        return CompletableFuture.completedFuture(DriveMapper.toDto(saved));
+        return DriveMapper.toDto(saved);
     }
 
 
     @Override
-    @Async
     @Transactional
-    public CompletableFuture<DriveDto> updateAsync(Long id, DriveDto dto) {
+    public DriveDto update(Long id, DriveDto dto) {
         Drive d = driveRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Drive not found: " + id));
 
@@ -148,26 +166,23 @@ public class DriveServiceImpl implements DriveService {
         }
 
         Drive saved = driveRepo.save(d);
-        return CompletableFuture.completedFuture(DriveMapper.toDto(saved));
+        return DriveMapper.toDto(saved);
     }
 
 
     @Override
-    @Async
     @Transactional
-    public CompletableFuture<Void> deleteAsync(Long id) {
+    public void delete(Long id) {
         Drive d = driveRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Drive not found: " + id));
-        driveRepo.delete(d); // now available via contract
-        return CompletableFuture.completedFuture(null);
+        driveRepo.delete(d);
     }
 
     @Override
-    @Async
     @Transactional(readOnly = true)
-    public CompletableFuture<Page<DriveCardDto>> getDriverCardsAsync(Pageable pageable) {
+    public Page<DriveCardDto> getDriverCards(Pageable pageable) {
         Page<DriveRow> rows = driveQueryRepo.findAllBy(pageable);
-        Page<DriveCardDto> page = rows.map(r ->
+        return rows.map(r ->
                 new DriveCardDto(
                         r.getId(), r.getTime(), r.getPrice(),
                         r.getAvailableSeats(), r.getTotalNoSeats(),
@@ -177,7 +192,22 @@ public class DriveServiceImpl implements DriveService {
                         r.getVehicle_Model()
                 )
         );
-        return CompletableFuture.completedFuture(page);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<DriveCardDto> getDrivesByDriverId(Long driverId) {
+        List<DriveRow> rows = driveQueryRepo.findAllByDriverId(driverId);
+        return rows.stream()
+                .map(r -> new DriveCardDto(
+                        r.getId(), r.getTime(), r.getPrice(),
+                        r.getAvailableSeats(), r.getTotalNoSeats(),
+                        r.getFrom_LocationName(), r.getFrom_Neighborhood(),
+                        r.getTo_LocationName(), r.getTo_Neighborhood(),
+                        r.getDriver_FirstName(), r.getDriver_LastName(),
+                        r.getVehicle_Model()
+                ))
+                .collect(java.util.stream.Collectors.toList());
     }
 
 

@@ -10,6 +10,7 @@ public class UserResponseDto {
     private String firstName;
     private String lastName;
     private FacultyResponseDto facultyDto;
+    private String token;
 
     public UserResponseDto() {
     }
@@ -78,5 +79,13 @@ public class UserResponseDto {
 
     public void setFaculty(FacultyResponseDto faculty) {
         this.facultyDto = faculty;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 }

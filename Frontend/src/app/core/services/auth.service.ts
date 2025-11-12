@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { last, Observable } from 'rxjs';
+import { BehaviorSubject, last, Observable, tap } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { UserRequest } from '../models/userRequest.model';
 import { Faculty } from '../models/faculty.model';
@@ -10,8 +10,12 @@ import { UserResponse } from '../models/userResponse';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private apiUrl = `${environment.apiUrl}/user`;
+  private readonly TOKEN_KEY = 'auth_token';
+  private readonly USER_KEY = 'current_user';
 
   private registrationData: UserRequest = {} as UserRequest;
+  private currentUserSubject = new BehaviorSubject<UserResponse | null>(this.getStoredUser());
+  public currentUser$ = this.currentUserSubject.asObservable();
 
   constructor(private http: HttpClient) {}
 
@@ -32,13 +36,27 @@ export class AuthService {
     return this.http.post(`${this.apiUrl}/register/create`, payload, { responseType: 'text' });
   }
 
-  verifyUser(payload: UserVerification): Observable<UserRequest> {
-    return this.http.post<UserRequest>(`${this.apiUrl}/register/verify`, payload);
+  verifyUser(payload: UserVerification): Observable<UserResponse> {
+    return this.http.post<UserResponse>(`${this.apiUrl}/register/verify`, payload).pipe(
+      tap(user => {
+        if (user.token) {
+          this.saveToken(user.token);
+        }
+        this.saveUser(user);
+      })
+    );
   };
 
   login(email: string, password: string): Observable<UserResponse> {
     const payload = { email, password };
-    return this.http.post<UserResponse>(`${this.apiUrl}/login`, payload);
+    return this.http.post<UserResponse>(`${this.apiUrl}/login`, payload).pipe(
+      tap(user => {
+        if (user.token) {
+          this.saveToken(user.token);
+        }
+        this.saveUser(user);
+      })
+    );
   }
 
 
@@ -68,5 +86,48 @@ export class AuthService {
 
   setFaculty(faculty: Faculty) {
     this.registrationData.faculty = faculty;
+  }
+
+  // JWT Token Management
+  saveToken(token: string): void {
+    localStorage.setItem(this.TOKEN_KEY, token);
+  }
+
+  getToken(): string | null {
+    return localStorage.getItem(this.TOKEN_KEY);
+  }
+
+  clearToken(): void {
+    localStorage.removeItem(this.TOKEN_KEY);
+  }
+
+  isAuthenticated(): boolean {
+    return this.getToken() !== null && this.currentUserSubject.value !== null;
+  }
+
+  // User Management
+  saveUser(user: UserResponse): void {
+    localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+    this.currentUserSubject.next(user);
+  }
+
+  private getStoredUser(): UserResponse | null {
+    const userJson = localStorage.getItem(this.USER_KEY);
+    return userJson ? JSON.parse(userJson) : null;
+  }
+
+  getCurrentUser(): UserResponse | null {
+    return this.currentUserSubject.value;
+  }
+
+  getCurrentUserId(): number | null {
+    const user = this.getCurrentUser();
+    return user ? user.id : null;
+  }
+
+  logout(): void {
+    localStorage.removeItem(this.TOKEN_KEY);
+    localStorage.removeItem(this.USER_KEY);
+    this.currentUserSubject.next(null);
   }
 }
