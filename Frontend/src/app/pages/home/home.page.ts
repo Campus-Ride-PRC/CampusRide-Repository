@@ -102,10 +102,10 @@ export class HomePage implements OnInit {
     const isToday = date.toDateString() === today.toDateString();
     const isTomorrow = date.toDateString() === tomorrow.toDateString();
 
-    const timeStr = date.toLocaleTimeString('en-US', { 
-      hour: 'numeric', 
+    const timeStr = date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
       minute: '2-digit',
-      hour12: true 
+      hour12: true
     });
 
     if (isToday) {
@@ -135,14 +135,13 @@ export class HomePage implements OnInit {
 
   onMenuItemClick(item: string) {
     console.log('Menu item clicked:', item);
-    
+
     switch(item) {
       case 'home':
         // Already on home
         break;
       case 'drives':
-        // TODO: Navigate to add ride page when implemented
-        console.log('Add ride feature coming soon');
+        this.router.navigate(['/add-drive']);
         break;
       case 'my-bookings':
         this.router.navigate(['/my-bookings']);
@@ -163,5 +162,9 @@ export class HomePage implements OnInit {
   logout() {
     this.authService.logout();
     this.router.navigate(['/welcome']);
+  }
+
+  handleAddRide() {
+    this.router.navigate(['/add-drive']);
   }
 }

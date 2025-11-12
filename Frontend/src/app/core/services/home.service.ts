@@ -7,7 +7,6 @@ import { UserResponse } from '../models/userResponse';
 })
 export class HomeService{
   private loggedUser: UserResponse = {} as UserResponse;
-
   constructor(private http: HttpClient) {}
 
   setLoggedUser(user: UserResponse) {
@@ -18,4 +17,7 @@ export class HomeService{
   getLoggedUser(): UserResponse {
     return this.loggedUser;
 }
+
+
+
 }

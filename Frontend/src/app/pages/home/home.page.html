@@ -1,10 +1,10 @@
-<app-header (menuClick)="onMenuOpen()"></app-header>
+<app-header menuTitle='CampusRide' (menuClick)="onMenuOpen()"></app-header>
 
 <ion-content class="bg-[#1a1a1a]">
   <div class="content-wrapper">
     <div class="header-section">
       <h2 class="drives-title">Drives</h2>
-      <button class="add-ride-btn">
+      <button class="add-ride-btn" (click)="handleAddRide()">
         Add Ride
       </button>
     </div>

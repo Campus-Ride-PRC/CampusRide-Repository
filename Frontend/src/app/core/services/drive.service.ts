@@ -29,5 +29,8 @@ export class DriveService {
   getDrivesByDriver(driverId: number): Observable<DriveCard[]> {
     return this.http.get<DriveCard[]>(`${this.apiUrl}/driver/${driverId}`);
   }
+  addDrive(drive : any) : Observable<any> {
+    return this.http.post<any>(this.apiUrl,drive);
+  }
 }
 
