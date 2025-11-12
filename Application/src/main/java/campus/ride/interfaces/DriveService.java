@@ -6,7 +6,6 @@ import org.springframework.data.domain.Pageable;
 import campus.ride.transfer.dtos.drive.DriveCardDto;
 import campus.ride.transfer.dtos.drive.DriveDto;
 
-import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
 
 public interface DriveService {

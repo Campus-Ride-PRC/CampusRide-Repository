@@ -111,10 +111,11 @@ public class UserServiceImpl implements UserService {
 
         PendingUserData pendingData = verificationCache.get(email, PendingUserData.class);
 
-        logger.info("Received code = {}, backend code = {}", request.getVerificationCode(), pendingData.getVerificationCode());
         if (pendingData == null) {
             throw new BadRequestException("Invalid or expired verification code.");
         }
+        
+        logger.info("Received code = {}, backend code = {}", request.getVerificationCode(), pendingData.getVerificationCode());
         if (!pendingData.getVerificationCode().equals(request.getVerificationCode())) {
             throw new BadRequestException("Invalid verification code.");
         }
