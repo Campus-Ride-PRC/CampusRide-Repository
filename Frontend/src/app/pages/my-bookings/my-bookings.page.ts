@@ -23,9 +23,9 @@ import {
   styleUrls: ['./my-bookings.page.scss'],
   standalone: true,
   imports: [
-    IonContent, IonHeader, IonTitle, IonToolbar, IonList,
+    IonContent, IonHeader, IonTitle, IonToolbar,
     IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton,
-    IonIcon, IonBadge, IonSpinner, IonText, IonButtons, IonMenuButton,
+    IonIcon, IonBadge, IonSpinner, IonButtons, IonMenuButton,
     CommonModule, FormsModule
   ]
 })

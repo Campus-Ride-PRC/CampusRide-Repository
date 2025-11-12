@@ -5,7 +5,7 @@ import {IonHeader, IonIcon, IonToolbar} from '@ionic/angular/standalone';
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, IonHeader, IonToolbar, IonIcon],
+  imports: [CommonModule, IonHeader, IonToolbar],
   template: `
     <ion-header class="ion-no-border">
       <ion-toolbar class="bg-[#1e1e1e]">

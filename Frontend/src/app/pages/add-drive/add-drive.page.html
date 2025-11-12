@@ -1,0 +1,188 @@
+<ion-header>
+  <ion-toolbar color="dark">
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="arrow-back" color="light"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title class="page-title">Add Drive</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content color="dark">
+  <div class="add-drive-container">
+    <form [formGroup]="driveForm" (ngSubmit)="onSubmit()">
+      
+      <!-- From Location Section -->
+      <div class="section-title">
+        <ion-icon name="location-outline"></ion-icon>
+        <h2>From Location</h2>
+      </div>
+      
+      <ion-item>
+        <ion-label position="floating">Street *</ion-label>
+        <ion-input formControlName="fromStreet" type="text"></ion-input>
+      </ion-item>
+      <div class="error-message" *ngIf="getErrorMessage('fromStreet')">
+        {{ getErrorMessage('fromStreet') }}
+      </div>
+
+      <ion-item>
+        <ion-label position="floating">Number *</ion-label>
+        <ion-input formControlName="fromNumber" type="text"></ion-input>
+      </ion-item>
+      <div class="error-message" *ngIf="getErrorMessage('fromNumber')">
+        {{ getErrorMessage('fromNumber') }}
+      </div>
+
+      <ion-item>
+        <ion-label position="floating">Neighborhood *</ion-label>
+        <ion-input formControlName="fromNeighborhood" type="text"></ion-input>
+      </ion-item>
+      <div class="error-message" *ngIf="getErrorMessage('fromNeighborhood')">
+        {{ getErrorMessage('fromNeighborhood') }}
+      </div>
+
+      <ion-item>
+        <ion-label position="floating">Location Name (Optional)</ion-label>
+        <ion-input formControlName="fromLocationName" type="text"></ion-input>
+      </ion-item>
+
+      <!-- To Location Section -->
+      <div class="section-title">
+        <ion-icon name="flag-outline"></ion-icon>
+        <h2>To Location</h2>
+      </div>
+
+      <ion-item>
+        <ion-label position="floating">Street *</ion-label>
+        <ion-input formControlName="toStreet" type="text"></ion-input>
+      </ion-item>
+      <div class="error-message" *ngIf="getErrorMessage('toStreet')">
+        {{ getErrorMessage('toStreet') }}
+      </div>
+
+      <ion-item>
+        <ion-label position="floating">Number *</ion-label>
+        <ion-input formControlName="toNumber" type="text"></ion-input>
+      </ion-item>
+      <div class="error-message" *ngIf="getErrorMessage('toNumber')">
+        {{ getErrorMessage('toNumber') }}
+      </div>
+
+      <ion-item>
+        <ion-label position="floating">Neighborhood *</ion-label>
+        <ion-input formControlName="toNeighborhood" type="text"></ion-input>
+      </ion-item>
+      <div class="error-message" *ngIf="getErrorMessage('toNeighborhood')">
+        {{ getErrorMessage('toNeighborhood') }}
+      </div>
+
+      <ion-item>
+        <ion-label position="floating">Location Name (Optional)</ion-label>
+        <ion-input formControlName="toLocationName" type="text"></ion-input>
+      </ion-item>
+
+      <!-- Drive Details Section -->
+      <div class="section-title">
+        <ion-icon name="car-outline"></ion-icon>
+        <h2>Drive Details</h2>
+      </div>
+
+      <ion-item>
+        <ion-label position="floating">Price (RON) *</ion-label>
+        <ion-input formControlName="price" type="number" step="0.01"></ion-input>
+      </ion-item>
+      <div class="error-message" *ngIf="getErrorMessage('price')">
+        {{ getErrorMessage('price') }}
+      </div>
+
+      <ion-item>
+        <ion-label position="floating">Date *</ion-label>
+        <ion-input 
+          formControlName="day" 
+          type="date"
+          [min]="getTodayDate()">
+        </ion-input>
+      </ion-item>
+      <div class="error-message" *ngIf="getErrorMessage('day')">
+        {{ getErrorMessage('day') }}
+      </div>
+
+      <ion-item>
+        <ion-label position="floating">Time *</ion-label>
+        <ion-input 
+          formControlName="hour" 
+          type="time">
+        </ion-input>
+      </ion-item>
+      <div class="error-message" *ngIf="getErrorMessage('hour')">
+        {{ getErrorMessage('hour') }}
+      </div>
+
+      <ion-item>
+        <ion-label position="floating">Available Seats *</ion-label>
+        <ion-input formControlName="availableSeats" type="number" min="1"></ion-input>
+      </ion-item>
+      <div class="error-message" *ngIf="getErrorMessage('availableSeats')">
+        {{ getErrorMessage('availableSeats') }}
+      </div>
+
+      <ion-item>
+        <ion-label position="floating">Total Seats *</ion-label>
+        <ion-input formControlName="totalNoSeats" type="number" min="1"></ion-input>
+      </ion-item>
+      <div class="error-message" *ngIf="getErrorMessage('totalNoSeats')">
+        {{ getErrorMessage('totalNoSeats') }}
+      </div>
+
+      <!-- Vehicle Details Section -->
+      <div class="section-title">
+        <ion-icon name="car-sport-outline"></ion-icon>
+        <h2>Vehicle Details</h2>
+      </div>
+
+      <ion-item>
+        <ion-label position="floating">Vehicle Model *</ion-label>
+        <ion-input formControlName="vehicleModel" type="text"></ion-input>
+      </ion-item>
+      <div class="error-message" *ngIf="getErrorMessage('vehicleModel')">
+        {{ getErrorMessage('vehicleModel') }}
+      </div>
+
+      <ion-item>
+        <ion-label position="floating">License Plate *</ion-label>
+        <ion-input formControlName="vehicleLicencePlate" type="text"></ion-input>
+      </ion-item>
+      <div class="error-message" *ngIf="getErrorMessage('vehicleLicencePlate')">
+        {{ getErrorMessage('vehicleLicencePlate') }}
+      </div>
+
+      <ion-item>
+        <ion-label position="floating">Vehicle Color *</ion-label>
+        <ion-input formControlName="vehicleColor" type="text"></ion-input>
+      </ion-item>
+      <div class="error-message" *ngIf="getErrorMessage('vehicleColor')">
+        {{ getErrorMessage('vehicleColor') }}
+      </div>
+
+      <!-- Error Message Display -->
+      <ion-card *ngIf="errorMessage" class="error-card">
+        <ion-card-content>
+          <ion-icon name="alert-circle-outline" color="danger"></ion-icon>
+          {{ errorMessage }}
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Submit Button -->
+      <ion-button 
+        expand="block" 
+        type="submit" 
+        [disabled]="isLoading"
+        class="submit-button">
+        <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
+        <span *ngIf="!isLoading">CREATE DRIVE</span>
+      </ion-button>
+    </form>
+  </div>
+</ion-content>

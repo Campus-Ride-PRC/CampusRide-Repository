@@ -1,2 +1,43 @@
 // For information on how to create your own theme, please see:
 // http://ionicframework.com/docs/theming/
+
+// Global Color Palette
+:root {
+  // Primary Colors
+  --campus-ride-primary: #00C36C;
+  --campus-ride-primary-hover: #00D478;
+  --campus-ride-primary-active: #00B862;
+  --campus-ride-primary-light: rgba(0, 195, 108, 0.15);
+  
+  // Background Colors
+  --campus-ride-bg-dark: #1E1E1E;
+  --campus-ride-bg-card: #2A2A2C;
+  --campus-ride-bg-item: #2A2A2C;
+  --campus-ride-bg-hover: #333335;
+  
+  // Text Colors
+  --campus-ride-text-primary: #FFFFFF;
+  --campus-ride-text-secondary: #9E9E9E;
+  --campus-ride-text-muted: #707070;
+  
+  // Status Colors
+  --campus-ride-success: #00C36C;
+  --campus-ride-warning: #FFA726;
+  --campus-ride-danger: #FF6B6B;
+  --campus-ride-info: #42A5F5;
+  
+  // Status Backgrounds
+  --campus-ride-success-bg: rgba(0, 195, 108, 0.15);
+  --campus-ride-warning-bg: rgba(255, 167, 38, 0.15);
+  --campus-ride-danger-bg: rgba(255, 107, 107, 0.15);
+  --campus-ride-info-bg: rgba(66, 165, 245, 0.15);
+  
+  // Border & Shadows
+  --campus-ride-border: rgba(255, 255, 255, 0.1);
+  --campus-ride-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --campus-ride-shadow-hover: 0 6px 16px rgba(0, 0, 0, 0.4);
+  
+  // Font Families
+  --campus-ride-font-primary: 'Roboto', -apple-system, Roboto, Helvetica, sans-serif;
+  --campus-ride-font-secondary: 'Inter', -apple-system, Roboto, Helvetica, sans-serif;
+}

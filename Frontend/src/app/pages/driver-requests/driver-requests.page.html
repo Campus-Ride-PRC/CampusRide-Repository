@@ -1,83 +1,99 @@
 <ion-header>
-  <ion-toolbar>
+  <ion-toolbar color="dark">
     <ion-buttons slot="start">
-      <ion-menu-button></ion-menu-button>
+      <ion-menu-button color="light"></ion-menu-button>
     </ion-buttons>
-    <ion-title>Ride Requests</ion-title>
+    <ion-title class="page-title">Passenger Requests</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
-  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
-    <ion-refresher-content></ion-refresher-content>
-  </ion-refresher>
+<ion-content color="dark">
+  <div class="requests-container">
+    <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
 
-  <div *ngIf="loading" class="loading-container">
-    <ion-spinner></ion-spinner>
-    <p>Loading ride requests...</p>
-  </div>
+    <div *ngIf="loading" class="loading-container">
+      <ion-spinner color="primary"></ion-spinner>
+      <p>Loading passenger requests...</p>
+    </div>
 
-  <div *ngIf="!loading && drivesWithBookings.length === 0" class="empty-state">
-    <ion-icon name="car-outline" class="empty-icon"></ion-icon>
-    <h2>No Pending Requests</h2>
-    <p>You don't have any pending booking requests at the moment.</p>
-  </div>
+    <div *ngIf="!loading && drivesWithBookings.length === 0" class="empty-state">
+      <ion-icon name="car-outline" class="empty-icon"></ion-icon>
+      <h2>No Pending Requests</h2>
+      <p>You don't have any pending booking requests at the moment.</p>
+    </div>
 
-  <div *ngIf="!loading && drivesWithBookings.length > 0">
-    <ion-card *ngFor="let item of drivesWithBookings" class="drive-card">
-      <ion-card-header>
-        <ion-card-title>
-          <ion-icon name="location-outline"></ion-icon>
-          {{item.drive.fromLocationName}} → {{item.drive.toLocationName}}
-        </ion-card-title>
-        <div class="drive-info">
-          <span><ion-icon name="time-outline"></ion-icon> {{formatDate(item.drive.time)}}</span>
-          <span><ion-icon name="cash-outline"></ion-icon> {{item.drive.price}} RON</span>
-          <span><ion-icon name="car-outline"></ion-icon> {{item.drive.availableSeats}}/{{item.drive.totalNoSeats}} seats</span>
-        </div>
-      </ion-card-header>
-
-      <ion-card-content>
-        <div class="requests-section">
-          <h3>Pending Requests ({{item.pendingBookings.length}})</h3>
-          
-          <div *ngFor="let booking of item.pendingBookings" class="request-item">
-            <div class="user-info">
-              <ion-icon name="person-outline"></ion-icon>
-              <div class="user-details">
-                <strong>{{booking.userFirstName}} {{booking.userLastName}}</strong>
-                <small>
-                  <ion-icon name="mail-outline"></ion-icon>
-                  {{booking.userEmail}}
-                </small>
-                <small>
-                  <ion-icon name="time-outline"></ion-icon>
-                  Requested: {{formatDate(booking.requestedAt)}}
-                </small>
-              </div>
+    <div *ngIf="!loading && drivesWithBookings.length > 0">
+      <ion-card *ngFor="let item of drivesWithBookings" class="drive-card">
+        <ion-card-header>
+          <div class="drive-header">
+            <div class="route-section">
+              <ion-icon name="location-outline"></ion-icon>
+              <ion-card-title>{{item.drive.fromLocationName}} → {{item.drive.toLocationName}}</ion-card-title>
             </div>
-            
-            <div class="actions">
-              <ion-button 
-                color="success" 
-                fill="solid" 
-                size="small"
-                (click)="acceptBooking(booking)">
-                <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
-                Accept
-              </ion-button>
-              <ion-button 
-                color="danger" 
-                fill="outline" 
-                size="small"
-                (click)="declineBooking(booking)">
-                <ion-icon name="close-circle-outline" slot="start"></ion-icon>
-                Decline
-              </ion-button>
+            <div class="drive-info">
+              <span class="info-item">
+                <ion-icon name="time-outline"></ion-icon>
+                {{formatDate(item.drive.time)}}
+              </span>
+              <span class="info-item">
+                <ion-icon name="cash-outline"></ion-icon>
+                {{item.drive.price}} RON
+              </span>
+              <span class="info-item">
+                <ion-icon name="car-outline"></ion-icon>
+                {{item.drive.availableSeats}}/{{item.drive.totalNoSeats}} seats
+              </span>
             </div>
           </div>
-        </div>
-      </ion-card-content>
-    </ion-card>
+        </ion-card-header>
+
+        <ion-card-content>
+          <div class="requests-section">
+            <div class="section-title">
+              <h3>Pending Requests</h3>
+              <ion-badge class="count-badge">{{item.pendingBookings.length}}</ion-badge>
+            </div>
+            
+            <div *ngFor="let booking of item.pendingBookings" class="request-item">
+              <div class="user-info">
+                <ion-icon name="person-circle-outline" class="user-icon"></ion-icon>
+                <div class="user-details">
+                  <strong>{{booking.userFirstName}} {{booking.userLastName}}</strong>
+                  <small class="detail-text">
+                    <ion-icon name="mail-outline"></ion-icon>
+                    {{booking.userEmail}}
+                  </small>
+                  <small class="detail-text">
+                    <ion-icon name="time-outline"></ion-icon>
+                    Requested: {{formatDate(booking.requestedAt)}}
+                  </small>
+                </div>
+              </div>
+              
+              <div class="actions">
+                <ion-button 
+                  class="accept-button"
+                  fill="solid" 
+                  size="small"
+                  (click)="acceptBooking(booking)">
+                  <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+                  Accept
+                </ion-button>
+                <ion-button 
+                  class="decline-button"
+                  fill="outline" 
+                  size="small"
+                  (click)="declineBooking(booking)">
+                  <ion-icon name="close-circle-outline" slot="start"></ion-icon>
+                  Decline
+                </ion-button>
+              </div>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
   </div>
 </ion-content>

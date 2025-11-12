@@ -32,9 +32,9 @@ interface DriveWithBookings {
   styleUrls: ['./driver-requests.page.scss'],
   standalone: true,
   imports: [
-    IonContent, IonHeader, IonTitle, IonToolbar, IonList,
+    IonContent, IonHeader, IonTitle, IonToolbar, IonBadge,
     IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton,
-    IonIcon, IonBadge, IonSpinner, IonText, IonButtons, IonMenuButton,
+    IonIcon, IonSpinner, IonButtons, IonMenuButton,
     IonRefresher, IonRefresherContent,
     CommonModule, FormsModule
   ]

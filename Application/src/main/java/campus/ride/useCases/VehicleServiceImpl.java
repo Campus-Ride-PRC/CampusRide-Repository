@@ -10,6 +10,7 @@ import campus.ride.transfer.mappings.VehicleMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @Service
@@ -52,5 +53,11 @@ public class VehicleServiceImpl implements VehicleService {
             vehicle = repo.save(new Vehicle(user, model, null, color, userId));
         }
         return CompletableFuture.completedFuture(VehicleMapper.toDto(vehicle));
+    }
+
+    @Override
+    public Optional<VehicleDto> getByUserId(Long userId) {
+        return repo.findByUserId(userId)
+                .map(VehicleMapper::toDto);
     }
 }
