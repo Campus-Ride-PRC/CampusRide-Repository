@@ -9,7 +9,7 @@
       </button>
     </div>
 
-    <div *ngIf="loading" class="loading-container">
+    <div *ngIf="loading && drives.length === 0" class="loading-container">
       <ion-spinner name="crescent" class="spinner"></ion-spinner>
     </div>
 
@@ -34,11 +34,16 @@
       ></app-ride-card>
     </div>
 
-    <div class="see-more-container" *ngIf="!loading && drives.length > 0">
-      <button class="see-more-btn">
-        See more
-      </button>
-    </div>
+    <!-- Infinite Scroll -->
+    <ion-infinite-scroll 
+      threshold="100px" 
+      (ionInfinite)="loadMoreDrives($event)"
+      [disabled]="isLastPage">
+      <ion-infinite-scroll-content
+        loadingSpinner="crescent"
+        loadingText="Loading more drives...">
+      </ion-infinite-scroll-content>
+    </ion-infinite-scroll>
   </div>
 </ion-content>
 

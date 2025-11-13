@@ -10,6 +10,9 @@ public class BookingResponseDto {
     private String userEmail;
     private String userFirstName;
     private String userLastName;
+    private String driverEmail;
+    private String driverFirstName;
+    private String driverLastName;
     private BookingStatus status;
     private BookingRole role;
     private LocalDateTime requestedAt;
@@ -19,6 +22,7 @@ public class BookingResponseDto {
 
     public BookingResponseDto(Long driveId, Long userId, String userEmail,
                              String userFirstName, String userLastName,
+                             String driverEmail, String driverFirstName, String driverLastName,
                              BookingStatus status, BookingRole role,
                              LocalDateTime requestedAt, LocalDateTime updatedAt) {
         this.driveId = driveId;
@@ -26,6 +30,9 @@ public class BookingResponseDto {
         this.userEmail = userEmail;
         this.userFirstName = userFirstName;
         this.userLastName = userLastName;
+        this.driverEmail = driverEmail;
+        this.driverFirstName = driverFirstName;
+        this.driverLastName = driverLastName;
         this.status = status;
         this.role = role;
         this.requestedAt = requestedAt;
@@ -46,6 +53,15 @@ public class BookingResponseDto {
 
     public String getUserLastName() { return userLastName; }
     public void setUserLastName(String userLastName) { this.userLastName = userLastName; }
+
+    public String getDriverEmail() { return driverEmail; }
+    public void setDriverEmail(String driverEmail) { this.driverEmail = driverEmail; }
+
+    public String getDriverFirstName() { return driverFirstName; }
+    public void setDriverFirstName(String driverFirstName) { this.driverFirstName = driverFirstName; }
+
+    public String getDriverLastName() { return driverLastName; }
+    public void setDriverLastName(String driverLastName) { this.driverLastName = driverLastName; }
 
     public BookingStatus getStatus() { return status; }
     public void setStatus(BookingStatus status) { this.status = status; }

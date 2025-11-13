@@ -6,6 +6,7 @@ import { AppHeaderComponent } from 'src/app/shared/components/header/app-header.
 import { SidePanelComponent } from 'src/app/shared/components/panel/side-panel.component';
 import { RideCardComponent } from 'src/app/shared/components/cards/ride-card.component';
 import { DriveService } from 'src/app/core/services/drive.service';
+import { AuthService } from 'src/app/core/services/auth.service';
 import { DriveCard } from 'src/app/core/models/drive-card.model';
 
 @Component({
@@ -21,22 +22,40 @@ export class HomePage implements OnInit {
   loading = false;
   currentPage = 0;
   totalPages = 0;
+  pageSize = 5;
+  isLastPage = false;
 
   constructor(
     private router: Router,
-    private driveService: DriveService
+    private driveService: DriveService,
+    private authService: AuthService
   ) {}
 
   ngOnInit() {
     this.loadDrives();
   }
 
-  loadDrives() {
+  loadDrives(reset: boolean = false) {
+    if (this.loading || (this.isLastPage && !reset)) {
+      return;
+    }
+
+    if (reset) {
+      this.currentPage = 0;
+      this.drives = [];
+      this.isLastPage = false;
+    }
+
     this.loading = true;
-    this.driveService.getDriveCards(this.currentPage, 10).subscribe({
+    this.driveService.getDriveCards(this.currentPage, this.pageSize).subscribe({
       next: (response) => {
-        this.drives = response.content;
+        if (reset) {
+          this.drives = response.content;
+        } else {
+          this.drives = [...this.drives, ...response.content];
+        }
         this.totalPages = response.totalPages;
+        this.isLastPage = response.last;
         this.loading = false;
       },
       error: (error) => {
@@ -44,6 +63,22 @@ export class HomePage implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  loadMoreDrives(event?: any) {
+    if (!this.isLastPage) {
+      this.currentPage++;
+      this.loadDrives();
+    }
+    
+    if (event) {
+      event.target.complete();
+      
+      // Disable infinite scroll when all data is loaded
+      if (this.isLastPage) {
+        event.target.disabled = true;
+      }
+    }
   }
 
   getDriverName(drive: DriveCard): string {
@@ -55,7 +90,7 @@ export class HomePage implements OnInit {
   }
 
   getToLocation(drive: DriveCard): string {
-    return drive.toNeighborhood || drive.toLocationName;
+    return drive.toLocationName ||drive.toNeighborhood;
   }
 
   formatDepartureTime(time: string): string {
@@ -87,7 +122,7 @@ export class HomePage implements OnInit {
   }
 
   onCardClick(drive: DriveCard) {
-    console.log('Drive clicked:', drive);
+    this.router.navigate(['/ride-details', drive.id]);
   }
 
   onMenuOpen() {
@@ -103,18 +138,33 @@ export class HomePage implements OnInit {
 
     switch(item) {
       case 'home':
+        // Already on home
         break;
       case 'drives':
+        this.router.navigate(['/add-drive']);
+        break;
+      case 'my-bookings':
+        this.router.navigate(['/my-bookings']);
+        break;
+      case 'driver-requests':
+        this.router.navigate(['/driver-requests']);
         break;
       case 'settings':
+        // TODO: Navigate to settings page when implemented
+        console.log('Settings feature coming soon');
         break;
       case 'logout':
-        console.log('Logging out...');
+        this.logout();
         break;
     }
   }
 
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/welcome']);
+  }
+
   handleAddRide() {
-    this.router.navigate(['add-ride']);
+    this.router.navigate(['/add-drive']);
   }
 }

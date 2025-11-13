@@ -1,0 +1,87 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start" style="padding-left: 5px;">
+      <ion-button (click)="goBack()" class="back-button">
+        <img src="assets/icon/arrow-back.svg" alt="Back" width="20" height="20" />
+      </ion-button>
+    </ion-buttons>
+    <ion-title class="page-title">My Ride Requests</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="bookings-container">
+    <div *ngIf="loading" class="loading-container">
+      <ion-spinner color="primary"></ion-spinner>
+      <p>Loading your ride requests...</p>
+    </div>
+
+    <div *ngIf="!loading && bookings.length === 0" class="empty-state">
+      <ion-icon name="car-outline" class="empty-icon"></ion-icon>
+      <h2>No Ride Requests Yet</h2>
+      <p>You haven't requested any rides yet. Browse available rides and book your next trip!</p>
+    </div>
+
+    <div *ngIf="!loading && bookings.length > 0">
+      <ion-card *ngFor="let booking of bookings" class="booking-card">
+        <ion-card-header>
+          <div class="card-header">
+            <div class="title-section">
+              <ion-icon name="car-outline"></ion-icon>
+              <ion-card-title>Ride Request #{{booking.driveId}}</ion-card-title>
+            </div>
+            <ion-badge [color]="getStatusColor(booking.status)" class="status-badge">
+              <ion-icon [name]="getStatusIcon(booking.status)"></ion-icon>
+              {{booking.status}}
+            </ion-badge>
+          </div>
+        </ion-card-header>
+
+        <ion-card-content>
+          <div class="booking-details">
+            <div class="detail-row">
+              <ion-icon name="person-outline"></ion-icon>
+              <span>Driver: {{booking.driverFirstName}} {{booking.driverLastName}}</span>
+            </div>
+
+            <div class="detail-row">
+              <ion-icon name="mail-outline"></ion-icon>
+              <span>{{booking.driverEmail}}</span>
+            </div>
+            
+            <div class="detail-row">
+              <ion-icon name="time-outline"></ion-icon>
+              <span>Requested: {{formatDate(booking.requestedAt)}}</span>
+            </div>
+
+            <div class="detail-row">
+              <ion-icon name="time-outline"></ion-icon>
+              <span>Updated: {{formatDate(booking.updatedAt)}}</span>
+            </div>
+
+            <div class="actions" *ngIf="canCancel(booking)">
+              <ion-button 
+                class="cancel-button"
+                fill="outline" 
+                size="small"
+                (click)="cancelBooking(booking)">
+                <ion-icon name="close-circle-outline" slot="start"></ion-icon>
+                Cancel Booking
+              </ion-button>
+            </div>
+
+            <div class="status-message canceled" *ngIf="booking.status === 'CANCELED' || booking.status === 'DECLINED'">
+              <ion-icon name="information-circle-outline"></ion-icon>
+              <span>This booking has been {{booking.status.toLowerCase()}}</span>
+            </div>
+
+            <div class="status-message accepted" *ngIf="booking.status === 'ACCEPTED'">
+              <ion-icon name="checkmark-circle-outline"></ion-icon>
+              <span>Your booking has been accepted! See you soon.</span>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </div>
+</ion-content>

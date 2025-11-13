@@ -1,4 +1,13 @@
-<app-header menuTitle="Add Ride" (menuClick)="onMenuOpen()"></app-header>
+<ion-header class="ion-no-border">
+  <ion-toolbar class="custom-toolbar">
+    <ion-buttons slot="start" style="padding-left: 5px;">
+      <ion-button (click)="goBack()" class="back-button">
+        <img src="assets/icon/arrow-back.svg" alt="Back" width="20" height="20" />
+      </ion-button>
+    </ion-buttons>
+    <ion-title class="page-title" style="text-align: center; justify-content: center; align-items: center;">Add Ride</ion-title>
+  </ion-toolbar>
+</ion-header>
 <ion-content class="bg-[#1a1a1a]">
   <div class="content-wrapper">
     <div class="cards-container">

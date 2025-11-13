@@ -2,7 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import {DriveCard, DriveCardPage} from '../models/drive-card.model';
+import { DriveCard, DriveCardPage } from '../models/drive-card.model';
+import { DriveDetails } from '../models/drive-details.model';
 
 @Injectable({
   providedIn: 'root'
@@ -12,12 +13,21 @@ export class DriveService {
 
   constructor(private http: HttpClient) {}
 
-  getDriveCards(page: number = 0, size: number = 10): Observable<DriveCardPage> {
+  getDriveCards(page: number = 0, size: number = 10, sort: string = 'time,asc'): Observable<DriveCardPage> {
     const params = new HttpParams()
       .set('page', page.toString())
-      .set('size', size.toString());
+      .set('size', size.toString())
+      .set('sort', sort);
+    
+    return this.http.get<DriveCardPage>(this.apiUrl, { params });
+  }
 
-    return this.http.get<DriveCardPage>(`${this.apiUrl}/cards`, { params });
+  getDriveById(id: number): Observable<DriveDetails> {
+    return this.http.get<DriveDetails>(`${this.apiUrl}/${id}`);
+  }
+
+  getDrivesByDriver(driverId: number): Observable<DriveCard[]> {
+    return this.http.get<DriveCard[]>(`${this.apiUrl}/driver/${driverId}`);
   }
   addDrive(drive : any) : Observable<any> {
     return this.http.post<any>(this.apiUrl,drive);

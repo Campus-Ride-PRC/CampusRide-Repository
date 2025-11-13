@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -36,6 +37,27 @@ export const routes: Routes = [
   {
     path: 'home',
     loadComponent: () => import('./pages/home/home.page').then((m) => m.HomePage),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'ride-details/:id',
+    loadComponent: () => import('./pages/home/ride-details/ride-details.page').then((m) => m.RideDetailsPage),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'my-bookings',
+    loadComponent: () => import('./pages/my-bookings/my-bookings.page').then((m) => m.MyBookingsPage),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'driver-requests',
+    loadComponent: () => import('./pages/driver-requests/driver-requests.page').then((m) => m.DriverRequestsPage),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'add-drive',
+    loadComponent: () => import('./pages/add-drive/add-drive.page').then((m) => m.AddDrivePage),
+    canActivate: [authGuard]
   },
   {
     path: '',

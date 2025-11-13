@@ -9,6 +9,7 @@ public interface BookingService {
     BookingResponseDto requestRide(BookingRequestDto requestDto);
     BookingResponseDto acceptBooking(Long driveId, Long userId);
     BookingResponseDto declineBooking(Long driveId, Long userId);
+    BookingResponseDto cancelBooking(Long driveId, Long userId);
     List<BookingResponseDto> getBookingsByDrive(Long driveId);
     List<BookingResponseDto> getBookingsByUser(Long userId);
     List<BookingResponseDto> getPendingBookingsByDrive(Long driveId);

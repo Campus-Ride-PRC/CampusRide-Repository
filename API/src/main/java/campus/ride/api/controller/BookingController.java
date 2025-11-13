@@ -90,6 +90,27 @@ public class BookingController {
     }
 
     @Operation(
+            summary = "Cancel a booking",
+            description = "User cancels their booking request"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Booking canceled successfully",
+                    content = @Content(schema = @Schema(implementation = BookingResponseDto.class))
+            ),
+            @ApiResponse(responseCode = "400", description = "Booking cannot be canceled"),
+            @ApiResponse(responseCode = "404", description = "Booking not found")
+    })
+    @PutMapping("/{driveId}/{userId}/cancel")
+    public ResponseEntity<BookingResponseDto> cancelBooking(
+            @Parameter(description = "Drive ID") @PathVariable Long driveId,
+            @Parameter(description = "User ID") @PathVariable Long userId) {
+        BookingResponseDto response = bookingService.cancelBooking(driveId, userId);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(
             summary = "Get bookings for a drive",
             description = "Retrieves all bookings for a specific drive"
     )

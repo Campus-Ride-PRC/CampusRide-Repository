@@ -1,5 +1,6 @@
 package campus.ride.useCases;
 
+import campus.ride.config.JwtUtil;
 import campus.ride.contracts.faculty.FacultyRepository;
 import campus.ride.contracts.user.UserRepository;
 import campus.ride.entities.Faculty;
@@ -36,18 +37,21 @@ public class UserServiceImpl implements UserService {
     private final EmailService emailService;
     private final Cache verificationCache;
     private final FacultyRepository facultyRepository;
+    private final JwtUtil jwtUtil;
 
     public UserServiceImpl(UserRepository userRepository,
                              PasswordEncoder passwordEncoder,
                              EmailService emailService,
                              CacheManager cacheManager,
-                             FacultyRepository facultyRepository) {
+                             FacultyRepository facultyRepository,
+                             JwtUtil jwtUtil) {
 
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
         this.verificationCache = cacheManager.getCache("verificationCache");
         this.facultyRepository = facultyRepository;
+        this.jwtUtil = jwtUtil;
     }
 
     @Override
@@ -159,8 +163,13 @@ public class UserServiceImpl implements UserService {
             throw new ResourceNotFoundException("Invalid email or password");
         }
 
+        // Generate JWT token
+        String token = jwtUtil.generateToken(user.getEmail(), user.getId());
+        
         logger.info("Login successful for email: {}", email);
-        return UserMapper.toDto(user);
+        UserResponseDto response = UserMapper.toDto(user);
+        response.setToken(token);
+        return response;
     }
 
 
