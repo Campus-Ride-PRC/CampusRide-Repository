@@ -9,6 +9,9 @@ export interface BookingResponse {
   userEmail: string;
   userFirstName: string;
   userLastName: string;
+  driverEmail: string;
+  driverFirstName: string;
+  driverLastName: string;
   status: BookingStatus;
   role: BookingRole;
   requestedAt: string;
