@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { 
   IonContent, IonHeader, IonTitle, IonToolbar, IonList, 
@@ -48,7 +49,8 @@ export class DriverRequestsPage implements OnInit {
     private bookingService: BookingService,
     private driveService: DriveService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private location: Location
   ) {
     addIcons({ 
       carOutline, locationOutline, timeOutline, cashOutline,
@@ -166,5 +168,9 @@ export class DriverRequestsPage implements OnInit {
 
   handleRefresh(event: any) {
     this.loadDriverRequests(event);
+  }
+
+  goBack() {
+    this.location.back();
   }
 }

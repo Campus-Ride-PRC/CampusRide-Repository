@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Location } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import {
   IonHeader,
@@ -58,7 +59,9 @@ export class AddRidePage implements OnInit {
     // eslint-disable-next-line @angular-eslint/prefer-inject
     private service: DriveService,
     // eslint-disable-next-line @angular-eslint/prefer-inject
-    private router: Router
+    private router: Router,
+    // eslint-disable-next-line @angular-eslint/prefer-inject
+    private location: Location
   ) {
     addIcons({
       addOutline,
@@ -132,5 +135,9 @@ export class AddRidePage implements OnInit {
 
   onMenuOpen() {
     this.router.navigate(['home']);
+  }
+
+  goBack() {
+    this.location.back();
   }
 }

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { 
   IonContent, IonHeader, IonTitle, IonToolbar, IonList, 
@@ -37,7 +38,8 @@ export class MyBookingsPage implements OnInit {
   constructor(
     private bookingService: BookingService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private location: Location
   ) {
     addIcons({ 
       carOutline, locationOutline, timeOutline, cashOutline,
@@ -147,5 +149,9 @@ export class MyBookingsPage implements OnInit {
       hour: '2-digit',
       minute: '2-digit'
     });
+  }
+
+  goBack() {
+    this.location.back();
   }
 }

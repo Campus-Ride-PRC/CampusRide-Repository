@@ -90,7 +90,7 @@ export class HomePage implements OnInit {
   }
 
   getToLocation(drive: DriveCard): string {
-    return drive.toNeighborhood || drive.toLocationName;
+    return drive.toLocationName ||drive.toNeighborhood;
   }
 
   formatDepartureTime(time: string): string {
