@@ -97,12 +97,9 @@ public class BookingServiceImpl implements BookingService {
             throw new BadRequestException("No available seats remaining");
         }
 
-        // Update booking status
         booking.setStatus(BookingStatus.ACCEPTED);
         booking.setUpdatedAt(LocalDateTime.now());
 
-        // Decrement available seats
-        drive.decrementAvailableSeats();
         driveRepository.save(drive);
 
         Booking updatedBooking = bookingRepository.save(booking);
@@ -139,14 +136,11 @@ public class BookingServiceImpl implements BookingService {
             throw new BadRequestException("Booking is already canceled");
         }
 
-        // If the booking was accepted, we need to increment available seats
         if (booking.getStatus() == BookingStatus.ACCEPTED) {
             Drive drive = booking.getDrive();
-            drive.incrementAvailableSeats();
             driveRepository.save(drive);
         }
 
-        // Update booking status
         booking.setStatus(BookingStatus.CANCELED);
         booking.setUpdatedAt(LocalDateTime.now());
 

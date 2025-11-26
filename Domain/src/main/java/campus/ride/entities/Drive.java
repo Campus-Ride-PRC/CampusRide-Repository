@@ -1,5 +1,7 @@
 package campus.ride.entities;
 
+import campus.ride.enums.BookingRole;
+import campus.ride.enums.BookingStatus;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -16,8 +18,6 @@ import java.util.List;
                 @Index(name = "ix_drives_created_at", columnList = "created_at"),
                 @Index(name = "ix_drives_from_time", columnList = "from_id, time"),
                 @Index(name = "ix_drives_to_time", columnList = "to_id, time"),
-                @Index(name = "ix_drives_driver_id", columnList = "driver_id"),
-                @Index(name = "ix_drives_vehicle_id", columnList = "vehicle_id")
         }
 )
 public class Drive {
@@ -40,40 +40,45 @@ public class Drive {
     private LocalDateTime time;
 
     @Column(nullable = false)
-    private Integer availableSeats;
-
-    @Column(nullable = false)
     private Integer totalNoSeats;
 
     @Column(name = "created_at", nullable = false, insertable = false, updatable = false,
             columnDefinition = "timestamp(6) DEFAULT now()")
     private LocalDateTime createdAt;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "driver_id", nullable = false)
-    private User driver;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "vehicle_id", nullable = false)
-    private Vehicle vehicle;
-
     @OneToMany(mappedBy = "drive", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Booking> bookings = new ArrayList<>();
+
+    public User getDriver() {
+        return bookings.stream()
+                .filter(b -> b.getRole() == BookingRole.DRIVER)
+                .map(Booking::getUser)
+                .findFirst()
+                .orElse(null);
+    }
+
+    public Vehicle getVehicle() {
+        User driver = getDriver();
+        return driver != null ? driver.getVehicle() : null;
+    }
+
+    public Integer getAvailableSeats() {
+        long booked = bookings.stream()
+                .filter(b -> b.getStatus() == BookingStatus.ACCEPTED && b.getRole() == BookingRole.CLIENT)
+                .count();
+        return totalNoSeats - (int) booked;
+    }
 
     protected Drive() {}
 
     public Drive(Address from, Address to, BigDecimal price, LocalDateTime time,
-                 Integer availableSeats, Integer totalNoSeats, LocalDateTime createdAt,
-                 User driver, Vehicle vehicle) {
+                 Integer totalNoSeats, LocalDateTime createdAt) {
         this.from = from;
         this.to = to;
         this.price = price;
         this.time = time;
-        this.availableSeats = availableSeats;
         this.totalNoSeats = totalNoSeats;
         this.createdAt = createdAt;
-        this.driver = driver;
-        this.vehicle = vehicle;
     }
 
 
@@ -92,33 +97,12 @@ public class Drive {
     public LocalDateTime getTime() { return time; }
     public void setTime(LocalDateTime time) { this.time = time; }
 
-    public Integer getAvailableSeats() { return availableSeats; }
-    public void setAvailableSeats(Integer availableSeats) { this.availableSeats = availableSeats; }
-
     public Integer getTotalNoSeats() { return totalNoSeats; }
     public void setTotalNoSeats(Integer totalNoSeats) { this.totalNoSeats = totalNoSeats; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
-    public User getDriver() { return driver; }
-    public void setDriver(User driver) { this.driver = driver; }
-
-    public Vehicle getVehicle() { return vehicle; }
-    public void setVehicle(Vehicle vehicle) { this.vehicle = vehicle; }
-
     public List<Booking> getBookings() { return bookings; }
     public void setBookings(List<Booking> bookings) { this.bookings = bookings; }
-
-    public void decrementAvailableSeats() {
-        if (this.availableSeats > 0) {
-            this.availableSeats--;
-        }
-    }
-
-    public void incrementAvailableSeats() {
-        if (this.availableSeats < this.totalNoSeats) {
-            this.availableSeats++;
-        }
-    }
 }

@@ -122,7 +122,7 @@ public class DriveServiceImpl implements DriveService {
             throw new IllegalArgumentException("Vehicle ID is required");
         }
 
-        Drive entity = DriveMapper.toEntity(dto, from, to, driver, vehicle);
+        Drive entity = DriveMapper.toEntity(dto, from, to);
 
         if (entity.getCreatedAt() == null) {
             entity.setCreatedAt(LocalDateTime.now());
@@ -158,7 +158,6 @@ public class DriveServiceImpl implements DriveService {
         if (dto.getToAddressId() != null) d.setTo(mustFindAddress(dto.getToAddressId()));
         if (dto.getPrice() != null) d.setPrice(dto.getPrice());
         if (dto.getTime() != null) d.setTime(dto.getTime());
-        if (dto.getAvailableSeats() != null) d.setAvailableSeats(dto.getAvailableSeats());
         if (dto.getTotalNoSeats() != null) d.setTotalNoSeats(dto.getTotalNoSeats());
 
         if (d.getFrom() != null && d.getTo() != null && d.getFrom().getId().equals(d.getTo().getId())) {
