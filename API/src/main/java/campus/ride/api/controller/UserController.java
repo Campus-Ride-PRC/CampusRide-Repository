@@ -20,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/api/user")
@@ -48,49 +49,55 @@ public class UserController {
             @ApiResponse(responseCode = "400", description = "Invalid email format")
     })
     @PostMapping("/email")
-    public ResponseEntity<UserResponseDto> findByEmail(@RequestBody EmailRequestDto request) {
+    public CompletableFuture<ResponseEntity<UserResponseDto>> findByEmail(@RequestBody EmailRequestDto request) {
         logger.info("Received request to find user by email");
         logger.debug("Searching for user with email: {}", request.getEmail());
         
-        UserResponseDto user = userService.findByEmail(request.getEmail());
-        
-        logger.info("User found with email: {}", request.getEmail());
-        return ResponseEntity.ok(user);
+        return userService.findByEmail(request.getEmail())
+                .thenApply(user -> {
+                    logger.info("User found with email: {}", request.getEmail());
+                    return ResponseEntity.ok(user);
+                });
     }
 
     @PostMapping("/exists")
-    public ResponseEntity<Boolean> userExists(@RequestBody EmailRequestDto request) {
+    public CompletableFuture<ResponseEntity<Boolean>> userExists(@RequestBody EmailRequestDto request) {
         logger.info("Received request to find user by email with email: {}", request.getEmail());
 
-        try{
-            var user = userService.findByEmail(request.getEmail());
-            logger.info("Already existing user found with email: {}", request.getEmail());
-            return ResponseEntity.status(HttpStatus.OK).body(true);
-        }catch (Exception e){
-            logger.info("User not found with email: {}", request.getEmail());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(false);
-        }
+        return userService.findByEmail(request.getEmail())
+                .handle((user, ex) -> {
+                    if (ex == null && user != null) {
+                        logger.info("Already existing user found with email: {}", request.getEmail());
+                        return ResponseEntity.status(HttpStatus.OK).body(true);
+                    } else {
+                        logger.info("User not found with email: {}", request.getEmail());
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(false);
+                    }
+                });
     }
 
     @PostMapping("/register/create")
-    public ResponseEntity<String> registerUser(@RequestBody CreateUserRequestDto request) {
+    public CompletableFuture<ResponseEntity<String>> registerUser(@RequestBody CreateUserRequestDto request) {
        logger.info("Received request to register new user");
         logger.debug("Registering user with email: {}", request.getEmail());
 
-        String message = userService.registerUser(request);
-
-        logger.info("Successfully sent verification code for email: {}", request.getEmail());
-        return ResponseEntity.ok(message);
+        return userService.registerUser(request)
+                .thenApply(message -> {
+                    logger.info("Successfully sent verification code for email: {}", request.getEmail());
+                    return ResponseEntity.ok(message);
+                });
     }
     
     @PostMapping("/register/verify")
-    public ResponseEntity<UserResponseDto> verifyUSer(@RequestBody VerificationRequestDto request){
+    public CompletableFuture<ResponseEntity<UserResponseDto>> verifyUSer(@RequestBody VerificationRequestDto request){
         logger.info("Received request to verify user");
         logger.debug("Verifying user with email: {}", request.getEmail());
 
-        UserResponseDto user = userService.verifyUser(request);
-        logger.info("User verified with email: {}", request.getEmail());
-        return ResponseEntity.status(HttpStatus.CREATED).body(user);
+        return userService.verifyUser(request)
+                .thenApply(user -> {
+                    logger.info("User verified with email: {}", request.getEmail());
+                    return ResponseEntity.status(HttpStatus.CREATED).body(user);
+                });
     }
 
     @Operation(
@@ -107,13 +114,36 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "User not found")
     })
     @PostMapping("/login")
-    public ResponseEntity<UserResponseDto> login(@RequestBody LoginRequestDto request) {
+    public CompletableFuture<ResponseEntity<UserResponseDto>> login(@RequestBody LoginRequestDto request) {
         logger.info("Received login request for email: {}", request.getEmail());
 
-        UserResponseDto user = userService.login(request.getEmail(), request.getPassword());
+        return userService.login(request.getEmail(), request.getPassword())
+                .thenApply(user -> {
+                    logger.info("Login successful for email: {}", request.getEmail());
+                    return ResponseEntity.ok(user);
+                });
+    }
 
-        logger.info("Login successful for email: {}", request.getEmail());
-        return ResponseEntity.ok(user);
+    @Operation(
+            summary = "Get current user profile",
+            description = "Retrieves the profile of the currently authenticated user"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "User profile retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = UserResponseDto.class))
+            ),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
+    @GetMapping("/me")
+    public CompletableFuture<ResponseEntity<UserResponseDto>> getMe() {
+        logger.info("Received request to get current user profile");
+        return userService.getMe()
+                .thenApply(user -> {
+                    logger.info("Returning profile for user: {}", user.getEmail());
+                    return ResponseEntity.ok(user);
+                });
     }
 
     @Operation(
@@ -128,12 +158,13 @@ public class UserController {
             )
     })
     @GetMapping
-    public ResponseEntity<List<UserResponseDto>> getAllUsers() {
+    public CompletableFuture<ResponseEntity<List<UserResponseDto>>> getAllUsers() {
         logger.info("Received request to get all users");
 
-        List<UserResponseDto> users = userService.getAllUsers();
-
-        logger.info("Returning {} users", users.size());
-        return ResponseEntity.ok(users);
+        return userService.getAllUsers()
+                .thenApply(users -> {
+                    logger.info("Returning {} users", users.size());
+                    return ResponseEntity.ok(users);
+                });
     }
 }

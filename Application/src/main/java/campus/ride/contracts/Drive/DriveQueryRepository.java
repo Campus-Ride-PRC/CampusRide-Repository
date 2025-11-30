@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface DriveQueryRepository {
-    Page<DriveRow> findAllBy(Pageable pageable);
+    Page<campus.ride.contracts.drive.DriveRow> findAllBy(Pageable pageable);
     
     @Query("""
         SELECT 
@@ -32,5 +32,5 @@ public interface DriveQueryRepository {
         WHERE dr.id = :driverId
         ORDER BY d.time ASC
     """)
-    List<DriveRow> findAllByDriverId(@Param("driverId") Long driverId);
+    List<campus.ride.contracts.drive.DriveRow> findAllByDriverId(@Param("driverId") Long driverId);
 }

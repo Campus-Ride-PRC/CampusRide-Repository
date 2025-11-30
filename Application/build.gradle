@@ -43,6 +43,7 @@ dependencies {
     implementation 'org.springframework:spring-context-support:6.1.10'
     implementation 'com.github.ben-manes.caffeine:caffeine:3.1.8'
     implementation 'org.springframework.security:spring-security-crypto:6.3.1'
+    implementation 'org.springframework.security:spring-security-core'
     implementation("org.springframework.boot:spring-boot-starter-mail:3.5.7")
 
     // JWT dependencies

@@ -15,11 +15,14 @@ import campus.ride.interfaces.BookingService;
 import campus.ride.transfer.dtos.booking.BookingRequestDto;
 import campus.ride.transfer.dtos.booking.BookingResponseDto;
 import campus.ride.transfer.mappings.BookingMapper;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,23 +41,24 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Async
     @Transactional
-    public BookingResponseDto requestRide(BookingRequestDto requestDto) {
+    public CompletableFuture<BookingResponseDto> requestRide(BookingRequestDto requestDto) {
         // Validate drive exists
         Drive drive = driveRepository.findById(requestDto.getDriveId())
                 .orElseThrow(() -> new ResourceNotFoundException("Drive not found with id: " + requestDto.getDriveId()));
 
-        // Validate user exists
-        User user = userRepository.findById(requestDto.getUserId())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + requestDto.getUserId()));
+        String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
 
         // Check if user is the driver
-        if (drive.getDriver().getId().equals(requestDto.getUserId())) {
+        if (drive.getDriver().getId().equals(user.getId())) {
             throw new BadRequestException("Driver cannot request their own ride");
         }
 
         // Check if booking already exists
-        BookingId bookingId = new BookingId(requestDto.getDriveId(), requestDto.getUserId());
+        BookingId bookingId = new BookingId(requestDto.getDriveId(), user.getId());
         if (bookingRepository.existsById(bookingId)) {
             throw new BadRequestException("Booking already exists for this drive and user");
         }
@@ -68,7 +72,7 @@ public class BookingServiceImpl implements BookingService {
         LocalDateTime now = LocalDateTime.now();
         Booking booking = new Booking(
                 requestDto.getDriveId(),
-                requestDto.getUserId(),
+                user.getId(),
                 drive,
                 user,
                 BookingStatus.PENDING,
@@ -78,15 +82,24 @@ public class BookingServiceImpl implements BookingService {
         );
 
         Booking savedBooking = bookingRepository.save(booking);
-        return BookingMapper.toDto(savedBooking);
+        return CompletableFuture.completedFuture(BookingMapper.toDto(savedBooking));
     }
 
     @Override
+    @Async
     @Transactional
-    public BookingResponseDto acceptBooking(Long driveId, Long userId) {
+    public CompletableFuture<BookingResponseDto> acceptBooking(Long driveId, Long userId) {
         BookingId bookingId = new BookingId(driveId, userId);
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new ResourceNotFoundException("Booking not found"));
+
+        String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (!booking.getDrive().getDriver().getId().equals(currentUser.getId())) {
+            throw new BadRequestException("Only the driver can accept bookings");
+        }
 
         if (booking.getStatus() != BookingStatus.PENDING) {
             throw new BadRequestException("Only pending bookings can be accepted");
@@ -103,15 +116,24 @@ public class BookingServiceImpl implements BookingService {
         driveRepository.save(drive);
 
         Booking updatedBooking = bookingRepository.save(booking);
-        return BookingMapper.toDto(updatedBooking);
+        return CompletableFuture.completedFuture(BookingMapper.toDto(updatedBooking));
     }
 
     @Override
+    @Async
     @Transactional
-    public BookingResponseDto declineBooking(Long driveId, Long userId) {
+    public CompletableFuture<BookingResponseDto> declineBooking(Long driveId, Long userId) {
         BookingId bookingId = new BookingId(driveId, userId);
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new ResourceNotFoundException("Booking not found"));
+
+        String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (!booking.getDrive().getDriver().getId().equals(currentUser.getId())) {
+            throw new BadRequestException("Only the driver can decline bookings");
+        }
 
         if (booking.getStatus() != BookingStatus.PENDING) {
             throw new BadRequestException("Only pending bookings can be declined");
@@ -122,13 +144,23 @@ public class BookingServiceImpl implements BookingService {
         booking.setUpdatedAt(LocalDateTime.now());
 
         Booking updatedBooking = bookingRepository.save(booking);
-        return BookingMapper.toDto(updatedBooking);
+        return CompletableFuture.completedFuture(BookingMapper.toDto(updatedBooking));
     }
 
     @Override
+    @Async
     @Transactional
-    public BookingResponseDto cancelBooking(Long driveId, Long userId) {
-        BookingId bookingId = new BookingId(driveId, userId);
+    public CompletableFuture<BookingResponseDto> cancelBooking(Long driveId, Long userId) {
+        // If userId is null, use the current authenticated user
+        Long targetUserId = userId;
+        if (targetUserId == null) {
+            String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+            targetUserId = user.getId();
+        }
+
+        BookingId bookingId = new BookingId(driveId, targetUserId);
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new ResourceNotFoundException("Booking not found"));
 
@@ -145,42 +177,60 @@ public class BookingServiceImpl implements BookingService {
         booking.setUpdatedAt(LocalDateTime.now());
 
         Booking updatedBooking = bookingRepository.save(booking);
-        return BookingMapper.toDto(updatedBooking);
+        return CompletableFuture.completedFuture(BookingMapper.toDto(updatedBooking));
     }
 
     @Override
+    @Async
     @Transactional(readOnly = true)
-    public List<BookingResponseDto> getBookingsByDrive(Long driveId) {
-        return bookingRepository.findByDriveId(driveId)
+    public CompletableFuture<List<BookingResponseDto>> getBookingsByDrive(Long driveId) {
+        return CompletableFuture.completedFuture(bookingRepository.findByDriveId(driveId)
                 .stream()
                 .map(BookingMapper::toDto)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
     }
 
     @Override
+    @Async
     @Transactional(readOnly = true)
-    public List<BookingResponseDto> getBookingsByUser(Long userId) {
-        return bookingRepository.findByUserId(userId)
+    public CompletableFuture<List<BookingResponseDto>> getBookingsByUser(Long userId) {
+        return CompletableFuture.completedFuture(bookingRepository.findByUserId(userId)
                 .stream()
                 .map(BookingMapper::toDto)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
     }
 
     @Override
+    @Async
     @Transactional(readOnly = true)
-    public List<BookingResponseDto> getPendingBookingsByDrive(Long driveId) {
-        return bookingRepository.findByDriveIdAndStatus(driveId, BookingStatus.PENDING)
+    public CompletableFuture<List<BookingResponseDto>> getMyBookings() {
+        String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        return CompletableFuture.completedFuture(bookingRepository.findByUserId(user.getId())
                 .stream()
                 .map(BookingMapper::toDto)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
     }
 
     @Override
+    @Async
     @Transactional(readOnly = true)
-    public BookingResponseDto getBooking(Long driveId, Long userId) {
+    public CompletableFuture<List<BookingResponseDto>> getPendingBookingsByDrive(Long driveId) {
+        return CompletableFuture.completedFuture(bookingRepository.findByDriveIdAndStatus(driveId, BookingStatus.PENDING)
+                .stream()
+                .map(BookingMapper::toDto)
+                .collect(Collectors.toList()));
+    }
+
+    @Override
+    @Async
+    @Transactional(readOnly = true)
+    public CompletableFuture<BookingResponseDto> getBooking(Long driveId, Long userId) {
         BookingId bookingId = new BookingId(driveId, userId);
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new ResourceNotFoundException("Booking not found"));
-        return BookingMapper.toDto(booking);
+        return CompletableFuture.completedFuture(BookingMapper.toDto(booking));
     }
 }

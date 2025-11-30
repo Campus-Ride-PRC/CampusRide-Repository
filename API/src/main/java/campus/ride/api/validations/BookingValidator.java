@@ -13,16 +13,8 @@ public class BookingValidator {
             throw new IllegalArgumentException("Drive ID is required");
         }
         
-        if (request.getUserId() == null) {
-            throw new IllegalArgumentException("User ID is required");
-        }
-        
         if (request.getDriveId() <= 0) {
             throw new IllegalArgumentException("Drive ID must be positive");
-        }
-        
-        if (request.getUserId() <= 0) {
-            throw new IllegalArgumentException("User ID must be positive");
         }
     }
 }

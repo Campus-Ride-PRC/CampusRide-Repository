@@ -15,7 +15,6 @@ import java.util.function.Function;
 
 @Component
 public class JwtUtil {
-
     private static final String SECRET_KEY = "YourSecretKeyForJWTTokenGenerationShouldBeLongEnoughAndSecure12345678901234567890";
     private static final long JWT_TOKEN_VALIDITY = 24 * 60 * 60 * 1000; // 24 hours
 
@@ -32,7 +31,6 @@ public class JwtUtil {
         return createToken(claims, email);
     }
 
-    // Create JWT token
     private String createToken(Map<String, Object> claims, String subject) {
         return Jwts.builder()
                 .claims(claims)
