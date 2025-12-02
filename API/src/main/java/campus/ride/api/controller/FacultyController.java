@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.concurrent.CompletableFuture;
+
 @RestController
 @RequestMapping("/api")
 @Tag(name = "Faculties", description = "Faculties management APIs")
@@ -42,13 +44,14 @@ public class FacultyController {
             @ApiResponse(responseCode = "404", description = "Faculties not found"),
     })
     @GetMapping("/faculties")
-    public ResponseEntity<List<FacultyResponseDto>> findAllFaculties() {
+    public CompletableFuture<ResponseEntity<List<FacultyResponseDto>>> findAllFaculties() {
         logger.info("Received request to find all faculties");
         logger.debug("Searching for faculties");
 
-        List<FacultyResponseDto> faculties = facultyService.findAllFaculties();
-
-        logger.info("Returning {} faculties", faculties.size());
-        return ResponseEntity.ok(faculties);
+        return facultyService.findAllFaculties()
+                .thenApply(faculties -> {
+                    logger.info("Returning {} faculties", faculties.size());
+                    return ResponseEntity.ok(faculties);
+                });
     }
 }

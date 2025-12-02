@@ -15,18 +15,15 @@ public final class DriveValidator {
         require(r.getToNumber(), "toNumber");
         require(r.getToNeighborhood(), "toNeighborhood");
 
-        if (r.getUserId() == null) throw new IllegalArgumentException("userId is required");
-        if (r.getUserId() <= 0) throw new IllegalArgumentException("userId must be positive");
+        // userId is handled via SecurityContext
+        // availableSeats defaults to totalNoSeats on creation
 
         if (r.getPrice() == null || r.getPrice().signum() <= 0) throw new IllegalArgumentException("price must be > 0");
         if (r.getDay() == null) throw new IllegalArgumentException("day is required");
         if (r.getHour() == null) throw new IllegalArgumentException("hour is required");
-        if (r.getAvailableSeats() == null) throw new IllegalArgumentException("availableSeats is required");
         if (r.getTotalNoSeats() == null) throw new IllegalArgumentException("totalNoSeats is required");
 
         if (r.getTotalNoSeats() <= 0) throw new IllegalArgumentException("totalNoSeats must be > 0");
-        if (r.getAvailableSeats() < 0) throw new IllegalArgumentException("availableSeats must be >= 0");
-        if (r.getAvailableSeats() > r.getTotalNoSeats()) throw new IllegalArgumentException("availableSeats cannot exceed totalNoSeats");
 
         var time = LocalDateTime.of(r.getDay(), r.getHour());
         if (!time.isAfter(LocalDateTime.now())) throw new IllegalArgumentException("time must be in the future");

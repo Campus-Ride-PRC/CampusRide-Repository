@@ -7,5 +7,5 @@ import java.util.concurrent.CompletableFuture;
 
 public interface VehicleService {
     CompletableFuture<VehicleDto> getOrCreate(String model, String plate, String color, Long userId);
-    Optional<VehicleDto> getByUserId(Long userId);
+    CompletableFuture<Optional<VehicleDto>> getByUserId(Long userId);
 }

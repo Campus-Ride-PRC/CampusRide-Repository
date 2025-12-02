@@ -13,7 +13,9 @@ public class FacultyMapper {
     }
 
     public static FacultyResponseDto toDto(Faculty faculty){
-        return new FacultyResponseDto(faculty.getId(), faculty.getName());
+        FacultyResponseDto dto = new FacultyResponseDto(faculty.getId(), faculty.getName());
+        dto.setAddress(AddressMapper.toDto(faculty.getAddress()));
+        return dto;
     }
 
     public static List<FacultyResponseDto> toDtoList(List<Faculty> faculties){
