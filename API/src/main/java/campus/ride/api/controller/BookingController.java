@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/api/bookings")
@@ -41,10 +42,10 @@ public class BookingController {
             @ApiResponse(responseCode = "404", description = "Drive or user not found")
     })
     @PostMapping("/request")
-    public ResponseEntity<BookingResponseDto> requestRide(@RequestBody BookingRequestDto requestDto) {
+    public CompletableFuture<ResponseEntity<BookingResponseDto>> requestRide(@RequestBody BookingRequestDto requestDto) {
         BookingValidator.validateBookingRequest(requestDto);
-        BookingResponseDto response = bookingService.requestRide(requestDto);
-        return ResponseEntity.ok(response);
+        return bookingService.requestRide(requestDto)
+                .thenApply(ResponseEntity::ok);
     }
 
     @Operation(
@@ -61,11 +62,11 @@ public class BookingController {
             @ApiResponse(responseCode = "404", description = "Booking not found")
     })
     @PutMapping("/{driveId}/{userId}/accept")
-    public ResponseEntity<BookingResponseDto> acceptBooking(
+    public CompletableFuture<ResponseEntity<BookingResponseDto>> acceptBooking(
             @Parameter(description = "Drive ID") @PathVariable Long driveId,
             @Parameter(description = "User ID") @PathVariable Long userId) {
-        BookingResponseDto response = bookingService.acceptBooking(driveId, userId);
-        return ResponseEntity.ok(response);
+        return bookingService.acceptBooking(driveId, userId)
+                .thenApply(ResponseEntity::ok);
     }
 
     @Operation(
@@ -82,11 +83,11 @@ public class BookingController {
             @ApiResponse(responseCode = "404", description = "Booking not found")
     })
     @PutMapping("/{driveId}/{userId}/decline")
-    public ResponseEntity<BookingResponseDto> declineBooking(
+    public CompletableFuture<ResponseEntity<BookingResponseDto>> declineBooking(
             @Parameter(description = "Drive ID") @PathVariable Long driveId,
             @Parameter(description = "User ID") @PathVariable Long userId) {
-        BookingResponseDto response = bookingService.declineBooking(driveId, userId);
-        return ResponseEntity.ok(response);
+        return bookingService.declineBooking(driveId, userId)
+                .thenApply(ResponseEntity::ok);
     }
 
     @Operation(
@@ -102,12 +103,11 @@ public class BookingController {
             @ApiResponse(responseCode = "400", description = "Booking cannot be canceled"),
             @ApiResponse(responseCode = "404", description = "Booking not found")
     })
-    @PutMapping("/{driveId}/{userId}/cancel")
-    public ResponseEntity<BookingResponseDto> cancelBooking(
-            @Parameter(description = "Drive ID") @PathVariable Long driveId,
-            @Parameter(description = "User ID") @PathVariable Long userId) {
-        BookingResponseDto response = bookingService.cancelBooking(driveId, userId);
-        return ResponseEntity.ok(response);
+    @PutMapping("/{driveId}/cancel")
+    public CompletableFuture<ResponseEntity<BookingResponseDto>> cancelBooking(
+            @Parameter(description = "Drive ID") @PathVariable Long driveId) {
+        return bookingService.cancelBooking(driveId, null)
+                .thenApply(ResponseEntity::ok);
     }
 
     @Operation(
@@ -122,10 +122,10 @@ public class BookingController {
             )
     })
     @GetMapping("/drive/{driveId}")
-    public ResponseEntity<List<BookingResponseDto>> getBookingsByDrive(
+    public CompletableFuture<ResponseEntity<List<BookingResponseDto>>> getBookingsByDrive(
             @Parameter(description = "Drive ID") @PathVariable Long driveId) {
-        List<BookingResponseDto> bookings = bookingService.getBookingsByDrive(driveId);
-        return ResponseEntity.ok(bookings);
+        return bookingService.getBookingsByDrive(driveId)
+                .thenApply(ResponseEntity::ok);
     }
 
     @Operation(
@@ -140,10 +140,27 @@ public class BookingController {
             )
     })
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<BookingResponseDto>> getBookingsByUser(
+    public CompletableFuture<ResponseEntity<List<BookingResponseDto>>> getBookingsByUser(
             @Parameter(description = "User ID") @PathVariable Long userId) {
-        List<BookingResponseDto> bookings = bookingService.getBookingsByUser(userId);
-        return ResponseEntity.ok(bookings);
+        return bookingService.getBookingsByUser(userId)
+                .thenApply(ResponseEntity::ok);
+    }
+
+    @Operation(
+            summary = "Get my bookings",
+            description = "Retrieves all bookings for the current authenticated user"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successfully retrieved bookings",
+                    content = @Content(schema = @Schema(implementation = BookingResponseDto.class))
+            )
+    })
+    @GetMapping("/my-bookings")
+    public CompletableFuture<ResponseEntity<List<BookingResponseDto>>> getMyBookings() {
+        return bookingService.getMyBookings()
+                .thenApply(ResponseEntity::ok);
     }
 
     @Operation(
@@ -158,10 +175,10 @@ public class BookingController {
             )
     })
     @GetMapping("/drive/{driveId}/pending")
-    public ResponseEntity<List<BookingResponseDto>> getPendingBookings(
+    public CompletableFuture<ResponseEntity<List<BookingResponseDto>>> getPendingBookings(
             @Parameter(description = "Drive ID") @PathVariable Long driveId) {
-        List<BookingResponseDto> bookings = bookingService.getPendingBookingsByDrive(driveId);
-        return ResponseEntity.ok(bookings);
+        return bookingService.getPendingBookingsByDrive(driveId)
+                .thenApply(ResponseEntity::ok);
     }
 
     @Operation(
@@ -177,10 +194,10 @@ public class BookingController {
             @ApiResponse(responseCode = "404", description = "Booking not found")
     })
     @GetMapping("/{driveId}/{userId}")
-    public ResponseEntity<BookingResponseDto> getBooking(
+    public CompletableFuture<ResponseEntity<BookingResponseDto>> getBooking(
             @Parameter(description = "Drive ID") @PathVariable Long driveId,
             @Parameter(description = "User ID") @PathVariable Long userId) {
-        BookingResponseDto booking = bookingService.getBooking(driveId, userId);
-        return ResponseEntity.ok(booking);
+        return bookingService.getBooking(driveId, userId)
+                .thenApply(ResponseEntity::ok);
     }
 }

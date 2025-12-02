@@ -5,11 +5,13 @@ import campus.ride.transfer.dtos.user.UserResponseDto;
 import campus.ride.transfer.dtos.user.VerificationRequestDto;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public interface UserService {
-    UserResponseDto findByEmail(String email);
-    UserResponseDto login(String email, String password);
-    List<UserResponseDto> getAllUsers();
-    String registerUser(CreateUserRequestDto request);
-    UserResponseDto verifyUser(VerificationRequestDto request);
+    CompletableFuture<UserResponseDto> findByEmail(String email);
+    CompletableFuture<UserResponseDto> login(String email, String password);
+    CompletableFuture<List<UserResponseDto>> getAllUsers();
+    CompletableFuture<String> registerUser(CreateUserRequestDto request);
+    CompletableFuture<UserResponseDto> verifyUser(VerificationRequestDto request);
+    CompletableFuture<UserResponseDto> getMe();
 }

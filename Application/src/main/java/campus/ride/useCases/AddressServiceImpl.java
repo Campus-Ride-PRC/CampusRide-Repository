@@ -4,6 +4,7 @@ import campus.ride.entities.Address;
 import campus.ride.interfaces.AddressService;
 import campus.ride.transfer.dtos.address.AddressDto;
 import campus.ride.transfer.mappings.AddressMapper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +20,7 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
+    @Async
     @Transactional
     public CompletableFuture<AddressDto> getOrCreate(String street, String number, String neighborhood, String locationName) {
         Address address = repo.findByStreetAndNumberAndNeighborhood(street, number, neighborhood)

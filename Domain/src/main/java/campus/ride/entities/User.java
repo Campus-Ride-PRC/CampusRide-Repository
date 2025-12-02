@@ -22,6 +22,13 @@ public class User {
     @JoinColumn(name = "address_id", nullable = true)
     private Address address;
 
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
+    private Vehicle vehicle;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "facultyid", nullable = false)
+    private Faculty faculty;
+
     @Column(nullable = false, unique = true)
     private String email;
 
@@ -31,10 +38,6 @@ public class User {
     private String phoneNumber;
     private String firstName;
     private String lastName;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "facultyid")
-    private Faculty faculty;
 
     public User() {}
 
@@ -49,6 +52,9 @@ public class User {
 
     public Address getAddress() { return address; }
     public void setAddress(Address address) { this.address = address; }
+
+    public Vehicle getVehicle() { return vehicle; }
+    public void setVehicle(Vehicle vehicle) { this.vehicle = vehicle; }
 
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }

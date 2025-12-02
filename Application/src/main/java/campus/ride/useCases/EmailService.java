@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -31,6 +32,7 @@ public class EmailService implements campus.ride.interfaces.EmailService {
     private static final Logger logger = LogManager.getLogger(EmailService.class);
 
    @Override
+   @Async
     public void sendVerificationEmail(String toEmail, String code, String firstName, String lastName) {
         logger.info("Starting to send HTML verification email to {}", toEmail);
         try {

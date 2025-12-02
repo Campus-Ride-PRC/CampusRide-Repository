@@ -1,5 +1,6 @@
 package campus.ride.api.config;
 
+import campus.ride.config.JwtUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -18,10 +19,15 @@ import java.util.List;
 @EnableWebSecurity
 public class WebSecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtUtil jwtUtil;
 
-    public WebSecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
-        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    public WebSecurityConfig(JwtUtil jwtUtil) {
+        this.jwtUtil = jwtUtil;
+    }
+
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter() {
+        return new JwtAuthenticationFilter(jwtUtil);
     }
 
     @Bean
@@ -33,7 +39,7 @@ public class WebSecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // Public endpoints - no authentication required
                 .requestMatchers("/api/user/login", "/api/user/register/**", "/api/user/exists", "/api/user/email").permitAll()
-                .requestMatchers("/api/faculty/**").permitAll()
+                .requestMatchers("/api/faculties/**").permitAll()
                 // Swagger/OpenAPI endpoints
                 .requestMatchers("/swagger-ui/**", "/swagger-ui.html").permitAll()
                 .requestMatchers("/v3/api-docs/**", "/v3/api-docs.yaml", "/v3/api-docs").permitAll()
@@ -41,7 +47,7 @@ public class WebSecurityConfig {
                 // All other endpoints require authentication
                 .anyRequest().authenticated()
             )
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

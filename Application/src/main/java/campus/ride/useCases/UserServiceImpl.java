@@ -17,14 +17,17 @@ import campus.ride.transfer.mappings.FacultyMapper;
 import campus.ride.transfer.mappings.UserMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Service
@@ -55,7 +58,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDto findByEmail(String email) {
+    @Async
+    @Transactional(readOnly = true)
+    public CompletableFuture<UserResponseDto> findByEmail(String email) {
         logger.debug("Finding user by email: {}", email);
         
         if (email == null || email.trim().isEmpty()) {
@@ -71,11 +76,12 @@ public class UserServiceImpl implements UserService {
         }
         
         logger.debug("User found in repository for email: {}", email);
-        return UserMapper.toDto(userOptional.get());
+        return CompletableFuture.completedFuture(UserMapper.toDto(userOptional.get()));
     }
 
     @Override
-    public String registerUser(CreateUserRequestDto request) {
+    @Async
+    public CompletableFuture<String> registerUser(CreateUserRequestDto request) {
         logger.info("Registering user with email: {}", request.getEmail());
         String email = request.getEmail().trim();
 
@@ -104,12 +110,13 @@ public class UserServiceImpl implements UserService {
         emailService.sendVerificationEmail(email, verificationCode, request.getFirstName(), request.getLastName());
 
         logger.info("Successfully sent verification code to: {}", email);
-        return "Registration successful. Please check your email (or console) to verify.";
+        return CompletableFuture.completedFuture("Registration successful. Please check your email (or console) to verify.");
     }
 
     @Override
+    @Async
     @Transactional
-    public UserResponseDto verifyUser(VerificationRequestDto request) {
+    public CompletableFuture<UserResponseDto> verifyUser(VerificationRequestDto request) {
         String email = request.getEmail().trim();
         logger.info("Attempting to verify user with email: {}", email);
 
@@ -144,11 +151,13 @@ public class UserServiceImpl implements UserService {
         verificationCache.evict(email);
 
         logger.info("Successfully verified and created user with ID: {}", savedUser.getId());
-        return UserMapper.toDto(savedUser);
+        return CompletableFuture.completedFuture(UserMapper.toDto(savedUser));
     }
 
     @Override
-    public UserResponseDto login(String email, String password) {
+    @Async
+    @Transactional(readOnly = true)
+    public CompletableFuture<UserResponseDto> login(String email, String password) {
         logger.info("Attempting login for email: {}", email);
 
         if (email == null || email.trim().isEmpty() || password == null || password.isEmpty()) {
@@ -163,22 +172,30 @@ public class UserServiceImpl implements UserService {
             throw new ResourceNotFoundException("Invalid email or password");
         }
 
-        // Generate JWT token
         String token = jwtUtil.generateToken(user.getEmail(), user.getId());
         
         logger.info("Login successful for email: {}", email);
         UserResponseDto response = UserMapper.toDto(user);
         response.setToken(token);
-        return response;
+        return CompletableFuture.completedFuture(response);
     }
 
+    @Override
+    @Async
+    @Transactional(readOnly = true)
+    public CompletableFuture<UserResponseDto> getMe() {
+        String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return findByEmail(email);
+    }
 
     @Override
-    public List<UserResponseDto> getAllUsers() {
-        return userRepository.findAll()
+    @Async
+    @Transactional(readOnly = true)
+    public CompletableFuture<List<UserResponseDto>> getAllUsers() {
+        return CompletableFuture.completedFuture(userRepository.findAll()
                 .stream()
                 .map(user -> new UserResponseDto(user.getId(), user.getEmail(), user.getAddress(), user.getPhoneNumber(), user.getFirstName(), user.getLastName(), FacultyMapper.toDto(user.getFaculty())))
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
     }
 
     private static class PendingUserData implements java.io.Serializable {

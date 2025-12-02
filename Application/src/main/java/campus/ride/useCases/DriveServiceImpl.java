@@ -7,6 +7,7 @@ import campus.ride.entities.User;
 import campus.ride.entities.Vehicle;
 import campus.ride.enums.BookingRole;
 import campus.ride.enums.BookingStatus;
+import campus.ride.contracts.address.AddressRepository;
 import campus.ride.contracts.booking.BookingRepository;
 import campus.ride.contracts.drive.DriveQueryRepository;
 import campus.ride.contracts.drive.DriveRepository;
@@ -17,16 +18,20 @@ import campus.ride.interfaces.DriveService;
 import campus.ride.transfer.dtos.drive.DriveCardDto;
 import campus.ride.transfer.dtos.drive.DriveDto;
 import campus.ride.transfer.dtos.drive.DrivePageDto;
+import campus.ride.transfer.dtos.drive.DriveUpdateRequestDto;
 import campus.ride.transfer.mappings.DriveMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class DriveServiceImpl implements DriveService {
@@ -36,6 +41,7 @@ public class DriveServiceImpl implements DriveService {
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
     private final VehicleRepository vehicleRepository;
+    private final AddressRepository addressRepository;
 
     @PersistenceContext
     private EntityManager em;
@@ -44,37 +50,40 @@ public class DriveServiceImpl implements DriveService {
                            DriveQueryRepository driveQueryRepo,
                            BookingRepository bookingRepository,
                            UserRepository userRepository,
-                           VehicleRepository vehicleRepository) {
+                           VehicleRepository vehicleRepository,
+                           AddressRepository addressRepository) {
         this.driveRepo = driveRepo;
         this.driveQueryRepo = driveQueryRepo;
         this.bookingRepository = bookingRepository;
         this.userRepository = userRepository;
         this.vehicleRepository = vehicleRepository;
+        this.addressRepository = addressRepository;
     }
 
-
     @Override
+    @Async
     @Transactional(readOnly = true)
-    public Page<DriveDto> getAll(Pageable pageable) {
-        return driveRepo.findAll(pageable).map(DriveMapper::toDto);
+    public CompletableFuture<Page<DriveDto>> getAll(Pageable pageable) {
+        return CompletableFuture.completedFuture(driveRepo.findAll(pageable).map(DriveMapper::toDto));
     }
 
-
     @Override
+    @Async
     @Transactional(readOnly = true)
-    public DriveDto getById(Long id) {
+    public CompletableFuture<DriveDto> getById(Long id) {
         Drive d = driveRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Drive not found: " + id));
-        return DriveMapper.toDto(d);
+        return CompletableFuture.completedFuture(DriveMapper.toDto(d));
     }
 
     @Override
+    @Async
     @Transactional(readOnly = true)
-    public DrivePageDto getDrivePageById(Long id) {
+    public CompletableFuture<DrivePageDto> getDrivePageById(Long id) {
         Drive d = driveRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Drive not found: " + id));
         
-        return new DrivePageDto(
+        return CompletableFuture.completedFuture(new DrivePageDto(
                 d.getId(),
                 d.getTime(),
                 d.getPrice(),
@@ -89,12 +98,13 @@ public class DriveServiceImpl implements DriveService {
                 d.getVehicle().getVehicleModel(),
                 d.getVehicle().getVehicleLicencePlate(),
                 d.getVehicle().getVehicleColor()
-        );
+        ));
     }
 
     @Override
+    @Async
     @Transactional
-    public DriveDto add(DriveDto dto) {
+    public CompletableFuture<DriveDto> add(DriveDto dto) {
         Address from = mustFindAddress(dto.getFromAddressId());
         Address to   = mustFindAddress(dto.getToAddressId());
 
@@ -102,14 +112,9 @@ public class DriveServiceImpl implements DriveService {
             throw new IllegalArgumentException("From and To addresses must be different.");
         }
 
-        User driver = dto.getDriverId() != null 
-            ? userRepository.findById(dto.getDriverId())
-                .orElseThrow(() -> new IllegalArgumentException("Driver not found: " + dto.getDriverId()))
-            : null;
-
-        if (driver == null) {
-            throw new IllegalArgumentException("Driver ID is required");
-        }
+        String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User driver = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + email));
 
         // Get or ensure vehicle
         Vehicle vehicle = null;
@@ -122,7 +127,7 @@ public class DriveServiceImpl implements DriveService {
             throw new IllegalArgumentException("Vehicle ID is required");
         }
 
-        Drive entity = DriveMapper.toEntity(dto, from, to, driver, vehicle);
+        Drive entity = DriveMapper.toEntity(dto, from, to);
 
         if (entity.getCreatedAt() == null) {
             entity.setCreatedAt(LocalDateTime.now());
@@ -144,21 +149,47 @@ public class DriveServiceImpl implements DriveService {
         );
         bookingRepository.save(driverBooking);
 
-        return DriveMapper.toDto(saved);
+        return CompletableFuture.completedFuture(DriveMapper.toDto(saved));
     }
 
-
     @Override
+    @Async
     @Transactional
-    public DriveDto update(Long id, DriveDto dto) {
+    public CompletableFuture<DriveDto> update(Long id, DriveUpdateRequestDto dto) {
         Drive d = driveRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Drive not found: " + id));
 
-        if (dto.getFromAddressId() != null) d.setFrom(mustFindAddress(dto.getFromAddressId()));
-        if (dto.getToAddressId() != null) d.setTo(mustFindAddress(dto.getToAddressId()));
+        String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + email));
+
+        if (!d.getDriver().getId().equals(user.getId())) {
+            throw new IllegalArgumentException("Only the driver can update the drive");
+        }
+
+        // Update addresses if provided
+        if (dto.getFromStreet() != null) {
+            Address from = addressRepository.findByStreetAndNumberAndNeighborhood(
+                    dto.getFromStreet(), dto.getFromNumber(), dto.getFromNeighborhood())
+                    .orElseGet(() -> addressRepository.save(new Address(
+                            dto.getFromStreet(), dto.getFromNumber(), dto.getFromNeighborhood(), dto.getFromLocationName(), null)));
+            d.setFrom(from);
+        }
+
+        if (dto.getToStreet() != null) {
+            Address to = addressRepository.findByStreetAndNumberAndNeighborhood(
+                    dto.getToStreet(), dto.getToNumber(), dto.getToNeighborhood())
+                    .orElseGet(() -> addressRepository.save(new Address(
+                            dto.getToStreet(), dto.getToNumber(), dto.getToNeighborhood(), dto.getToLocationName(), null)));
+            d.setTo(to);
+        }
+
         if (dto.getPrice() != null) d.setPrice(dto.getPrice());
-        if (dto.getTime() != null) d.setTime(dto.getTime());
-        if (dto.getAvailableSeats() != null) d.setAvailableSeats(dto.getAvailableSeats());
+        
+        if (dto.getDay() != null && dto.getHour() != null) {
+            d.setTime(LocalDateTime.of(dto.getDay(), dto.getHour()));
+        }
+        
         if (dto.getTotalNoSeats() != null) d.setTotalNoSeats(dto.getTotalNoSeats());
 
         if (d.getFrom() != null && d.getTo() != null && d.getFrom().getId().equals(d.getTo().getId())) {
@@ -166,23 +197,34 @@ public class DriveServiceImpl implements DriveService {
         }
 
         Drive saved = driveRepo.save(d);
-        return DriveMapper.toDto(saved);
+        return CompletableFuture.completedFuture(DriveMapper.toDto(saved));
     }
 
-
     @Override
+    @Async
     @Transactional
-    public void delete(Long id) {
+    public CompletableFuture<Void> delete(Long id) {
         Drive d = driveRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Drive not found: " + id));
+
+        String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + email));
+
+        if (!d.getDriver().getId().equals(user.getId())) {
+            throw new IllegalArgumentException("Only the driver can delete the drive");
+        }
+
         driveRepo.delete(d);
+        return CompletableFuture.completedFuture(null);
     }
 
     @Override
+    @Async
     @Transactional(readOnly = true)
-    public Page<DriveCardDto> getDriverCards(Pageable pageable) {
+    public CompletableFuture<Page<DriveCardDto>> getDriverCards(Pageable pageable) {
         Page<DriveRow> rows = driveQueryRepo.findAllBy(pageable);
-        return rows.map(r ->
+        return CompletableFuture.completedFuture(rows.map(r ->
                 new DriveCardDto(
                         r.getId(), r.getTime(), r.getPrice(),
                         r.getAvailableSeats(), r.getTotalNoSeats(),
@@ -191,14 +233,15 @@ public class DriveServiceImpl implements DriveService {
                         r.getDriver_FirstName(), r.getDriver_LastName(),
                         r.getVehicle_Model()
                 )
-        );
+        ));
     }
 
     @Override
+    @Async
     @Transactional(readOnly = true)
-    public List<DriveCardDto> getDrivesByDriverId(Long driverId) {
+    public CompletableFuture<List<DriveCardDto>> getDrivesByDriverId(Long driverId) {
         List<DriveRow> rows = driveQueryRepo.findAllByDriverId(driverId);
-        return rows.stream()
+        return CompletableFuture.completedFuture(rows.stream()
                 .map(r -> new DriveCardDto(
                         r.getId(), r.getTime(), r.getPrice(),
                         r.getAvailableSeats(), r.getTotalNoSeats(),
@@ -207,9 +250,19 @@ public class DriveServiceImpl implements DriveService {
                         r.getDriver_FirstName(), r.getDriver_LastName(),
                         r.getVehicle_Model()
                 ))
-                .collect(java.util.stream.Collectors.toList());
+                .collect(java.util.stream.Collectors.toList()));
     }
 
+    @Override
+    @Async
+    @Transactional(readOnly = true)
+    public CompletableFuture<List<DriveCardDto>> getMyDrives() {
+        String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + email));
+
+        return getDrivesByDriverId(user.getId());
+    }
 
     private Address mustFindAddress(Long id) {
         Address a = em.find(Address.class, id);

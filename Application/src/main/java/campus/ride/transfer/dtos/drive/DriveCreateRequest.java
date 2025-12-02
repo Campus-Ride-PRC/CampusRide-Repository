@@ -18,7 +18,7 @@ public class DriveCreateRequest {
     private String toLocationName;
 
     private BigDecimal price;
-    private LocalDate day;     // separate day
+    private LocalDate day;
 
     @Schema(
             type = "string",
@@ -26,15 +26,8 @@ public class DriveCreateRequest {
     )
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm[:ss]")
     private LocalTime hour; // separate hour
-
-    private Integer availableSeats;
     private Integer totalNoSeats;
 
-    // Driver user ID (required until authentication is implemented)
-    private Long userId;
-
-    // Vehicle (not linked yet, but we store/ensure it exists)
-    // dupa autorizare cand o sa avem id ul o sa putem si linkui
     private String vehicleModel;
     private String vehicleLicencePlate;
     private String vehicleColor;
@@ -66,8 +59,6 @@ public class DriveCreateRequest {
     public void setDay(LocalDate day) { this.day = day; }
     public LocalTime getHour() { return hour; }
     public void setHour(LocalTime hour) { this.hour = hour; }
-    public Integer getAvailableSeats() { return availableSeats; }
-    public void setAvailableSeats(Integer availableSeats) { this.availableSeats = availableSeats; }
     public Integer getTotalNoSeats() { return totalNoSeats; }
     public void setTotalNoSeats(Integer totalNoSeats) { this.totalNoSeats = totalNoSeats; }
 
@@ -77,7 +68,5 @@ public class DriveCreateRequest {
     public void setVehicleLicencePlate(String vehicleLicencePlate) { this.vehicleLicencePlate = vehicleLicencePlate; }
     public String getVehicleColor() { return vehicleColor; }
     public void setVehicleColor(String vehicleColor) { this.vehicleColor = vehicleColor; }
-    
-    public Long getUserId() { return userId; }
-    public void setUserId(Long userId) { this.userId = userId; }
+
 }
