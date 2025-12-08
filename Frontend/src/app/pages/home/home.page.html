@@ -47,11 +47,8 @@
   </div>
 </ion-content>
 
-<div class="fixed inset-0 z-[1000] pointer-events-none">
-  <app-side-panel
-    [isOpen]="isPanelOpen"
-    (closed)="onPanelClosed()"
-    (itemClicked)="onMenuItemClick($event)"
-    class="pointer-events-auto">
-  </app-side-panel>
-</div>
+<app-side-panel
+  [isOpen]="isPanelOpen"
+  (closed)="onPanelClosed()"
+  (itemClicked)="onMenuItemClick($event)">
+</app-side-panel>
