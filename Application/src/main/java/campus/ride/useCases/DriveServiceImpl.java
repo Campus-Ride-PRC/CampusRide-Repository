@@ -92,7 +92,8 @@ public class DriveServiceImpl implements DriveService {
                 fromAddr.getStreet(),
                 fromAddr.getNumber(),
                 fromAddr.getLocationName(),
-                fromAddr.getNeighborhood()
+                fromAddr.getNeighborhood(),
+                fromAddr.getCity()
         );
         
         AddressDto toAddressDto = new AddressDto(
@@ -100,7 +101,8 @@ public class DriveServiceImpl implements DriveService {
                 toAddr.getStreet(),
                 toAddr.getNumber(),
                 toAddr.getLocationName(),
-                toAddr.getNeighborhood()
+                toAddr.getNeighborhood(),
+                toAddr.getCity()
         );
         
         return CompletableFuture.completedFuture(new DrivePageDto(
@@ -189,7 +191,7 @@ public class DriveServiceImpl implements DriveService {
             Address from = addressRepository.findByStreetAndNumberAndNeighborhood(
                     dto.getFromStreet(), dto.getFromNumber(), dto.getFromNeighborhood())
                     .orElseGet(() -> addressRepository.save(new Address(
-                            dto.getFromStreet(), dto.getFromNumber(), dto.getFromNeighborhood(), dto.getFromLocationName())));
+                            dto.getFromStreet(), dto.getFromNumber(), dto.getFromNeighborhood(), dto.getFromLocationName(), dto.getFromCity())));
             d.setFrom(from);
         }
 
@@ -197,7 +199,7 @@ public class DriveServiceImpl implements DriveService {
             Address to = addressRepository.findByStreetAndNumberAndNeighborhood(
                     dto.getToStreet(), dto.getToNumber(), dto.getToNeighborhood())
                     .orElseGet(() -> addressRepository.save(new Address(
-                            dto.getToStreet(), dto.getToNumber(), dto.getToNeighborhood(), dto.getToLocationName())));
+                            dto.getToStreet(), dto.getToNumber(), dto.getToNeighborhood(), dto.getToLocationName(), dto.getToCity())));
             d.setTo(to);
         }
 

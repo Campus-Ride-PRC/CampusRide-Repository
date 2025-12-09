@@ -20,10 +20,10 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     @Transactional
-    public CompletableFuture<AddressDto> getOrCreate(String street, String number, String neighborhood, String locationName) {
+    public CompletableFuture<AddressDto> getOrCreate(String street, String number, String neighborhood, String locationName, String city) {
         Address address = repo.findByStreetAndNumberAndNeighborhood(street, number, neighborhood)
                 .orElseGet(() -> {
-                    Address newAddress = new Address(street, number, neighborhood, locationName);
+                    Address newAddress = new Address(street, number, neighborhood, locationName, city);
                     Address saved = repo.saveAndFlush(newAddress);
                     return saved;
                 });

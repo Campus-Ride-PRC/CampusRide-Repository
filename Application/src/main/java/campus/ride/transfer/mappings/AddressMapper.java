@@ -13,7 +13,8 @@ public class AddressMapper {
             address.getStreet(),
             address.getNumber(),
             address.getLocationName(),
-            address.getNeighborhood()
+            address.getNeighborhood(),
+            address.getCity()
         );
     }
 
@@ -21,6 +22,6 @@ public class AddressMapper {
         if (dto == null) {
             return null;
         }
-        return new Address(dto.getStreet(), dto.getNumber(), dto.getNeighborhood(), dto.getLocationName());
+        return new Address(dto.getStreet(), dto.getNumber(), dto.getNeighborhood(), dto.getLocationName(), dto.getCity());
     }
 }

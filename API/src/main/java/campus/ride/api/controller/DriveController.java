@@ -168,11 +168,11 @@ public class DriveController {
         LocalDateTime time = LocalDateTime.of(req.getDay(), req.getHour());
 
         CompletableFuture<AddressDto> fromFuture = addressService.getOrCreate(
-                req.getFromAddress().getStreet(), req.getFromAddress().getNumber(), req.getFromAddress().getNeighborhood(), req.getFromAddress().getLocationName()
+                req.getFromAddress().getStreet(), req.getFromAddress().getNumber(), req.getFromAddress().getNeighborhood(), req.getFromAddress().getLocationName(), req.getFromAddress().getCity()
         );
         
         CompletableFuture<AddressDto> toFuture = addressService.getOrCreate(
-                req.getToAddress().getStreet(), req.getToAddress().getNumber(), req.getToAddress().getNeighborhood(), req.getToAddress().getLocationName()
+                req.getToAddress().getStreet(), req.getToAddress().getNumber(), req.getToAddress().getNeighborhood(), req.getToAddress().getLocationName(), req.getToAddress().getCity()
         );
 
         CompletableFuture<VehicleDto> vehicleFuture = vehicleService.getOrCreate(
