@@ -16,24 +16,18 @@ interface PanelItem {
   selector: 'app-side-panel',
   standalone: true,
   imports: [CommonModule, IonicModule, PrimaryButtonComponent],
-  styles: [`
-    :host {
-      display: contents;
-    }
-  `],
   template: `
     <!-- Overlay -->
     <div
       *ngIf="isOpen"
-      style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); z-index: 998;"
+      class="fixed inset-0 bg-black bg-opacity-50 z-[999]"
       (click)="closePanel()">
     </div>
 
     <!-- Panel -->
     <div
-      style="position: fixed; top: 0; left: 0; height: 100vh; width: 260px; background-color: #1a1a1a; color: white; box-shadow: 0 0 20px rgba(0,0,0,0.5); transition: transform 300ms ease-in-out; z-index: 999;"
-      [style.transform]="isOpen ? 'translateX(0)' : 'translateX(-100%)'"
-      (click)="$event.stopPropagation()">
+      class="absolute top-0 left-0 h-screen w-[260px] bg-[#1a1a1a] text-white shadow-xl transform transition-transform duration-300 ease-in-out z-[1000]"
+      [style.transform]="isOpen ? 'translateX(0)' : 'translateX(-100%)'">
 
       <div class="flex flex-col h-full">
 
@@ -146,13 +140,9 @@ export class SidePanelComponent {
 
   ngOnChanges(changes: SimpleChanges) {
     console.log('SidePanel isOpen changed to:', this.isOpen);
-    if (changes['isOpen']) {
-      console.log('isOpen change detected:', changes['isOpen'].currentValue);
-    }
   }
 
   closePanel() {
-    console.log('closePanel called');
     this.closed.emit();
   }
 
