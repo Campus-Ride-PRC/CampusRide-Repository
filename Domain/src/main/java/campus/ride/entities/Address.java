@@ -28,18 +28,18 @@ public class Address {
     @Column(nullable = false)
     private String neighborhood;
 
-    private String mapsUrl;
+    @Column(nullable = true)
+    private String city;
 
     protected Address() {} 
 
-    public Address(String street, String number, String neighborhood, String locationName, String mapsUrl) {
+    public Address(String street, String number, String neighborhood, String locationName, String city) {
         this.street = street;
         this.number = number;
         this.neighborhood = neighborhood;
         this.locationName = locationName;
-        this.mapsUrl = mapsUrl;
+        this.city = city;
     }
-
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -56,6 +56,6 @@ public class Address {
     public String getNeighborhood() { return neighborhood; }
     public void setNeighborhood(String neighborhood) { this.neighborhood = neighborhood; }
 
-    public String getMapsUrl() { return mapsUrl; }
-    public void setMapsUrl(String mapsUrl) { this.mapsUrl = mapsUrl; }
+    public String getCity() { return city; }
+    public void setCity(String city) { this.city = city; }
 }

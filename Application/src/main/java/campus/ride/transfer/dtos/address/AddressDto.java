@@ -18,6 +18,13 @@ public class AddressDto {
         this.neighborhood = neighborhood;
     }
 
+    public AddressDto(String street, String number, String locationName, String neighborhood) {
+        this.street = street;
+        this.number = number;
+        this.locationName = locationName;
+        this.neighborhood = neighborhood;
+    }
+
     public Long getId() {
         return id;
     }

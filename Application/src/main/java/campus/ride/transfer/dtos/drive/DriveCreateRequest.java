@@ -5,17 +5,11 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
+import campus.ride.transfer.dtos.address.AddressDto;
 
 public class DriveCreateRequest {
-    private String fromStreet;
-    private String fromNumber;
-    private String fromNeighborhood;
-    private String fromLocationName;
-
-    private String toStreet;
-    private String toNumber;
-    private String toNeighborhood;
-    private String toLocationName;
+    private AddressDto fromAddress;
+    private AddressDto toAddress;
 
     private BigDecimal price;
     private LocalDate day;
@@ -34,24 +28,11 @@ public class DriveCreateRequest {
 
     public DriveCreateRequest() {}
 
+    public AddressDto getFromAddress() { return fromAddress; }
+    public void setFromAddress(AddressDto fromAddress) { this.fromAddress = fromAddress; }
 
-    public String getFromStreet() { return fromStreet; }
-    public void setFromStreet(String fromStreet) { this.fromStreet = fromStreet; }
-    public String getFromNumber() { return fromNumber; }
-    public void setFromNumber(String fromNumber) { this.fromNumber = fromNumber; }
-    public String getFromNeighborhood() { return fromNeighborhood; }
-    public void setFromNeighborhood(String fromNeighborhood) { this.fromNeighborhood = fromNeighborhood; }
-    public String getFromLocationName() { return fromLocationName; }
-    public void setFromLocationName(String fromLocationName) { this.fromLocationName = fromLocationName; }
-
-    public String getToStreet() { return toStreet; }
-    public void setToStreet(String toStreet) { this.toStreet = toStreet; }
-    public String getToNumber() { return toNumber; }
-    public void setToNumber(String toNumber) { this.toNumber = toNumber; }
-    public String getToNeighborhood() { return toNeighborhood; }
-    public void setToNeighborhood(String toNeighborhood) { this.toNeighborhood = toNeighborhood; }
-    public String getToLocationName() { return toLocationName; }
-    public void setToLocationName(String toLocationName) { this.toLocationName = toLocationName; }
+    public AddressDto getToAddress() { return toAddress; }
+    public void setToAddress(AddressDto toAddress) { this.toAddress = toAddress; }
 
     public BigDecimal getPrice() { return price; }
     public void setPrice(BigDecimal price) { this.price = price; }

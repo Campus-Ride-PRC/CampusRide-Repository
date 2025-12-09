@@ -18,8 +18,7 @@ import { SafeHtml } from '@angular/platform-browser';
   [style.width]="width"
   [style.height]="height"
   [style.border-color]="getBorderColor()"
-  class="bg-[#1a1a1a] text-[#e0e0e0] font-[600] rounded-[16px] text-[16px] font-medium transition-opacity hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed flex items-center border-2"
-  [ngClass]="customClass"
+  [ngClass]="buttonClasses"
   [style.justifyContent]="textAlign === 'center' ? 'center' : 'flex-start'">
 
   <ng-container *ngIf="icon && iconPosition === 'left'">
@@ -48,10 +47,30 @@ export class PrimaryButtonComponent {
   @Input() icon?: SafeHtml; // SVG-ul ca SafeHtml
   @Input() iconPosition: 'left' | 'right' = 'left';
   @Input() textAlign: 'start' | 'center' = 'center';
+  @Input() variant: 'primary' | 'dark' | 'transparent' = 'dark';
 
   @Output() onClick = new EventEmitter<void>();
 
   private _isPressed: boolean = false;
+
+  get buttonClasses(): string {
+    const base = 'text-white font-[600] rounded-[16px] text-[16px] font-medium transition-opacity hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed flex items-center border-2';
+    
+    let variantClass = '';
+    switch (this.variant) {
+      case 'primary':
+        variantClass = 'bg-[#00C36C]';
+        break;
+      case 'transparent':
+        variantClass = 'bg-transparent hover:bg-[#2A2A2C] active:bg-[#1E1E1E]';
+        break;
+      default: // dark
+        variantClass = 'bg-[#2A2A2C] hover:bg-[#333335] active:bg-[#1E1E1E]';
+        break;
+    }
+      
+    return `${base} ${variantClass} ${this.customClass}`;
+  }
 
   handleClick() {
     if (!this.disabled) {

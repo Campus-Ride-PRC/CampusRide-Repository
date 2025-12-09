@@ -26,8 +26,12 @@ public interface DriveJPAQueryRepository
                d.totalNoSeats as totalNoSeats,
                fromAddr.locationName as from_LocationName,
                fromAddr.neighborhood as from_Neighborhood,
+               fromAddr.street as from_Street,
+               fromAddr.number as from_Number,
                toAddr.locationName as to_LocationName,
                toAddr.neighborhood as to_Neighborhood,
+               toAddr.street as to_Street,
+               toAddr.number as to_Number,
                u.firstName as driver_FirstName,
                u.lastName as driver_LastName,
                v.vehicleModel as vehicle_Model
@@ -38,6 +42,7 @@ public interface DriveJPAQueryRepository
         JOIN b.user u
         LEFT JOIN u.vehicle v
         WHERE b.role = campus.ride.enums.BookingRole.DRIVER
+          AND b.status = campus.ride.enums.BookingStatus.ACCEPTED
         """)
     Page<DriveRow> findAllBy(Pageable pageable);
 
@@ -50,8 +55,12 @@ public interface DriveJPAQueryRepository
                d.totalNoSeats as totalNoSeats,
                fromAddr.locationName as from_LocationName,
                fromAddr.neighborhood as from_Neighborhood,
+               fromAddr.street as from_Street,
+               fromAddr.number as from_Number,
                toAddr.locationName as to_LocationName,
                toAddr.neighborhood as to_Neighborhood,
+               toAddr.street as to_Street,
+               toAddr.number as to_Number,
                u.firstName as driver_FirstName,
                u.lastName as driver_LastName,
                v.vehicleModel as vehicle_Model
@@ -63,6 +72,7 @@ public interface DriveJPAQueryRepository
         LEFT JOIN u.vehicle v
         WHERE b.role = campus.ride.enums.BookingRole.DRIVER
           AND u.id = :driverId
+          AND b.status = campus.ride.enums.BookingStatus.ACCEPTED
         ORDER BY d.time ASC
         """)
     List<DriveRow> findAllByDriverId(@Param("driverId") Long driverId);

@@ -20,12 +20,14 @@ public class DriveUpdateRequestDto {
     private String fromNumber;
     private String fromNeighborhood;
     private String fromLocationName;
+    private String fromCity;
 
     @Size(min = 3, message = "Street name must be at least 3 characters.")
     private String toStreet;
     private String toNumber;
     private String toNeighborhood;
     private String toLocationName;
+    private String toCity;
 
     private LocalDate day;
 

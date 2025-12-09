@@ -21,9 +21,6 @@ public class AddressMapper {
         if (dto == null) {
             return null;
         }
-
-        Address address = new Address(dto.getStreet(), dto.getNumber(), dto.getNeighborhood(), dto.getLocationName(), null);
-        address.setId(dto.getId());
-        return address;
+        return new Address(dto.getStreet(), dto.getNumber(), dto.getNeighborhood(), dto.getLocationName());
     }
 }

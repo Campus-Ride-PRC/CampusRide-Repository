@@ -1,5 +1,6 @@
 package campus.ride.transfer.dtos.drive;
 
+import campus.ride.transfer.dtos.address.AddressDto;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -9,10 +10,8 @@ public class DriveCardDto {
     private BigDecimal price;
     private Integer availableSeats;
     private Integer totalNoSeats;
-    private String fromLocationName;
-    private String fromNeighborhood;
-    private String toLocationName;
-    private String toNeighborhood;
+    private AddressDto fromAddress;
+    private AddressDto toAddress;
     private String driverFirstName;
     private String driverLastName;
     private String vehicleModel;
@@ -21,8 +20,7 @@ public class DriveCardDto {
 
     public DriveCardDto(Long id, LocalDateTime time, BigDecimal price,
                          Integer availableSeats, Integer totalNoSeats,
-                         String fromLocationName, String fromNeighborhood,
-                         String toLocationName, String toNeighborhood,
+                         AddressDto fromAddress, AddressDto toAddress,
                          String driverFirstName, String driverLastName,
                          String vehicleModel) {
         this.id = id;
@@ -30,10 +28,8 @@ public class DriveCardDto {
         this.price = price;
         this.availableSeats = availableSeats;
         this.totalNoSeats = totalNoSeats;
-        this.fromLocationName = fromLocationName;
-        this.fromNeighborhood = fromNeighborhood;
-        this.toLocationName = toLocationName;
-        this.toNeighborhood = toNeighborhood;
+        this.fromAddress = fromAddress;
+        this.toAddress = toAddress;
         this.driverFirstName = driverFirstName;
         this.driverLastName = driverLastName;
         this.vehicleModel = vehicleModel;
@@ -49,14 +45,10 @@ public class DriveCardDto {
     public void setAvailableSeats(Integer availableSeats) { this.availableSeats = availableSeats; }
     public Integer getTotalNoSeats() { return totalNoSeats; }
     public void setTotalNoSeats(Integer totalNoSeats) { this.totalNoSeats = totalNoSeats; }
-    public String getFromLocationName() { return fromLocationName; }
-    public void setFromLocationName(String fromLocationName) { this.fromLocationName = fromLocationName; }
-    public String getFromNeighborhood() { return fromNeighborhood; }
-    public void setFromNeighborhood(String fromNeighborhood) { this.fromNeighborhood = fromNeighborhood; }
-    public String getToLocationName() { return toLocationName; }
-    public void setToLocationName(String toLocationName) { this.toLocationName = toLocationName; }
-    public String getToNeighborhood() { return toNeighborhood; }
-    public void setToNeighborhood(String toNeighborhood) { this.toNeighborhood = toNeighborhood; }
+    public AddressDto getFromAddress() { return fromAddress; }
+    public void setFromAddress(AddressDto fromAddress) { this.fromAddress = fromAddress; }
+    public AddressDto getToAddress() { return toAddress; }
+    public void setToAddress(AddressDto toAddress) { this.toAddress = toAddress; }
     public String getDriverFirstName() { return driverFirstName; }
     public void setDriverFirstName(String driverFirstName) { this.driverFirstName = driverFirstName; }
     public String getDriverLastName() { return driverLastName; }

@@ -86,11 +86,11 @@ export class HomePage implements OnInit {
   }
 
   getFromLocation(drive: DriveCard): string {
-    return drive.fromNeighborhood || drive.fromLocationName;
+    return drive.fromAddress.neighborhood || drive.fromAddress.locationName;
   }
 
   getToLocation(drive: DriveCard): string {
-    return drive.toLocationName ||drive.toNeighborhood;
+    return drive.toAddress.locationName || drive.toAddress.neighborhood;
   }
 
   formatDepartureTime(time: string): string {

@@ -40,6 +40,7 @@ interface PanelItem {
             [iconPosition]="item.iconPosition || 'left'"
             [textAlign]="item.textAlign || 'start'"
             class="w-full"
+            variant="transparent"
             (onClick)="onItemClick(item.id)"
             customClass="ps-[32px]">
           </app-primary-button>
@@ -54,6 +55,7 @@ interface PanelItem {
             [iconPosition]="item.iconPosition || 'left'"
             [textAlign]="item.textAlign || 'start'"
             class="w-full"
+            variant="transparent"
             (onClick)="onItemClick(item.id)"
             customClass="ps-[32px]">
           </app-primary-button>

@@ -64,9 +64,5 @@ export const routes: Routes = [
     redirectTo: 'welcome',
     pathMatch: 'full',
   },
-  {
-    path: 'add-ride',
-    loadComponent: () => import('./pages/home/add-ride/add-ride.page').then( m => m.AddRidePage)
-  },
 
 ];
