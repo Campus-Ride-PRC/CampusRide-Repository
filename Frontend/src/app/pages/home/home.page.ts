@@ -70,10 +70,10 @@ export class HomePage implements OnInit {
       this.currentPage++;
       this.loadDrives();
     }
-    
+
     if (event) {
       event.target.complete();
-      
+
       // Disable infinite scroll when all data is loaded
       if (this.isLastPage) {
         event.target.disabled = true;
@@ -153,6 +153,9 @@ export class HomePage implements OnInit {
         // TODO: Navigate to settings page when implemented
         console.log('Settings feature coming soon');
         break;
+      case 'profile':
+            this.router.navigate(['/profile']);
+            break;
       case 'logout':
         this.logout();
         break;
