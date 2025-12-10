@@ -26,10 +26,6 @@
         <div class="meta">
           <span>{{ user.faculty.name }}</span>
         </div>
-        <div class="meta">
-          <span> 25 rides</span>
-          <span> · 4 friends </span>
-        </div>
       </div>
       <div >
         <button class="add-ride-btn">
@@ -37,12 +33,12 @@
         </button>
       </div>
     </div>
-    <div class="button-section">
+    <div class="button-section" style="padding-inline: 8px !important; padding-bottom: 8px !important;">
       <p class="title-b">My Bookings</p>
       <app-booking-card *ngFor="let booking of myBookings" [booking]="booking"></app-booking-card>
     </div>
-    <div class="button-section">
-      <button class="add-ride-btn" (click)="goToAllDrives()">
+    <div class="button-section" style="padding-bottom: 8px !important;">
+      <button class="add-ride-btn" (click)="goToAllBookings()">
         See all bookings
       </button>
     </div>
@@ -65,7 +61,7 @@
     </div>
     <div class="button-section">
       <button class="add-ride-btn" (click)="goToAllDrives()">
-        See all rides
+        See all future rides
       </button>
     </div>
   </div>

@@ -70,6 +70,8 @@ ion-content {
 
 .drive-card {
   margin-bottom: 1.5rem;
+  margin-inline-start: 0;
+  margin-inline-end: 0;
   background: var(--campus-ride-bg-card);
   border-radius: 12px;
   box-shadow: var(--campus-ride-shadow);

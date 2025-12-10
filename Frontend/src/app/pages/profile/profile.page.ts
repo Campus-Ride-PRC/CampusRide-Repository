@@ -130,8 +130,13 @@ export class ProfilePage implements OnInit {
   onCardClick(drive: DriveCard) {
     this.router.navigate(['/ride-details', drive.id]);
   }
-  goToAllDrives() : void {
-    this.router.navigate(['/home']);
+  
+  goToAllBookings(): void {
+    this.router.navigate(['/my-bookings']);
+  }
+  
+  goToAllDrives(): void {
+    this.router.navigate(['/driver-requests']);
   }
 
 }
