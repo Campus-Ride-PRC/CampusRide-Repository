@@ -1,0 +1,68 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar class="custom-toolbar">
+    <ion-buttons slot="start" style="padding-left: 5px;">
+      <ion-button (click)="goBack()" class="back-button">
+        <img src="assets/icon/arrow-back.svg" alt="Back" width="20" height="20" />
+      </ion-button>
+    </ion-buttons>
+    <ion-title class="page-title">Notifications</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="bg-[#1a1a1a]">
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="notifications-container">
+    <div *ngIf="loading" class="loading-container">
+      <ion-spinner color="primary"></ion-spinner>
+      <p>Loading notifications...</p>
+    </div>
+
+    <div *ngIf="!loading && notifications.length === 0" class="empty-state">
+      <ion-icon name="notifications-off-outline" class="empty-icon"></ion-icon>
+      <h2>No Notifications</h2>
+      <p>You don't have any notifications at the moment.</p>
+    </div>
+
+    <ion-card *ngFor="let notification of notifications" class="notification-card" [ngClass]="'notification-' + notification.type">
+      <ion-card-content>
+        <!-- Request Sent Notification -->
+        <div *ngIf="notification.type === 'request-sent'">
+          <div class="notification-content">
+            <ion-icon name="paper-plane-outline" class="notification-icon"></ion-icon>
+            <div class="notification-details">
+              <p class="title">{{notification.title}}</p>
+              <p class="subtitle">{{notification.subtitle}}</p>
+            </div>
+            <ion-badge [color]="notification.booking.status === 'ACCEPTED' ? 'success' : (notification.booking.status === 'DECLINED' ? 'danger' : 'warning')" class="status-badge">
+              {{notification.booking.status}}
+            </ion-badge>
+          </div>
+        </div>
+
+        <!-- Request Received Notification -->
+        <div *ngIf="notification.type === 'request-received'">
+          <div class="notification-content">
+            <ion-icon name="person-add-outline" class="notification-icon"></ion-icon>
+            <div class="notification-details">
+              <p class="title">{{notification.title}}</p>
+              <p class="subtitle">{{notification.subtitle}}</p>
+            </div>
+          </div>
+          <div class="actions">
+            <ion-button class="accept-button" fill="solid" size="small" (click)="acceptBooking(notification.booking)">
+              <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+              Accept
+            </ion-button>
+            <ion-button class="decline-button" fill="outline" size="small" (click)="declineBooking(notification.booking)">
+              <ion-icon name="close-circle-outline" slot="start"></ion-icon>
+              Decline
+            </ion-button>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

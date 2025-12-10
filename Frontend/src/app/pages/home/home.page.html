@@ -1,4 +1,4 @@
-<app-header menuTitle='CampusRide' (menuClick)="onMenuOpen()"></app-header>
+<app-header menuTitle='CampusRide' (menuClick)="onMenuOpen()" (notificationClick)="onNotificationOpen()"></app-header>
 
 <ion-content class="bg-[#1a1a1a]">
   <div class="content-wrapper">
@@ -35,8 +35,8 @@
     </div>
 
     <!-- Infinite Scroll -->
-    <ion-infinite-scroll 
-      threshold="100px" 
+    <ion-infinite-scroll
+      threshold="100px"
       (ionInfinite)="loadMoreDrives($event)"
       [disabled]="isLastPage">
       <ion-infinite-scroll-content

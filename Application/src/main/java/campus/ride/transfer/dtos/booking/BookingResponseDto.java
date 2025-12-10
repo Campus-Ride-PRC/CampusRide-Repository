@@ -13,6 +13,8 @@ public class BookingResponseDto {
     private String driverEmail;
     private String driverFirstName;
     private String driverLastName;
+    private String fromLocationName;
+    private String toLocationName;
     private BookingStatus status;
     private BookingRole role;
     private LocalDateTime requestedAt;
@@ -23,6 +25,7 @@ public class BookingResponseDto {
     public BookingResponseDto(Long driveId, Long userId, String userEmail,
                              String userFirstName, String userLastName,
                              String driverEmail, String driverFirstName, String driverLastName,
+                             String fromLocationName, String toLocationName,
                              BookingStatus status, BookingRole role,
                              LocalDateTime requestedAt, LocalDateTime updatedAt) {
         this.driveId = driveId;
@@ -33,6 +36,8 @@ public class BookingResponseDto {
         this.driverEmail = driverEmail;
         this.driverFirstName = driverFirstName;
         this.driverLastName = driverLastName;
+        this.fromLocationName = fromLocationName;
+        this.toLocationName = toLocationName;
         this.status = status;
         this.role = role;
         this.requestedAt = requestedAt;
@@ -62,6 +67,12 @@ public class BookingResponseDto {
 
     public String getDriverLastName() { return driverLastName; }
     public void setDriverLastName(String driverLastName) { this.driverLastName = driverLastName; }
+
+    public String getFromLocationName() { return fromLocationName; }
+    public void setFromLocationName(String fromLocationName) { this.fromLocationName = fromLocationName; }
+
+    public String getToLocationName() { return toLocationName; }
+    public void setToLocationName(String toLocationName) { this.toLocationName = toLocationName; }
 
     public BookingStatus getStatus() { return status; }
     public void setStatus(BookingStatus status) { this.status = status; }

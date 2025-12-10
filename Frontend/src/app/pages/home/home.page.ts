@@ -70,10 +70,10 @@ export class HomePage implements OnInit {
       this.currentPage++;
       this.loadDrives();
     }
-    
+
     if (event) {
       event.target.complete();
-      
+
       // Disable infinite scroll when all data is loaded
       if (this.isLastPage) {
         event.target.disabled = true;
@@ -133,6 +133,10 @@ export class HomePage implements OnInit {
     this.isPanelOpen = false;
   }
 
+  onNotificationOpen() {
+    this.router.navigate(['/notifications']);
+  }
+
   onMenuItemClick(item: string) {
     console.log('Menu item clicked:', item);
 
@@ -142,12 +146,6 @@ export class HomePage implements OnInit {
         break;
       case 'drives':
         this.router.navigate(['/add-drive']);
-        break;
-      case 'my-bookings':
-        this.router.navigate(['/my-bookings']);
-        break;
-      case 'driver-requests':
-        this.router.navigate(['/driver-requests']);
         break;
       case 'settings':
         // TODO: Navigate to settings page when implemented
