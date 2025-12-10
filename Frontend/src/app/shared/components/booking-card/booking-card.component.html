@@ -1,0 +1,227 @@
+<ion-card class="booking-card">
+  <ion-card-header>
+    <div class="card-header">
+      <div class="title-section">
+        <!-- car-outline -->
+        <svg
+          class="icon icon-car"
+          viewBox="0 0 512 512"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="32"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M80 224l28.89-86.66A32 32 0 0 1 139.7 112h232.6a32 32 0 0 1 30.81 25.34L432 224"
+          />
+          <path
+            d="M80 224h352v144a16 16 0 0 1-16 16h-24a24 24 0 0 1-24-24v-8H144v8a24 24 0 0 1-24 24h-24a16 16 0 0 1-16-16Z"
+          />
+          <circle cx="144" cy="288" r="24" />
+          <circle cx="368" cy="288" r="24" />
+          <path d="M368 128v-32M144 128v-32" />
+        </svg>
+
+        <ion-card-title>Ride Request #{{ booking.driveId }}</ion-card-title>
+      </div>
+
+      <ion-badge [color]="getStatusColor(booking.status)" class="status-badge">
+        <!-- status icon (în loc de getStatusIcon) -->
+        <ng-container [ngSwitch]="booking.status">
+          <!-- ACCEPTED -> checkmark-circle-outline -->
+          <svg
+            *ngSwitchCase="'ACCEPTED'"
+            class="icon icon-status"
+            viewBox="0 0 512 512"
+            fill="none"
+            stroke="currentColor"
+            style="color: black"
+            stroke-width="32"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M256 48C141.12 48 48 141.12 48 256s93.12 208 208 208 208-93.12 208-208S370.88 48 256 48Z"
+            />
+            <path d="M352 176 217.6 336 160 272" />
+          </svg>
+
+          <!-- CANCELED / DECLINED -> close-circle-outline -->
+          <svg
+            *ngSwitchCase="'CANCELED'"
+            class="icon icon-status"
+            viewBox="0 0 512 512"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="32"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M256 48C141.31 48 48 141.31 48 256s93.31 208 208 208 208-93.31 208-208S370.69 48 256 48Z"
+            />
+            <path d="M320 320 192 192M192 320l128-128" />
+          </svg>
+
+          <svg
+            *ngSwitchCase="'DECLINED'"
+            class="icon icon-status"
+            viewBox="0 0 512 512"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="32"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M256 48C141.31 48 48 141.31 48 256s93.31 208 208 208 208-93.31 208-208S370.69 48 256 48Z"
+            />
+            <path d="M320 320 192 192M192 320l128-128" />
+          </svg>
+
+          <!-- DEFAULT (ex. PENDING) -> time-outline -->
+          <svg
+            *ngSwitchDefault
+            class="icon icon-status"
+            viewBox="0 0 512 512"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="32"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M256 64C150 64 64 150 64 256s86 192 192 192 192-86 192-192S362 64 256 64Z"
+            />
+            <path d="M256 128v144l96 56" />
+          </svg>
+        </ng-container>
+
+        {{ booking.status }}
+      </ion-badge>
+    </div>
+  </ion-card-header>
+
+  <ion-card-content>
+    <div class="booking-details">
+      <!-- person-outline -->
+      <div class="detail-row">
+        <svg
+          class="icon icon-person"
+          viewBox="0 0 512 512"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="32"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M344 144c0 48.6-39.4 88-88 88s-88-39.4-88-88 39.4-88 88-88 88 39.4 88 88Z"
+          />
+          <path
+            d="M256 304c-70.7 0-128 57.3-128 128M384 432c0-70.7-57.3-128-128-128"
+          />
+        </svg>
+        <span>Driver: {{ booking.driverFirstName }} {{ booking.driverLastName }}</span>
+      </div>
+
+      <!-- mail-outline -->
+      <div class="detail-row">
+        <svg
+          class="icon icon-mail"
+          viewBox="0 0 512 512"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="32"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <rect x="48" y="96" width="416" height="320" rx="40" ry="40" />
+          <path d="M112 160 256 272 400 160" />
+        </svg>
+        <span>{{ booking.driverEmail }}</span>
+      </div>
+
+      <!-- time-outline (requested) -->
+      <div class="detail-row">
+        <svg
+          class="icon icon-time"
+          viewBox="0 0 512 512"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="32"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M256 64C150 64 64 150 64 256s86 192 192 192 192-86 192-192S362 64 256 64Z"
+          />
+          <path d="M256 128v144l96 56" />
+        </svg>
+        <span>Requested: {{ formatDate(booking.requestedAt) }}</span>
+      </div>
+
+      <!-- time-outline (updated) -->
+      <div class="detail-row">
+        <svg
+          class="icon icon-time"
+          viewBox="0 0 512 512"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="32"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M256 64C150 64 64 150 64 256s86 192 192 192 192-86 192-192S362 64 256 64Z"
+          />
+          <path d="M256 128v144l96 56" />
+        </svg>
+        <span>Updated: {{ formatDate(booking.updatedAt) }}</span>
+      </div>
+
+      <!-- information-circle-outline -->
+      <div
+        class="status-message canceled"
+        *ngIf="booking.status === 'CANCELED' || booking.status === 'DECLINED'"
+      >
+        <svg
+          class="icon icon-info"
+          viewBox="0 0 512 512"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="32"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M248 64h16a192 192 0 1 1-16 0Z"
+          />
+          <path d="M220 220h24v144M256 340h32" />
+          <path d="M248 128h16" />
+        </svg>
+        <span>This booking has been {{ booking.status.toLowerCase() }}</span>
+      </div>
+
+      <!-- checkmark-circle-outline -->
+      <div class="status-message accepted" *ngIf="booking.status === 'ACCEPTED'">
+        <svg
+          class="icon icon-check"
+          viewBox="0 0 512 512"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="32"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M256 48C141.12 48 48 141.12 48 256s93.12 208 208 208 208-93.12 208-208S370.88 48 256 48Z"
+          />
+          <path d="M352 176 217.6 336 160 272" />
+        </svg>
+        <span>Your booking has been accepted! See you soon.</span>
+      </div>
+    </div>
+  </ion-card-content>
+</ion-card>

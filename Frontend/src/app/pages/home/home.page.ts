@@ -151,6 +151,9 @@ export class HomePage implements OnInit {
         // TODO: Navigate to settings page when implemented
         console.log('Settings feature coming soon');
         break;
+      case 'profile':
+            this.router.navigate(['/profile']);
+            break;
       case 'logout':
         this.logout();
         break;

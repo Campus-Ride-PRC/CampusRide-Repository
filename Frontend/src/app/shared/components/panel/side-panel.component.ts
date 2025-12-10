@@ -1,8 +1,8 @@
-import { Component, Input, Output, EventEmitter, SimpleChanges } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { IonicModule } from '@ionic/angular';
-import { PrimaryButtonComponent } from '../../../shared/components/buttons/primary-button.component';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import {Component, Input, Output, EventEmitter, SimpleChanges} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {IonicModule} from '@ionic/angular';
+import {PrimaryButtonComponent} from '../../../shared/components/buttons/primary-button.component';
+import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 
 interface PanelItem {
   id: string;
@@ -80,6 +80,7 @@ export class SidePanelComponent {
   logoutIcon!: SafeHtml;
   bookingsIcon!: SafeHtml;
   requestsIcon!: SafeHtml;
+  profileIcon!: SafeHtml;
 
   /** Butoanele principale și secundare */
   mainItems: PanelItem[] = [];
@@ -127,16 +128,36 @@ export class SidePanelComponent {
           d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
       </svg>
     `);
+    this.profileIcon = this.sanitizer.bypassSecurityTrustHtml(`
+  <svg class="w-[24px] h-[24px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+      d="M15.75 7.5a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+      d="M4.5 20.25a8.25 8.25 0 0115 0" />
+  </svg>
+`);
+
 
     // Setăm array-urile de butoane
     this.mainItems = [
       { id: 'home', label: 'Home', icon: this.homeIcon, iconPosition: 'left', textAlign: 'start' },
       { id: 'drives', label: 'Add a ride', icon: this.drivesIcon, iconPosition: 'left', textAlign: 'start' }
+      {id: 'home', label: 'Home', icon: this.homeIcon, iconPosition: 'left', textAlign: 'start'},
+      {id: 'drives', label: 'Add a ride', icon: this.drivesIcon, iconPosition: 'left', textAlign: 'start'},
+      {id: 'my-bookings', label: 'My Ride Requests', icon: this.bookingsIcon, iconPosition: 'left', textAlign: 'start'},
+      {
+        id: 'driver-requests',
+        label: 'Passenger Requests',
+        icon: this.requestsIcon,
+        iconPosition: 'left',
+        textAlign: 'start'
+      },
     ];
 
     this.secondaryItems = [
-      { id: 'settings', label: 'Settings', icon: this.settingsIcon, iconPosition: 'left', textAlign: 'start' },
-      { id: 'logout', label: 'Log out', icon: this.logoutIcon, iconPosition: 'left', textAlign: 'start' }
+      {id: 'profile', label: 'Profile', icon: this.profileIcon, iconPosition: 'left', textAlign: 'start'},
+      {id: 'settings', label: 'Settings', icon: this.settingsIcon, iconPosition: 'left', textAlign: 'start'},
+      {id: 'logout', label: 'Log out', icon: this.logoutIcon, iconPosition: 'left', textAlign: 'start'}
     ];
   }
 

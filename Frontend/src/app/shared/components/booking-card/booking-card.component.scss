@@ -1,0 +1,237 @@
+ion-header {
+  ion-toolbar {
+    --background: var(--campus-ride-bg-dark);
+    --border-color: transparent;
+
+    .page-title {
+      font-family: var(--campus-ride-font-primary);
+      font-size: 20px;
+      font-weight: 500;
+      color: var(--campus-ride-text-primary);
+    }
+  }
+}
+
+ion-content {
+  --background: var(--campus-ride-bg-dark);
+}
+
+.bookings-container {
+  padding: 24px 16px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  gap: 1rem;
+
+  p {
+    font-family: var(--campus-ride-font-secondary);
+    color: var(--campus-ride-text-secondary);
+    font-size: 16px;
+  }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  text-align: center;
+  color: var(--campus-ride-text-secondary);
+
+  .empty-icon {
+    font-size: 64px;
+    margin-bottom: 1rem;
+    color: var(--campus-ride-primary);
+  }
+
+  h2 {
+    font-family: var(--campus-ride-font-primary);
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--campus-ride-text-primary);
+  }
+
+  p {
+    font-family: var(--campus-ride-font-secondary);
+    font-size: 1rem;
+    margin: 0;
+    color: var(--campus-ride-text-secondary);
+  }
+}
+
+.booking-card {
+  margin-bottom: 1.5rem;
+  margin-inline-start: 0;
+  margin-inline-end: 0;
+  background: var(--campus-ride-bg-card);
+  border-radius: 12px;
+  box-shadow: var(--campus-ride-shadow);
+  border: 1px solid var(--campus-ride-border);
+
+  &:hover {
+    box-shadow: var(--campus-ride-shadow-hover);
+    transition: box-shadow 0.3s ease;
+  }
+
+  ion-card-header {
+    background: transparent;
+    padding: 16px;
+  }
+
+  ion-card-content {
+    background: transparent;
+    color: var(--campus-ride-text-primary);
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+
+    .title-section {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+
+      ion-icon {
+        font-size: 26px;
+        color: var(--campus-ride-primary);
+      }
+
+      ion-card-title {
+        font-family: var(--campus-ride-font-primary);
+        font-size: 1.2rem;
+        font-weight: 500;
+        color: var(--campus-ride-text-primary);
+        margin: 0;
+      }
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      font-family: var(--campus-ride-font-secondary);
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 8px;
+      text-transform: uppercase;
+
+      ion-icon {
+        font-size: 16px;
+      }
+    }
+  }
+}
+
+.booking-details {
+  .detail-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    font-family: var(--campus-ride-font-secondary);
+    font-size: 0.95rem;
+    color: var(--campus-ride-text-primary);
+
+    ion-icon {
+      font-size: 20px;
+      color: var(--campus-ride-primary);
+      flex-shrink: 0;
+    }
+
+    span {
+      line-height: 1.4;
+    }
+  }
+
+  .actions {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 0.5rem;
+
+    .cancel-button {
+      --border-radius: 12px;
+      --border-color: var(--campus-ride-danger);
+      --color: var(--campus-ride-danger);
+      --background-hover: var(--campus-ride-danger-bg);
+      font-family: var(--campus-ride-font-secondary);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+
+      &::part(native) {
+        border: 2px solid var(--campus-ride-danger);
+      }
+
+      &:hover::part(native) {
+        background: var(--campus-ride-danger-bg);
+      }
+    }
+  }
+
+  .status-message {
+    margin-top: 1rem;
+    padding: 12px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--campus-ride-font-secondary);
+    font-size: 0.875rem;
+
+    ion-icon {
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    &.canceled {
+      background: var(--campus-ride-danger-bg);
+      color: var(--campus-ride-danger);
+      border-left: 4px solid var(--campus-ride-danger);
+    }
+
+    &.accepted {
+      background: var(--campus-ride-success-bg);
+      color: var(--campus-ride-success);
+      border-left: 4px solid var(--campus-ride-success);
+    }
+  }
+}
+.empty-icon {
+  font-size: 64px;
+  margin-bottom: 1rem;
+  color: var(--campus-ride-primary);
+}
+.icon {
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  margin-right: 8px;
+  vertical-align: middle;
+  color: var(--campus-ride-primary);
+}
+
+.icon-status {
+  width: 18px;
+  height: 18px;
+  margin-right: 4px;
+  color: black;
+}
+
+.detail-row .icon {
+  flex-shrink: 0;
+}
+
