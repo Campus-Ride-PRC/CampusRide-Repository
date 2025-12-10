@@ -1,0 +1,72 @@
+<ion-header translucent="true">
+  <ion-toolbar class="toolbar-dark">
+    <ion-buttons slot="start" style="padding-left: 5px;">
+      <ion-button (click)="goBack()" class="back-button">
+        <img src="assets/icon/arrow-back.svg" alt="Back" width="20" height="20"/>
+      </ion-button>
+    </ion-buttons>
+    <ion-title class="page-title">Profile</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="profile-page">
+  <div *ngIf="user_state === 'ready' && drives_state === 'ready' && booking__state === 'ready' && user"
+       class="profile-wrapper">
+
+    <div class="profile-header">
+      <div class="avatar-wrapper">
+        <img
+          [src]="'https://api.dicebear.com/7.x/avataaars/svg?seed=' + user.firstName"
+          [alt]="user.firstName"
+          class="avatar"
+        />
+      </div>
+      <div class="profile-text">
+        <h1 class="name">{{ user.firstName }} {{ user.lastName }}</h1>
+        <div class="meta">
+          <span>{{ user.faculty.name }}</span>
+        </div>
+        <div class="meta">
+          <span> 25 rides</span>
+          <span> · 4 friends </span>
+        </div>
+      </div>
+      <div >
+        <button class="add-ride-btn">
+          Edit
+        </button>
+      </div>
+    </div>
+    <div class="button-section">
+      <p class="title-b">My Bookings</p>
+      <app-booking-card *ngFor="let booking of myBookings" [booking]="booking"></app-booking-card>
+    </div>
+    <div class="button-section">
+      <button class="add-ride-btn" (click)="goToAllDrives()">
+        See all bookings
+      </button>
+    </div>
+    <div class="button-section example">
+      <p class="title-b">My most recent drives</p>
+      <app-ride-card
+        *ngFor="let drive of myDrives"
+        [userName]="getDriverName(drive)"
+        [userAvatar]="'https://api.dicebear.com/7.x/avataaars/svg?seed=' + drive.driverFirstName"
+        [rating]="4.8"
+        [fromLocation]="getFromLocation(drive)"
+        [toLocation]="getToLocation(drive)"
+        [departureTime]="formatDepartureTime(drive.time)"
+        [seatsAvailable]="drive.availableSeats"
+        [totalSeats]="drive.totalNoSeats"
+        [price]="formatPrice(drive.price)"
+        (cardClick)="onCardClick(drive)"
+        class="card-item"
+      ></app-ride-card>
+    </div>
+    <div class="button-section">
+      <button class="add-ride-btn" (click)="goToAllDrives()">
+        See all rides
+      </button>
+    </div>
+  </div>
+</ion-content>

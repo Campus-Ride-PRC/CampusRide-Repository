@@ -1,0 +1,131 @@
+
+.toolbar-dark {
+  --background: transparent;
+  --color: #fff;
+}
+
+.profile-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+
+.profile-header {
+  padding: 24px 16px 24px 16px;
+  //background: linear-gradient(135deg, #1db954, #121212);
+  margin-right: 5px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: fit-content;
+}
+
+.avatar-wrapper {
+  flex-shrink: 0;
+}
+
+.avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #00B862;
+}
+
+.profile-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.profile-text .label {
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #d1d5db;
+  margin-bottom: 4px;
+}
+
+.profile-text .name {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.profile-text .meta {
+  margin-top: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #e5e7eb;
+}
+
+
+.profile-content {
+  padding: 16px;
+  background: #121212;
+  min-height: 100%;
+}
+
+.profile-item {
+  --background: transparent;
+  --color: #fff;
+  margin-bottom: 4px;
+}
+
+.profile-item h2 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.profile-item p {
+  font-size: 13px;
+  color: #9ca3af;
+}
+.add-ride-btn {
+  background: linear-gradient(135deg, #00C36C 0%, #00A859 100%);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 16px;
+  padding: 10px 24px;
+  // font-family: 'Monsterrat', -apple-system, Roboto, Helvetica, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 195, 108, 0.25);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 195, 108, 0.35);
+    background: linear-gradient(135deg, #00D478 0%, #00B862 100%);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(0, 195, 108, 0.2);
+  }
+}
+.button-section{
+  padding: 10px 16px 24px 16px;
+  align-items: center;
+}
+
+.my-rides {
+  padding: 10px 16px 24px 16px;
+
+}
+.my-rides p {
+  font-size: 22px;
+  font-weight: 700;
+  padding-left: 10px;
+}
+
+.title-b{
+  font-size: 22px;
+  font-weight: 700;
+  padding-left: 10px;
+}
+
+
