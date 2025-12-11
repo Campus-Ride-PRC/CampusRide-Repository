@@ -244,15 +244,13 @@
 
           <div class="form-row two-columns">
             <div class="form-field">
-              <label>Date</label>
-              <div class="input-container">
-                <ion-icon name="calendar-outline" class="field-icon"></ion-icon>
-                <input 
-                  type="date" 
-                  formControlName="day" 
-                  [min]="getTodayDate()"
-                />
-              </div>
+              <app-custom-date-picker
+                label="Date"
+                formControlName="day"
+                presentation="date"
+                [min]="getTodayDate()"
+                helperText="Select your trip date"
+              ></app-custom-date-picker>
               <span class="error-message" *ngIf="getErrorMessage('day')">{{ getErrorMessage('day') }}</span>
             </div>
             

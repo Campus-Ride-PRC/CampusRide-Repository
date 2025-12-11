@@ -21,10 +21,12 @@ interface PlaceSuggestion {
   distance?: string;
 }
 
+import { CustomDatePickerComponent } from 'src/app/shared/components/date-picker/custom-date-picker.component';
+
 @Component({
   selector: 'app-add-drive',
   standalone: true,
-  imports: [CommonModule, IonicModule, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, IonicModule, ReactiveFormsModule, FormsModule, CustomDatePickerComponent],
   templateUrl: './add-drive.page.html',
   styleUrls: ['./add-drive.page.scss']
 })
