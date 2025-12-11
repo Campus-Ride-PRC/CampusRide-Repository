@@ -64,5 +64,14 @@ export const routes: Routes = [
     redirectTo: 'welcome',
     pathMatch: 'full',
   },
+  {
+    path: 'add-ride',
+    loadComponent: () => import('./pages/home/add-ride/add-ride.page').then( m => m.AddRidePage)
+  },
+  {
+    path: 'profile',
+    loadComponent: () => import('./pages/profile/profile.page').then( m => m.ProfilePage)
+  },
+
 
 ];
