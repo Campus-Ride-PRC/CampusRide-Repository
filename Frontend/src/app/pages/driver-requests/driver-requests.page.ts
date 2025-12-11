@@ -35,7 +35,7 @@ interface DriveWithBookings {
   imports: [
     IonContent, IonHeader, IonTitle, IonToolbar, IonBadge,
     IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton,
-    IonIcon, IonSpinner, IonButtons, IonMenuButton,
+    IonIcon, IonSpinner, IonButtons,
     IonRefresher, IonRefresherContent,
     CommonModule, FormsModule
   ]

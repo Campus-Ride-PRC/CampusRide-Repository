@@ -160,19 +160,19 @@ public class DriveController {
     public CompletableFuture<ResponseEntity<DriveDto>> create(@RequestBody DriveCreateRequest req) {
         DriveValidator.validateForCreate(req);
 
-        AddressValidator.requireCore(req.getFromStreet(), req.getFromNumber(), req.getFromNeighborhood());
-        AddressValidator.requireCore(req.getToStreet(),   req.getToNumber(),   req.getToNeighborhood());
+        AddressValidator.requireCore(req.getFromAddress().getStreet(), req.getFromAddress().getNumber(), req.getFromAddress().getNeighborhood());
+        AddressValidator.requireCore(req.getToAddress().getStreet(),   req.getToAddress().getNumber(),   req.getToAddress().getNeighborhood());
 
         VehicleValidator.softValidate(req.getVehicleModel(), req.getVehicleLicencePlate(), req.getVehicleColor());
 
         LocalDateTime time = LocalDateTime.of(req.getDay(), req.getHour());
 
         CompletableFuture<AddressDto> fromFuture = addressService.getOrCreate(
-                req.getFromStreet(), req.getFromNumber(), req.getFromNeighborhood(), req.getFromLocationName()
+                req.getFromAddress().getStreet(), req.getFromAddress().getNumber(), req.getFromAddress().getNeighborhood(), req.getFromAddress().getLocationName(), req.getFromAddress().getCity()
         );
         
         CompletableFuture<AddressDto> toFuture = addressService.getOrCreate(
-                req.getToStreet(), req.getToNumber(), req.getToNeighborhood(), req.getToLocationName()
+                req.getToAddress().getStreet(), req.getToAddress().getNumber(), req.getToAddress().getNeighborhood(), req.getToAddress().getLocationName(), req.getToAddress().getCity()
         );
 
         CompletableFuture<VehicleDto> vehicleFuture = vehicleService.getOrCreate(
@@ -185,7 +185,7 @@ public class DriveController {
                     AddressDto to = toFuture.join();
                     VehicleDto vehicle = vehicleFuture.join();
 
-                    if (from.getId().equals(to.getId())) {
+                    if (from.getId() != null && to.getId() != null && from.getId().equals(to.getId())) {
                         throw new IllegalArgumentException("From and To addresses must be different.");
                     }
 
@@ -195,7 +195,7 @@ public class DriveController {
                             to.getId(),
                             req.getPrice(),
                             time,
-                            0,
+                            req.getTotalNoSeats(),
                             req.getTotalNoSeats(),
                             null,
                             null,

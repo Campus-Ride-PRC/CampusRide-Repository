@@ -1,16 +1,11 @@
+import { Address } from './address.model';
+
 export interface DriveCreateRequest {
-  fromStreet: string;
-  fromNumber: string;
-  fromNeighborhood: string;
-  fromLocationName: string;
-  toStreet: string;
-  toNumber: string;
-  toNeighborhood: string;
-  toLocationName: string;
+  fromAddress: Omit<Address, 'id'>;
+  toAddress: Omit<Address, 'id'>;
   price: number;
   day: string;  // Format: YYYY-MM-DD
   hour: string; // Format: HH:MM:SS
-  availableSeats: number;
   totalNoSeats: number;
   vehicleModel: string;
   vehicleLicencePlate: string;

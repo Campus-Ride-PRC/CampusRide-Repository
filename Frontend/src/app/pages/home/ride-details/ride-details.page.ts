@@ -1,26 +1,102 @@
-import { Component, OnInit } from '@angular/core';
+/// <reference types="google.maps" />
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, signal, computed, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule, ToastController, AlertController } from '@ionic/angular';
 import { ActivatedRoute, Router } from '@angular/router';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { DriveService } from 'src/app/core/services/drive.service';
 import { BookingService } from 'src/app/core/services/booking.service';
 import { AuthService } from 'src/app/core/services/auth.service';
+import { GoogleMapsService, ParsedAddress } from 'src/app/core/services/google-maps.service';
 import { DriveDetails } from 'src/app/core/models/drive-details.model';
 import { BookingRequest } from 'src/app/core/models/booking.model';
+import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
+
+type FlowStep = 'details' | 'pickup' | 'confirmation';
+
+interface PlaceSuggestion {
+  placeId: string;
+  mainText: string;
+  secondaryText: string;
+  distance?: string;
+}
+
+interface ExistingPickupPoint {
+  lat: number;
+  lng: number;
+  address: string;
+  passengerCount: number;
+  passengerNames: string[];
+}
 
 @Component({
   selector: 'app-ride-details',
   standalone: true,
-  imports: [CommonModule, IonicModule],
+  imports: [CommonModule, IonicModule, ReactiveFormsModule],
   templateUrl: './ride-details.page.html',
   styleUrls: ['./ride-details.page.scss'],
 })
-export class RideDetailsPage implements OnInit {
+export class RideDetailsPage implements OnInit, OnDestroy {
+  @ViewChild('mapContainer', { static: false }) mapContainer!: ElementRef<HTMLDivElement>;
+  @ViewChild('pickupInput', { static: false }) pickupInput!: ElementRef<HTMLInputElement>;
+
   driveId!: number;
   drive: DriveDetails | null = null;
-  loading = false;
-  error: string | null = null;
-  requestingRide = false;
+
+  // Signals for reactive state
+  readonly mapLoaded = signal(false);
+  readonly mapError = signal<string | null>(null);
+  readonly loading = signal(false);
+  readonly error = signal<string | null>(null);
+  readonly requestingRide = signal(false);
+  readonly routePolyline = signal<google.maps.LatLng[] | null>(null);
+  readonly currentStep = signal<FlowStep>('details');
+  readonly isGeocoding = signal(false);
+  
+  // Pickup point state
+  readonly pickupAddress = signal<ParsedAddress | null>(null);
+  readonly pickupLocation = signal<{ lat: number; lng: number } | null>(null);
+  readonly existingPickupPoints = signal<ExistingPickupPoint[]>([]);
+  
+  // Search suggestions
+  readonly pickupSuggestions = signal<PlaceSuggestion[]>([]);
+  readonly showPickupSuggestions = signal(false);
+  
+  // Bottom sheet drag state
+  readonly sheetHeight = signal(55);
+  readonly isDragging = signal(false);
+  readonly isExpanded = signal(false);
+
+  // Computed signals
+  readonly canBookRide = computed(() => 
+    this.pickupLocation() !== null && 
+    this.drive !== null && 
+    this.drive.availableSeats > 0
+  );
+  
+  readonly showDetailsPanel = computed(() => this.currentStep() === 'details');
+  readonly showPickupPanel = computed(() => this.currentStep() === 'pickup');
+  readonly showConfirmationPanel = computed(() => this.currentStep() === 'confirmation');
+
+  private map: google.maps.Map | null = null;
+  private directionsRenderer: google.maps.DirectionsRenderer | null = null;
+  private pickupMarker: google.maps.Marker | null = null;
+  private startMarker: google.maps.Marker | null = null;
+  private endMarker: google.maps.Marker | null = null;
+  private existingPickupMarkers: google.maps.Marker[] = [];
+  private autocompleteService: google.maps.places.AutocompleteService | null = null;
+  private placesService: google.maps.places.PlacesService | null = null;
+  
+  // Route coordinates for validation
+  private routeStartLocation: google.maps.LatLngLiteral | null = null;
+  private routeEndLocation: google.maps.LatLngLiteral | null = null;
+  
+  // Drag handling
+  private dragStartY = 0;
+  private dragStartHeight = 55;
+
+  // Search subject for debouncing
+  private pickupSearch$ = new Subject<string>();
 
   constructor(
     private route: ActivatedRoute,
@@ -28,9 +104,12 @@ export class RideDetailsPage implements OnInit {
     private driveService: DriveService,
     private bookingService: BookingService,
     private authService: AuthService,
+    private mapsService: GoogleMapsService,
     private toastController: ToastController,
     private alertController: AlertController
-  ) {}
+  ) {
+    this.setupSearchSubscription();
+  }
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
@@ -38,40 +117,697 @@ export class RideDetailsPage implements OnInit {
       this.driveId = parseInt(id, 10);
       this.loadDriveDetails();
     } else {
-      this.error = 'Invalid drive ID';
+      this.error.set('Invalid drive ID');
     }
   }
 
-  loadDriveDetails() {
-    this.loading = true;
-    this.error = null;
-    
-    this.driveService.getDriveById(this.driveId).subscribe({
-      next: (response) => {
-        this.drive = response;
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Error loading drive details:', error);
-        this.error = 'Failed to load drive details';
-        this.loading = false;
+  async ngAfterViewInit() {
+    setTimeout(() => {
+      if (this.drive) {
+        this.initializeMap();
+      }
+    }, 500);
+  }
+
+  ngOnDestroy() {
+    this.cleanupMap();
+    this.pickupSearch$.complete();
+  }
+
+  private setupSearchSubscription() {
+    this.pickupSearch$.pipe(
+      debounceTime(300),
+      distinctUntilChanged()
+    ).subscribe(query => {
+      if (query.length >= 2) {
+        this.searchPlaces(query);
+      } else {
+        this.pickupSuggestions.set([]);
+        this.showPickupSuggestions.set(false);
       }
     });
   }
 
+  private async searchPlaces(query: string) {
+    if (!this.autocompleteService) return;
+
+    const request: google.maps.places.AutocompletionRequest = {
+      input: query,
+      componentRestrictions: { country: 'ro' },
+      types: ['geocode', 'establishment']
+    };
+
+    this.autocompleteService.getPlacePredictions(request, (predictions, status) => {
+      if (status === google.maps.places.PlacesServiceStatus.OK && predictions) {
+        const suggestions: PlaceSuggestion[] = predictions.slice(0, 5).map(p => ({
+          placeId: p.place_id,
+          mainText: p.structured_formatting.main_text,
+          secondaryText: p.structured_formatting.secondary_text || '',
+          distance: p.distance_meters ? `${(p.distance_meters / 1000).toFixed(1)} km` : undefined
+        }));
+        
+        this.pickupSuggestions.set(suggestions);
+        this.showPickupSuggestions.set(true);
+      }
+    });
+  }
+
+  onPickupInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    this.pickupSearch$.next(input.value);
+  }
+
+  async selectSuggestion(suggestion: PlaceSuggestion) {
+    if (!this.placesService) return;
+
+    this.isGeocoding.set(true);
+    this.showPickupSuggestions.set(false);
+
+    try {
+      const request: google.maps.places.PlaceDetailsRequest = {
+        placeId: suggestion.placeId,
+        fields: ['geometry', 'formatted_address', 'address_components', 'name']
+      };
+
+      this.placesService.getDetails(request, async (place, status) => {
+        if (status === google.maps.places.PlacesServiceStatus.OK && place?.geometry?.location) {
+          const lat = place.geometry.location.lat();
+          const lng = place.geometry.location.lng();
+          
+          // Validate and snap to route
+          await this.validateAndSnapToRoute({ lat, lng }, suggestion.mainText);
+        }
+        this.isGeocoding.set(false);
+      });
+    } catch (error) {
+      console.error('Error selecting suggestion:', error);
+      this.isGeocoding.set(false);
+      this.showToast('Failed to get location details', 'danger');
+    }
+  }
+
+  private async validateAndSnapToRoute(location: { lat: number; lng: number }, addressName: string) {
+    const polyline = this.routePolyline();
+    if (!polyline || polyline.length === 0) {
+      this.showToast('Route not loaded yet', 'warning');
+      return;
+    }
+
+    // Snap to nearest point on route with larger tolerance for address search
+    const snapResult = this.mapsService.findNearestPointOnPolyline(
+      location,
+      polyline,
+      500 // 500 meters tolerance for address search
+    );
+
+    if (snapResult.snapped) {
+      const snappedLocation = { lat: snapResult.lat, lng: snapResult.lng };
+      
+      // Update pickup location
+      this.pickupLocation.set(snappedLocation);
+      
+      // Create parsed address
+      const parsedAddress: ParsedAddress = {
+        street: addressName,
+        number: '',
+        neighborhood: '',
+        city: '',
+        locationName: addressName,
+        latitude: snapResult.lat,
+        longitude: snapResult.lng
+      };
+      this.pickupAddress.set(parsedAddress);
+      
+      // Update input value
+      if (this.pickupInput?.nativeElement) {
+        this.pickupInput.nativeElement.value = addressName;
+      }
+      
+      // Update marker
+      await this.updatePickupMarker(snappedLocation);
+      
+      this.showToast('Pickup point set on route', 'success');
+    } else {
+      this.showToast('This location is too far from the route. Please select a point closer to the route.', 'warning');
+    }
+  }
+
+  loadDriveDetails() {
+    this.loading.set(true);
+    this.error.set(null);
+    
+    this.driveService.getDriveById(this.driveId).subscribe({
+      next: (response) => {
+        this.drive = response;
+        this.loading.set(false);
+        
+        // Mock existing pickup points (replace with actual API call)
+        this.loadExistingPickupPoints();
+        
+        if (this.mapContainer) {
+          this.initializeMap();
+        }
+      },
+      error: (error) => {
+        console.error('Error loading drive details:', error);
+        this.error.set('Failed to load drive details');
+        this.loading.set(false);
+      }
+    });
+  }
+
+  private loadExistingPickupPoints() {
+    // TODO: Replace with actual API call to get existing bookings with their pickup points
+    // For now, this is mock data
+    this.existingPickupPoints.set([
+      // Example mock data - in production, this would come from the API
+      // {
+      //   lat: 46.77,
+      //   lng: 23.60,
+      //   address: 'Central Station',
+      //   passengerCount: 2,
+      //   passengerNames: ['John D.', 'Maria S.']
+      // }
+    ]);
+  }
+
+  private async initializeMap() {
+    if (!this.drive || !this.mapContainer) {
+      return;
+    }
+
+    try {
+      await this.mapsService.waitForGoogleMaps(15000);
+
+      const center = { lat: 46.772962, lng: 23.597231 }; // Cluj default
+      this.map = await this.mapsService.createMap(this.mapContainer.nativeElement, {
+        center,
+        zoom: 12,
+        styles: [
+          { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] }
+        ]
+      });
+
+      // Initialize Places services
+      this.autocompleteService = new google.maps.places.AutocompleteService();
+      this.placesService = new google.maps.places.PlacesService(this.map);
+
+      // Add click listener for pickup point selection (only active in pickup step)
+      this.map.addListener('click', (event: any) => {
+        if (this.currentStep() === 'pickup') {
+          this.onMapClick(event);
+        }
+      });
+
+      await this.displayRoute();
+      this.mapLoaded.set(true);
+      this.mapError.set(null);
+
+    } catch (error: any) {
+      console.error('Error initializing map:', error);
+      this.mapError.set('Failed to load map. Please refresh.');
+      this.showToast('Map initialization failed', 'danger');
+    }
+  }
+
+  private async displayRoute() {
+    if (!this.drive || !this.map) {
+      return;
+    }
+
+    try {
+      const fromAddress = `${this.drive.fromAddress.street} ${this.drive.fromAddress.number}, ${this.drive.fromAddress.neighborhood}, ${this.drive.fromAddress.city}, ${this.drive.fromAddress.locationName}, Romania`;
+      const toAddress = `${this.drive.toAddress.street} ${this.drive.toAddress.number}, ${this.drive.toAddress.neighborhood}, ${this.drive.toAddress.city}, ${this.drive.toAddress.locationName}, Romania`;
+
+      const fromResult = await this.mapsService.geocodeAddress(fromAddress);
+      const toResult = await this.mapsService.geocodeAddress(toAddress);
+
+      if (!fromResult || !toResult) {
+        this.showToast('Could not load route locations', 'warning');
+        return;
+      }
+
+      const fromLocation = fromResult.geometry.location;
+      const toLocation = toResult.geometry.location;
+
+      const origin: google.maps.LatLngLiteral = {
+        lat: (typeof fromLocation.lat === 'function' ? fromLocation.lat() : fromLocation.lat) as number,
+        lng: (typeof fromLocation.lng === 'function' ? fromLocation.lng() : fromLocation.lng) as number
+      };
+
+      const destination: google.maps.LatLngLiteral = {
+        lat: (typeof toLocation.lat === 'function' ? toLocation.lat() : toLocation.lat) as number,
+        lng: (typeof toLocation.lng === 'function' ? toLocation.lng() : toLocation.lng) as number
+      };
+
+      // Store route endpoints
+      this.routeStartLocation = origin;
+      this.routeEndLocation = destination;
+
+      // Create DirectionsRenderer with custom styling
+      this.directionsRenderer = new google.maps.DirectionsRenderer({
+        map: this.map,
+        suppressMarkers: true, // We'll create our own markers
+        polylineOptions: {
+          strokeColor: '#4285F4',
+          strokeWeight: 5,
+          strokeOpacity: 0.8
+        }
+      });
+
+      // Display the route
+      const directionsResult = await this.mapsService.displayRoute(
+        this.map,
+        origin,
+        destination,
+        this.directionsRenderer ?? undefined
+      );
+
+      // Extract polyline for snapping
+      const polyline = this.mapsService.getPolylineFromDirections(directionsResult);
+      this.routePolyline.set(polyline);
+
+      // Create custom start and end markers
+      await this.createRouteMarkers(origin, destination);
+      
+      // Add existing pickup point markers
+      await this.displayExistingPickupMarkers();
+
+    } catch (error) {
+      console.error('Error displaying route:', error);
+      this.showToast('Could not display route', 'warning');
+    }
+  }
+
+  private async createRouteMarkers(origin: google.maps.LatLngLiteral, destination: google.maps.LatLngLiteral) {
+    if (!this.map) return;
+
+    // Start marker with "A" label
+    this.startMarker = await this.mapsService.createMarker(this.map, origin, {
+      title: 'Pickup (A)',
+      label: { text: 'A', color: '#FFFFFF', fontWeight: 'bold' },
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 12,
+        fillColor: '#1a1a1a',
+        fillOpacity: 1,
+        strokeColor: '#ffffff',
+        strokeWeight: 3
+      }
+    });
+
+    // End marker with "B" label - using CIRCLE shape to properly display label
+    this.endMarker = await this.mapsService.createMarker(this.map, destination, {
+      title: 'Destination (B)',
+      label: { text: 'B', color: '#FFFFFF', fontWeight: 'bold' },
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 12,
+        fillColor: '#1a1a1a',
+        fillOpacity: 1,
+        strokeColor: '#ffffff',
+        strokeWeight: 3
+      }
+    });
+  }
+
+  private async displayExistingPickupMarkers() {
+    if (!this.map) return;
+
+    // Clear existing markers
+    this.existingPickupMarkers.forEach(marker => marker.setMap(null));
+    this.existingPickupMarkers = [];
+
+    const pickupPoints = this.existingPickupPoints();
+    
+    for (const point of pickupPoints) {
+      const marker = await this.mapsService.createMarker(this.map, { lat: point.lat, lng: point.lng }, {
+        title: `${point.passengerCount} passenger(s) here`,
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 12,
+          fillColor: '#F59E0B', // Orange/amber for existing pickups
+          fillOpacity: 1,
+          strokeColor: '#ffffff',
+          strokeWeight: 3
+        },
+        label: {
+          text: point.passengerCount.toString(),
+          color: '#ffffff',
+          fontWeight: 'bold',
+          fontSize: '12px'
+        }
+      });
+
+      // Add click listener to select this point
+      marker.addListener('click', () => {
+        this.selectExistingPickupPoint(point);
+      });
+
+      this.existingPickupMarkers.push(marker);
+    }
+  }
+
+  private async selectExistingPickupPoint(point: ExistingPickupPoint) {
+    this.pickupLocation.set({ lat: point.lat, lng: point.lng });
+    
+    const parsedAddress: ParsedAddress = {
+      street: point.address,
+      number: '',
+      neighborhood: '',
+      city: '',
+      locationName: point.address,
+      latitude: point.lat,
+      longitude: point.lng
+    };
+    this.pickupAddress.set(parsedAddress);
+    
+    if (this.pickupInput?.nativeElement) {
+      this.pickupInput.nativeElement.value = point.address;
+    }
+    
+    await this.updatePickupMarker({ lat: point.lat, lng: point.lng });
+    
+    this.showToast(`Join ${point.passengerCount} other passenger(s) at this stop`, 'success');
+  }
+
+  private async onMapClick(event: any) {
+    if (this.currentStep() !== 'pickup') return;
+    
+    const clickLatLng = { 
+      lat: event.latLng.lat(), 
+      lng: event.latLng.lng() 
+    };
+
+    const polyline = this.routePolyline();
+    if (!polyline || polyline.length === 0) {
+      this.showToast('Route not loaded yet', 'warning');
+      return;
+    }
+
+    this.isGeocoding.set(true);
+
+    try {
+      // Snap the click to the nearest point on the route
+      const snapResult = this.mapsService.findNearestPointOnPolyline(
+        clickLatLng,
+        polyline,
+        150 // 150 meters tolerance for map click
+      );
+
+      if (snapResult.snapped) {
+        const snappedLocation = { lat: snapResult.lat, lng: snapResult.lng };
+        this.pickupLocation.set(snappedLocation);
+        
+        // Reverse geocode to get address with place name lookup
+        const parsed = await this.mapsService.reverseGeocodeWithPlaceName(
+          snapResult.lat, 
+          snapResult.lng, 
+          this.map || undefined
+        );
+        if (parsed) {
+          this.pickupAddress.set(parsed);
+          if (this.pickupInput?.nativeElement) {
+            this.pickupInput.nativeElement.value = this.mapsService.formatAddress(parsed);
+          }
+        }
+        
+        await this.updatePickupMarker(snappedLocation);
+        this.showToast('Pickup point selected', 'success');
+        
+      } else {
+        this.showToast('Please click closer to the route', 'warning');
+      }
+    } catch (error) {
+      console.error('Error handling map click:', error);
+      this.showToast('Error selecting pickup point', 'danger');
+    } finally {
+      this.isGeocoding.set(false);
+    }
+  }
+
+  private async updatePickupMarker(location: google.maps.LatLngLiteral) {
+    if (!this.map) return;
+
+    if (this.pickupMarker) {
+      this.pickupMarker.setPosition(location);
+    } else {
+      this.pickupMarker = await this.mapsService.createMarker(this.map, location, {
+        title: 'Your Pickup Point',
+        draggable: true,
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 14,
+          fillColor: '#8B5CF6', // Purple for user's pickup
+          fillOpacity: 1,
+          strokeColor: '#ffffff',
+          strokeWeight: 3
+        },
+        animation: google.maps.Animation.DROP
+      });
+
+      // Handle marker drag
+      this.pickupMarker.addListener('dragend', async (event: any) => {
+        const newLatLng = { lat: event.latLng.lat(), lng: event.latLng.lng() };
+        
+        // Validate new position is on route
+        const polyline = this.routePolyline();
+        if (polyline) {
+          const snapResult = this.mapsService.findNearestPointOnPolyline(newLatLng, polyline, 150);
+          if (snapResult.snapped) {
+            this.pickupLocation.set({ lat: snapResult.lat, lng: snapResult.lng });
+            this.pickupMarker?.setPosition({ lat: snapResult.lat, lng: snapResult.lng });
+            
+            // Reverse geocode with place name lookup
+            const parsed = await this.mapsService.reverseGeocodeWithPlaceName(
+              snapResult.lat, 
+              snapResult.lng, 
+              this.map || undefined
+            );
+            if (parsed) {
+              this.pickupAddress.set(parsed);
+              if (this.pickupInput?.nativeElement) {
+                this.pickupInput.nativeElement.value = this.mapsService.formatAddress(parsed);
+              }
+            }
+          } else {
+            // Reset to previous position
+            const prevLoc = this.pickupLocation();
+            if (prevLoc) {
+              this.pickupMarker?.setPosition(prevLoc);
+            }
+            this.showToast('Please keep pickup point on the route', 'warning');
+          }
+        }
+      });
+    }
+
+    // Center map on pickup point
+    this.map.panTo(location);
+  }
+
+  // Bottom sheet drag handlers
+  onDragStart(event: TouchEvent | MouseEvent) {
+    this.isDragging.set(true);
+    this.dragStartY = this.getEventY(event);
+    this.dragStartHeight = this.sheetHeight();
+    event.preventDefault();
+  }
+
+  @HostListener('document:touchmove', ['$event'])
+  @HostListener('document:mousemove', ['$event'])
+  onDragMove(event: TouchEvent | MouseEvent) {
+    if (!this.isDragging()) return;
+
+    const currentY = this.getEventY(event);
+    const deltaY = this.dragStartY - currentY;
+    const screenHeight = window.innerHeight;
+    const deltaPercent = (deltaY / screenHeight) * 100;
+    
+    let newHeight = this.dragStartHeight + deltaPercent;
+    newHeight = Math.max(35, Math.min(90, newHeight));
+    
+    this.sheetHeight.set(newHeight);
+  }
+
+  @HostListener('document:touchend')
+  @HostListener('document:mouseup')
+  onDragEnd() {
+    if (!this.isDragging()) return;
+
+    this.isDragging.set(false);
+    
+    const height = this.sheetHeight();
+    if (height < 45) {
+      this.sheetHeight.set(35);
+      this.isExpanded.set(false);
+    } else if (height < 70) {
+      this.sheetHeight.set(55);
+      this.isExpanded.set(false);
+    } else {
+      this.sheetHeight.set(90);
+      this.isExpanded.set(true);
+    }
+  }
+
+  private getEventY(event: TouchEvent | MouseEvent): number {
+    if (event instanceof TouchEvent) {
+      return event.touches[0]?.clientY || event.changedTouches[0]?.clientY || 0;
+    }
+    return event.clientY;
+  }
+
+  expandSheet() {
+    this.sheetHeight.set(90);
+    this.isExpanded.set(true);
+  }
+
+  collapseSheet() {
+    this.sheetHeight.set(55);
+    this.isExpanded.set(false);
+  }
+
+  // Navigation between steps
+  proceedToPickup() {
+    this.currentStep.set('pickup');
+    this.sheetHeight.set(60);
+  }
+
+  backToDetails() {
+    this.currentStep.set('details');
+    this.sheetHeight.set(55);
+    // Clear pickup selection
+    this.pickupLocation.set(null);
+    this.pickupAddress.set(null);
+    if (this.pickupMarker) {
+      this.pickupMarker.setMap(null);
+      this.pickupMarker = null;
+    }
+    if (this.pickupInput?.nativeElement) {
+      this.pickupInput.nativeElement.value = '';
+    }
+  }
+
+  proceedToConfirmation() {
+    if (this.canBookRide()) {
+      this.currentStep.set('confirmation');
+      this.sheetHeight.set(70);
+    }
+  }
+
+  backToPickup() {
+    this.currentStep.set('pickup');
+    this.sheetHeight.set(60);
+  }
+
+  clearPickup() {
+    this.pickupLocation.set(null);
+    this.pickupAddress.set(null);
+    this.pickupSuggestions.set([]);
+    this.showPickupSuggestions.set(false);
+    if (this.pickupInput?.nativeElement) {
+      this.pickupInput.nativeElement.value = '';
+    }
+    if (this.pickupMarker) {
+      this.pickupMarker.setMap(null);
+      this.pickupMarker = null;
+    }
+  }
+
+  onInputFocus() {
+    this.expandSheet();
+  }
+
+  onInputBlur() {
+    setTimeout(() => {
+      this.showPickupSuggestions.set(false);
+    }, 200);
+  }
+
+  // Helper methods
   getDriverName(): string {
     if (!this.drive) return '';
     return `${this.drive.driverFirstName} ${this.drive.driverLastName}`;
   }
 
+  /**
+   * Format the from/pickup location with street address and city/neighborhood
+   * Format: location_name, Street Number, Neighborhood, City
+   */
   getFromLocation(): string {
     if (!this.drive) return '';
-    return this.drive.fromNeighborhood || this.drive.fromLocationName;
+    const addr = this.drive.fromAddress;
+    
+    // Build full address with all available fields
+    const parts: string[] = [];
+    
+    // Add location name if available
+    if (addr.locationName) {
+      parts.push(addr.locationName);
+    }
+    
+    // Add street and number
+    if (addr.street) {
+      const streetPart = addr.number ? `${addr.street} ${addr.number}` : addr.street;
+      // Only add if different from locationName
+      if (!addr.locationName || !addr.locationName.includes(addr.street)) {
+        parts.push(streetPart);
+      }
+    }
+    
+    // Add neighborhood if available and not already included
+    if (addr.neighborhood && !parts.some(p => p.includes(addr.neighborhood))) {
+      parts.push(addr.neighborhood);
+    }
+    
+    return parts.join(', ') || 'Unknown location';
   }
 
+  /**
+   * Format the destination location with street address and city/neighborhood
+   * Format: location_name, Street Number, Neighborhood, City
+   */
   getToLocation(): string {
     if (!this.drive) return '';
-    return this.drive.toNeighborhood || this.drive.toLocationName;
+    const addr = this.drive.toAddress;
+    
+    // Build full address with all available fields
+    const parts: string[] = [];
+    
+    // Add location name if available
+    if (addr.locationName) {
+      parts.push(addr.locationName);
+    }
+    
+    // Add street and number
+    if (addr.street) {
+      const streetPart = addr.number ? `${addr.street} ${addr.number}` : addr.street;
+      // Only add if different from locationName
+      if (!addr.locationName || !addr.locationName.includes(addr.street)) {
+        parts.push(streetPart);
+      }
+    }
+    
+    // Add neighborhood if available and not already included
+    if (addr.neighborhood && !parts.some(p => p.includes(addr.neighborhood))) {
+      parts.push(addr.neighborhood);
+    }
+    
+    return parts.join(', ') || 'Unknown location';
+  }
+
+  /**
+   * Format the pickup location with city context
+   */
+  getPickupLocation(): string {
+    const addr = this.pickupAddress();
+    if (!addr) return '';
+    
+    // Use the locationName or formatted address with city
+    if (addr.locationName && addr.city && !addr.locationName.includes(addr.city)) {
+      return `${addr.locationName}, ${addr.city}`;
+    }
+    return addr.locationName || this.mapsService.formatAddressWithCity(addr);
   }
 
   formatDepartureTime(): string {
@@ -98,8 +834,7 @@ export class RideDetailsPage implements OnInit {
     } else {
       return `${date.toLocaleDateString('en-US', { 
         month: 'short', 
-        day: 'numeric',
-        year: 'numeric'
+        day: 'numeric'
       })}, ${timeStr}`;
     }
   }
@@ -109,29 +844,46 @@ export class RideDetailsPage implements OnInit {
     return `${this.drive.price} RON`;
   }
 
-  async onRequestRide() {
+  getEstimatedPickupTime(): string {
+    // This would be calculated based on pickup position along the route
+    // For now, return the departure time
+    return this.formatDepartureTime();
+  }
+
+  async confirmBooking() {
     const userId = this.authService.getCurrentUserId();
     
     if (!userId) {
-      await this.showToast('You must be logged in to request a ride', 'warning');
+      await this.showToast('You must be logged in to book a ride', 'warning');
       this.router.navigate(['/login/auth']);
       return;
     }
 
-    // Confirm the request
+    if (!this.canBookRide()) {
+      await this.showToast('Please select a pickup point', 'warning');
+      return;
+    }
+
+    // Show confirmation alert
     const alert = await this.alertController.create({
-      header: 'Confirm Request',
-      message: 'Are you sure you want to request this ride?',
+      header: 'Confirm Booking',
+      message: `Driver: ${this.getDriverName()}
+Pickup: ${this.getPickupLocation()}
+Destination: ${this.getToLocation()}
+Price: ${this.formatPrice()}`,
+      cssClass: 'confirm-booking-alert',
       buttons: [
         {
           text: 'Cancel',
-          role: 'cancel'
+          role: 'cancel',
+          cssClass: 'alert-button-cancel'
         },
         {
           text: 'Confirm',
           handler: () => {
-            this.submitRideRequest(userId);
-          }
+            this.submitBooking(userId);
+          },
+          cssClass: 'alert-button-confirm'
         }
       ]
     });
@@ -139,29 +891,33 @@ export class RideDetailsPage implements OnInit {
     await alert.present();
   }
 
-  private submitRideRequest(userId: number) {
+  private submitBooking(userId: number) {
     if (!this.drive) return;
 
-    this.requestingRide = true;
+    this.requestingRide.set(true);
+    
     const request: BookingRequest = {
       driveId: this.driveId,
       userId: userId
+      // TODO: Add pickup point to the request when backend supports it
+      // pickupLatitude: this.pickupLocation()?.lat,
+      // pickupLongitude: this.pickupLocation()?.lng,
+      // pickupAddress: this.getPickupLocation()
     };
 
     this.bookingService.requestRide(request).subscribe({
       next: async (response) => {
-        this.requestingRide = false;
-        await this.showToast('Ride request sent successfully! Status: ' + response.status, 'success');
-        // Optionally navigate back or refresh the page
+        this.requestingRide.set(false);
+        await this.showToast('Booking confirmed! Status: ' + response.status, 'success');
         setTimeout(() => {
           this.router.navigate(['/home']);
         }, 1500);
       },
       error: async (error) => {
-        this.requestingRide = false;
-        console.error('Error requesting ride:', error);
+        this.requestingRide.set(false);
+        console.error('Error booking ride:', error);
         
-        let errorMessage = 'Failed to request ride. Please try again.';
+        let errorMessage = 'Failed to book ride. Please try again.';
         if (error.error?.message) {
           errorMessage = error.error.message;
         } else if (error.status === 400) {
@@ -180,18 +936,31 @@ export class RideDetailsPage implements OnInit {
       message: message,
       duration: 3000,
       color: color,
-      position: 'bottom',
-      buttons: [
-        {
-          text: 'Dismiss',
-          role: 'cancel'
-        }
-      ]
+      position: 'bottom'
     });
     await toast.present();
   }
 
   goBack() {
-    this.router.navigate(['/home']);
+    if (this.currentStep() === 'pickup') {
+      this.backToDetails();
+    } else if (this.currentStep() === 'confirmation') {
+      this.backToPickup();
+    } else {
+      this.router.navigate(['/home']);
+    }
+  }
+
+  private cleanupMap() {
+    if (this.map) {
+      this.mapsService.destroyMap(this.map);
+      this.map = null;
+    }
+    this.directionsRenderer = null;
+    this.pickupMarker = null;
+    this.startMarker = null;
+    this.endMarker = null;
+    this.existingPickupMarkers.forEach(m => m.setMap(null));
+    this.existingPickupMarkers = [];
   }
 }

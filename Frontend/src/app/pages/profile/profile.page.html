@@ -44,7 +44,8 @@
     </div>
     <div class="button-section example">
       <p class="title-b">My most recent drives</p>
-      <app-ride-card
+      <div class="drives-container">
+        <app-ride-card
         *ngFor="let drive of myDrives"
         [userName]="getDriverName(drive)"
         [userAvatar]="'https://api.dicebear.com/7.x/avataaars/svg?seed=' + drive.driverFirstName"
@@ -58,6 +59,7 @@
         (cardClick)="onCardClick(drive)"
         class="card-item"
       ></app-ride-card>
+      </div>
     </div>
     <div class="button-section">
       <button class="add-ride-btn" (click)="goToAllDrives()">

@@ -40,4 +40,55 @@
   // Font Families
   --campus-ride-font-primary: 'Montserrat', -apple-system, Roboto, Helvetica, sans-serif;
   --campus-ride-font-secondary: 'Montserrat', -apple-system, Roboto, Helvetica, sans-serif;
+  
+  // Button Default Colors
+  --campus-ride-btn-bg: var(--campus-ride-bg-card);
+  --campus-ride-btn-bg-hover: var(--campus-ride-bg-hover);
+  --campus-ride-btn-bg-active: var(--campus-ride-bg-dark);
+}
+
+// Global Button Styles
+ion-button {
+  --background: var(--campus-ride-btn-bg);
+  --background-hover: var(--campus-ride-btn-bg-hover);
+  --background-activated: var(--campus-ride-btn-bg-active);
+  --background-focused: var(--campus-ride-btn-bg-hover);
+  --color: var(--campus-ride-text-primary);
+  --border-radius: 8px;
+  
+  &.button-solid {
+    --background: var(--campus-ride-btn-bg);
+    --background-hover: var(--campus-ride-btn-bg-hover);
+    --background-activated: var(--campus-ride-btn-bg-active);
+  }
+  
+  &.button-outline {
+    --background: transparent;
+    --background-hover: var(--campus-ride-bg-item);
+    --background-activated: var(--campus-ride-bg-dark);
+    --border-color: var(--campus-ride-border);
+  }
+  
+  &.button-clear {
+    --background: transparent;
+    --background-hover: var(--campus-ride-bg-item);
+    --background-activated: var(--campus-ride-bg-dark);
+  }
+}
+
+button:not([class*="ion-"]) {
+  background-color: var(--campus-ride-btn-bg);
+  color: var(--campus-ride-text-primary);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  
+  &:hover {
+    background-color: var(--campus-ride-btn-bg-hover);
+  }
+  
+  &:active {
+    background-color: var(--campus-ride-btn-bg-active);
+  }
 }

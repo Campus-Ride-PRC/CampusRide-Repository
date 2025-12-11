@@ -4,4 +4,5 @@ export interface Address{
     number: string;
     locationName: string;
     neighborhood: string;
+    city: string;
 }

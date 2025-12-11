@@ -23,4 +23,11 @@ export class RideCardComponent {
   onCardClick() {
     this.cardClick.emit();
   }
+
+  truncateLocation(location: string): string {
+    if (location && location.length > 12) {
+      return location.substring(0, 12) + '...';
+    }
+    return location;
+  }
 }

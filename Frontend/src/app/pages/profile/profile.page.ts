@@ -92,11 +92,11 @@ export class ProfilePage implements OnInit {
   }
 
   getFromLocation(drive: DriveCard): string {
-    return drive.fromNeighborhood || drive.fromLocationName;
+    return drive.fromAddress.locationName || drive.fromAddress.neighborhood || drive.fromAddress.city;
   }
 
   getToLocation(drive: DriveCard): string {
-    return drive.toLocationName ||drive.toNeighborhood;
+    return drive.toAddress.locationName || drive.toAddress.neighborhood || drive.toAddress.city;
   }
 
   formatDepartureTime(time: string): string {
@@ -130,13 +130,12 @@ export class ProfilePage implements OnInit {
   onCardClick(drive: DriveCard) {
     this.router.navigate(['/ride-details', drive.id]);
   }
-  
+  goToAllDrives() : void {
+    this.router.navigate(['/home']);
+  }
+
   goToAllBookings(): void {
     this.router.navigate(['/my-bookings']);
-  }
-  
-  goToAllDrives(): void {
-    this.router.navigate(['/driver-requests']);
   }
 
 }
