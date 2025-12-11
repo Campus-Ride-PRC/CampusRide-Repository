@@ -133,4 +133,16 @@
   padding-left: 10px;
 }
 
+.drives-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 8px;
+}
+
+.card-item {
+  width: 100%;
+}
+
+
 

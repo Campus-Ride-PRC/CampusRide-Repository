@@ -20,14 +20,30 @@ interface PanelItem {
     <!-- Overlay -->
     <div
       *ngIf="isOpen"
-      class="fixed inset-0 bg-black bg-opacity-50 z-[999]"
+      [style.position]="'fixed'"
+      [style.top]="'0'"
+      [style.left]="'0'"
+      [style.right]="'0'"
+      [style.bottom]="'0'"
+      [style.background-color]="'rgba(0, 0, 0, 0.5)'"
+      [style.z-index]="'998'"
       (click)="closePanel()">
     </div>
 
     <!-- Panel -->
     <div
-      class="absolute top-0 left-0 h-screen w-[260px] bg-[#1a1a1a] text-white shadow-xl transform transition-transform duration-300 ease-in-out z-[1000]"
-      [style.transform]="isOpen ? 'translateX(0)' : 'translateX(-100%)'">
+      [style.position]="'fixed'"
+      [style.top]="'0'"
+      [style.left]="'0'"
+      [style.height]="'100vh'"
+      [style.width]="'260px'"
+      [style.background-color]="'#1a1a1a'"
+      [style.color]="'white'"
+      [style.box-shadow]="'0 10px 25px rgba(0, 0, 0, 0.3)'"
+      [style.transform]="isOpen ? 'translateX(0)' : 'translateX(-100%)'"
+      [style.transition]="'transform 0.3s ease-in-out'"
+      [style.z-index]="'999'"
+      (click)="$event.stopPropagation()">
 
       <div class="flex flex-col h-full">
 
