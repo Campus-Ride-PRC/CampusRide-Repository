@@ -15,21 +15,27 @@ public interface DriveQueryRepository {
             d.id as id,
             d.time as time,
             d.price as price,
-            d.availableSeats as availableSeats,
             d.totalNoSeats as totalNoSeats,
+            (d.totalNoSeats - COALESCE((SELECT COUNT(b2) FROM Booking b2 WHERE b2.drive.id = d.id AND b2.status = campus.ride.enums.BookingStatus.ACCEPTED AND b2.role = campus.ride.enums.BookingRole.CLIENT), 0)) as availableSeats,
             f.locationName as from_LocationName,
             f.neighborhood as from_Neighborhood,
+            f.number as from_Number,
+            f.street as from_Street,
             t.locationName as to_LocationName,
             t.neighborhood as to_Neighborhood,
+            t.number as to_Number,
+            t.street as to_Street,
             dr.firstName as driver_FirstName,
             dr.lastName as driver_LastName,
             v.vehicleModel as vehicle_Model
         FROM Drive d
         JOIN d.from f
         JOIN d.to t
-        JOIN d.driver dr
-        JOIN d.vehicle v
-        WHERE dr.id = :driverId
+        JOIN d.bookings b
+        JOIN b.user dr
+        LEFT JOIN dr.vehicle v
+        WHERE b.role = campus.ride.enums.BookingRole.DRIVER
+        AND dr.id = :driverId
         ORDER BY d.time ASC
     """)
     List<campus.ride.contracts.drive.DriveRow> findAllByDriverId(@Param("driverId") Long driverId);

@@ -26,7 +26,7 @@ import {
   imports: [
     IonContent, IonHeader, IonTitle, IonToolbar,
     IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton,
-    IonIcon, IonBadge, IonSpinner, IonButtons, IonMenuButton,
+    IonIcon, IonBadge, IonSpinner, IonButtons,
     CommonModule, FormsModule
   ]
 })
