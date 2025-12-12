@@ -192,6 +192,12 @@ export class HomePage implements OnInit {
       case 'drives':
         this.router.navigate(['/add-drive']);
         break;
+      case 'my-bookings':
+        this.router.navigate(['/my-bookings']);
+        break;
+      case 'driver-requests':
+        this.router.navigate(['/driver-requests']);
+        break;
       case 'settings':
         // TODO: Navigate to settings page when implemented
         console.log('Settings feature coming soon');

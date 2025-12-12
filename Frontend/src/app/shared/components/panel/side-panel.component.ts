@@ -178,6 +178,8 @@ export class SidePanelComponent {
     this.mainItems = [
       {id: 'home', label: 'Home', icon: this.homeIcon, iconPosition: 'left', textAlign: 'start'},
       {id: 'drives', label: 'Add a ride', icon: this.drivesIcon, iconPosition: 'left', textAlign: 'start'},
+      {id: 'my-bookings', label: 'My Bookings', icon: this.bookingsIcon, iconPosition: 'left', textAlign: 'start'},
+      {id: 'driver-requests', label: 'My Rides', icon: this.requestsIcon, iconPosition: 'left', textAlign: 'start'},
     ];
 
     this.secondaryItems = [
