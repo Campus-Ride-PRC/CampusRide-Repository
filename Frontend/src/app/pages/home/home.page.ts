@@ -86,11 +86,40 @@ export class HomePage implements OnInit {
   }
 
   getFromLocation(drive: DriveCard): string {
-    return drive.fromNeighborhood || drive.fromLocationName;
+    // Prefer neighborhood for a short, descriptive name
+    return drive.fromAddress.neighborhood || this.getShortLocationName(drive.fromAddress);
   }
 
   getToLocation(drive: DriveCard): string {
-    return drive.toLocationName ||drive.toNeighborhood;
+    const addr = drive.toAddress;
+    
+    // Prefer neighborhood as the most descriptive short name
+    if (addr.neighborhood) {
+      return addr.neighborhood;
+    }
+    
+    // If locationName looks like a place name (not just a number or street number), use it
+    const locationName = addr.locationName;
+    if (locationName && !this.looksLikeStreetNumber(locationName) && !locationName.includes(',')) {
+      return locationName;
+    }
+    
+    // Fall back to street name
+    return addr.street || 'Unknown';
+  }
+
+  private looksLikeStreetNumber(text: string): boolean {
+    // Check if text looks like just a street number (e.g., "58-60", "23-25", "62")
+    return /^[\d\-\/]+$/.test(text.trim());
+  }
+
+  private getShortLocationName(address: any): string {
+    // Extract a short name from locationName (take first part before comma)
+    if (address.locationName && !this.looksLikeStreetNumber(address.locationName)) {
+      const parts = address.locationName.split(',');
+      return parts[0].trim();
+    }
+    return address.street || 'Unknown';
   }
 
   formatDepartureTime(time: string): string {

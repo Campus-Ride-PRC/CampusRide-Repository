@@ -7,7 +7,6 @@ import campus.ride.contracts.vehicle.VehicleRepository;
 import campus.ride.interfaces.VehicleService;
 import campus.ride.transfer.dtos.vehicle.VehicleDto;
 import campus.ride.transfer.mappings.VehicleMapper;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +26,6 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    @Async
     @Transactional
     public CompletableFuture<VehicleDto> getOrCreate(String model, String plate, String color, Long userId) {
         // If userId is not provided, try to get it from SecurityContext
@@ -55,15 +53,18 @@ public class VehicleServiceImpl implements VehicleService {
         if (plate != null) {
             // Check if vehicle with this plate already exists
             vehicle = repo.findByVehicleLicencePlate(plate)
-                    .orElseGet(() -> repo.save(new Vehicle(user, model, plate, color, user.getId())));
+                    .orElseGet(() -> {
+                        Vehicle newVehicle = new Vehicle(user, model, plate, color, user.getId());
+                        return repo.saveAndFlush(newVehicle);
+                    });
         } else {
-            vehicle = repo.save(new Vehicle(user, model, null, color, user.getId()));
+            Vehicle newVehicle = new Vehicle(user, model, null, color, user.getId());
+            vehicle = repo.saveAndFlush(newVehicle);
         }
         return CompletableFuture.completedFuture(VehicleMapper.toDto(vehicle));
     }
 
     @Override
-    @Async
     @Transactional(readOnly = true)
     public CompletableFuture<Optional<VehicleDto>> getByUserId(Long userId) {
         return CompletableFuture.completedFuture(repo.findByUserId(userId)

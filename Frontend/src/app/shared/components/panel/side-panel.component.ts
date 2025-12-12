@@ -16,23 +16,33 @@ interface PanelItem {
   selector: 'app-side-panel',
   standalone: true,
   imports: [CommonModule, IonicModule, PrimaryButtonComponent],
-  styles: [`
-    :host {
-      display: contents;
-    }
-  `],
   template: `
     <!-- Overlay -->
     <div
       *ngIf="isOpen"
-      style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); z-index: 998;"
+      [style.position]="'fixed'"
+      [style.top]="'0'"
+      [style.left]="'0'"
+      [style.right]="'0'"
+      [style.bottom]="'0'"
+      [style.background-color]="'rgba(0, 0, 0, 0.5)'"
+      [style.z-index]="'998'"
       (click)="closePanel()">
     </div>
 
     <!-- Panel -->
     <div
-      style="position: fixed; top: 0; left: 0; height: 100vh; width: 260px; background-color: #1a1a1a; color: white; box-shadow: 0 0 20px rgba(0,0,0,0.5); transition: transform 300ms ease-in-out; z-index: 999;"
+      [style.position]="'fixed'"
+      [style.top]="'0'"
+      [style.left]="'0'"
+      [style.height]="'100vh'"
+      [style.width]="'260px'"
+      [style.background-color]="'#1a1a1a'"
+      [style.color]="'white'"
+      [style.box-shadow]="'0 10px 25px rgba(0, 0, 0, 0.3)'"
       [style.transform]="isOpen ? 'translateX(0)' : 'translateX(-100%)'"
+      [style.transition]="'transform 0.3s ease-in-out'"
+      [style.z-index]="'999'"
       (click)="$event.stopPropagation()">
 
       <div class="flex flex-col h-full">
@@ -46,6 +56,7 @@ interface PanelItem {
             [iconPosition]="item.iconPosition || 'left'"
             [textAlign]="item.textAlign || 'start'"
             class="w-full"
+            variant="transparent"
             (onClick)="onItemClick(item.id)"
             customClass="ps-[32px]">
           </app-primary-button>
@@ -60,6 +71,7 @@ interface PanelItem {
             [iconPosition]="item.iconPosition || 'left'"
             [textAlign]="item.textAlign || 'start'"
             class="w-full"
+            variant="transparent"
             (onClick)="onItemClick(item.id)"
             customClass="ps-[32px]">
           </app-primary-button>
@@ -153,13 +165,9 @@ export class SidePanelComponent {
 
   ngOnChanges(changes: SimpleChanges) {
     console.log('SidePanel isOpen changed to:', this.isOpen);
-    if (changes['isOpen']) {
-      console.log('isOpen change detected:', changes['isOpen'].currentValue);
-    }
   }
 
   closePanel() {
-    console.log('closePanel called');
     this.closed.emit();
   }
 
