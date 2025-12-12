@@ -40,7 +40,7 @@ import {IonHeader, IonIcon, IonToolbar} from '@ionic/angular/standalone';
             (click)="onNotificationClick()"
             class="p-2 rounded-xl transition-colors flex items-center justify-center"
             ion-button="false"
-            style="--background: transparent; --ripple-color: transparent;">
+            style="--background: transparent; --ripple-color: transparent; padding-inline-end: 20px;">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="22"

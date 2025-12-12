@@ -8,6 +8,8 @@ import { RideCardComponent } from 'src/app/shared/components/cards/ride-card.com
 import { DriveService } from 'src/app/core/services/drive.service';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { DriveCard } from 'src/app/core/models/drive-card.model';
+import { Profile } from 'src/app/core/services/profile';
+import { UserResponse } from 'src/app/core/models/userResponse';
 
 @Component({
   selector: 'app-home',
@@ -24,15 +26,29 @@ export class HomePage implements OnInit {
   totalPages = 0;
   pageSize = 5;
   isLastPage = false;
+  user: UserResponse | null = null;
 
   constructor(
     private router: Router,
     private driveService: DriveService,
-    private authService: AuthService
+    private authService: AuthService,
+    private profileService: Profile
   ) {}
 
   ngOnInit() {
     this.loadDrives();
+    this.loadUser();
+  }
+
+  loadUser() {
+    this.profileService.getLoggedUser().subscribe({
+      next: (data) => {
+        this.user = data;
+      },
+      error: (err) => {
+        console.error('Error loading user:', err);
+      }
+    });
   }
 
   loadDrives(reset: boolean = false) {
