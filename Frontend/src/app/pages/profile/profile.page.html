@@ -1,13 +1,8 @@
-<ion-header translucent="true">
-  <ion-toolbar class="toolbar-dark">
-    <ion-buttons slot="start" style="padding-left: 5px;">
-      <ion-button (click)="goBack()" class="back-button">
-        <img src="assets/icon/arrow-back.svg" alt="Back" width="20" height="20"/>
-      </ion-button>
-    </ion-buttons>
-    <ion-title class="page-title">Profile</ion-title>
-  </ion-toolbar>
-</ion-header>
+<app-header
+  menuTitle="Profile"
+  (menuClick)="onMenuOpen()"
+  (notificationClick)="onNotificationOpen()">
+</app-header>
 
 <ion-content [fullscreen]="true" class="profile-page">
   <div *ngIf="user_state === 'ready' && drives_state === 'ready' && booking__state === 'ready' && user"
@@ -34,16 +29,17 @@
       </div>
     </div>
     <div class="button-section" style="padding-inline: 8px !important; padding-bottom: 8px !important;">
-      <p class="title-b">My Bookings</p>
+      <p class="title-b text-center">My Bookings</p>
       <app-booking-card *ngFor="let booking of myBookings" [booking]="booking"></app-booking-card>
+      <p *ngIf="myBookings.length === 0" class="text-[#888] text-center py-4">You don't have any bookings yet</p>
     </div>
-    <div class="button-section" style="padding-bottom: 8px !important;">
+    <div class="button-section" *ngIf="myBookings.length > 0" style="padding-inline: 8px !important; padding-bottom: 8px !important;">
       <button class="add-ride-btn" (click)="goToAllBookings()">
         See all bookings
       </button>
     </div>
-    <div class="button-section example">
-      <p class="title-b">My most recent drives</p>
+    <div class="button-section example" style="padding-inline: 8px !important; padding-bottom: 8px !important;">
+      <p class="title-b text-center">My Recent Rides</p>
       <div class="drives-container">
         <app-ride-card
         *ngFor="let drive of myDrives"
@@ -60,11 +56,23 @@
         class="card-item"
       ></app-ride-card>
       </div>
+      <p *ngIf="myDrives.length === 0" class="text-[#888] text-center" style="margin-top: 0px !important; margin-bottom: 0px !important;">You don't have any rides yet</p>
     </div>
-    <div class="button-section">
+    <div class="button-section" *ngIf="myDrives.length > 0" style="padding-inline: 8px !important; padding-bottom: 8px !important;">
       <button class="add-ride-btn" (click)="goToAllDrives()">
         See all future rides
       </button>
     </div>
   </div>
 </ion-content>
+
+<div class="fixed inset-0 z-[1000] pointer-events-none">
+  <app-side-panel
+    [isOpen]="isPanelOpen"
+    [userFirstName]="user?.firstName || 'Guest'"
+    [userAvatar]="user ? 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + user.firstName : ''"
+    (closed)="onPanelClosed()"
+    (itemClicked)="onMenuItemClick($event)"
+    class="pointer-events-auto">
+  </app-side-panel>
+</div>

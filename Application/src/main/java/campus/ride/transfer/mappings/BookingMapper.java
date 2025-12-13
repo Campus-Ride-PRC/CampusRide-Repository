@@ -18,6 +18,8 @@ public class BookingMapper {
                 booking.getDrive() != null && booking.getDrive().getDriver() != null ? booking.getDrive().getDriver().getEmail() : null,
                 booking.getDrive() != null && booking.getDrive().getDriver() != null ? booking.getDrive().getDriver().getFirstName() : null,
                 booking.getDrive() != null && booking.getDrive().getDriver() != null ? booking.getDrive().getDriver().getLastName() : null,
+                booking.getDrive() != null ? booking.getDrive().getFrom().getLocationName() : null,
+                booking.getDrive() != null ? booking.getDrive().getTo().getLocationName() : null,
                 booking.getStatus(),
                 booking.getRole(),
                 booking.getRequestedAt(),

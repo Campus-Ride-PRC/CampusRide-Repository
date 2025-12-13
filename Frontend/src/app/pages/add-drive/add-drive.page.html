@@ -206,7 +206,6 @@
         <!-- Trip Info Section -->
         <div class="form-section">
           <h3 class="section-title">
-            <ion-icon name="calendar-outline"></ion-icon>
             Trip Information
           </h3>
           
@@ -214,7 +213,7 @@
             <div class="form-field">
               <label>Price (RON)</label>
               <div class="input-container">
-                <ion-icon name="cash-outline" class="field-icon"></ion-icon>
+                <ion-icon name="cash-outline" class="field-icon" style="padding-inline-start: 10px;"></ion-icon>
                 <input 
                   type="number" 
                   formControlName="price" 
@@ -257,7 +256,7 @@
             <div class="form-field">
               <label>Time</label>
               <div class="input-container">
-                <ion-icon name="time-outline" class="field-icon"></ion-icon>
+                <ion-icon name="time-outline" class="field-icon" style="padding-inline-start: 10px;"></ion-icon>
                 <input 
                   type="time" 
                   formControlName="hour"
@@ -271,7 +270,6 @@
         <!-- Vehicle Section -->
         <div class="form-section">
           <h3 class="section-title">
-            <ion-icon name="car-sport-outline"></ion-icon>
             Vehicle Details
             <span class="badge" *ngIf="hasVehicle()">Registered</span>
           </h3>
@@ -279,7 +277,7 @@
           <div class="form-field">
             <label>Vehicle Model</label>
             <div class="input-container" [class.disabled]="hasVehicle()">
-              <ion-icon name="car-outline" class="field-icon"></ion-icon>
+              <ion-icon name="car-outline" class="field-icon" style="padding-inline-start: 10px;"></ion-icon>
               <input 
                 type="text" 
                 formControlName="vehicleModel" 

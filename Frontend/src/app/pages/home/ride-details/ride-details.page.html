@@ -329,7 +329,6 @@
     <!-- Action Buttons -->
     <div class="action-buttons-row">
       <button class="action-button secondary" (click)="backToPickup()">
-        <ion-icon name="create-outline"></ion-icon>
         Edit
       </button>
       <button 
@@ -339,7 +338,6 @@
       >
         <ion-spinner *ngIf="requestingRide()" name="crescent"></ion-spinner>
         <span *ngIf="!requestingRide()">
-          <ion-icon name="checkmark-circle"></ion-icon>
           Confirm Booking
         </span>
       </button>
