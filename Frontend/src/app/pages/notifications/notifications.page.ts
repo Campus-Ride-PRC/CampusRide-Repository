@@ -21,6 +21,10 @@ import {
   paperPlaneOutline, personAddOutline
 } from 'ionicons/icons';
 import { forkJoin } from 'rxjs';
+import { AppHeaderComponent } from 'src/app/shared/components/header/app-header.component';
+import { SidePanelComponent } from 'src/app/shared/components/panel/side-panel.component';
+import { Profile } from 'src/app/core/services/profile';
+import { UserResponse } from 'src/app/core/models/userResponse';
 
 @Component({
   selector: 'app-notifications',
@@ -32,20 +36,24 @@ import { forkJoin } from 'rxjs';
     IonCard, IonCardContent, IonButton,
     IonIcon, IonSpinner, IonButtons,
     IonRefresher, IonRefresherContent,
-    CommonModule, FormsModule
+    CommonModule, FormsModule,
+    AppHeaderComponent, SidePanelComponent
   ]
 })
 export class NotificationsPage implements OnInit {
   notifications: Notification[] = [];
   loading = true;
   BookingStatus = BookingStatus;
+  isPanelOpen = false;
+  user: UserResponse | null = null;
 
   constructor(
     private bookingService: BookingService,
     private driveService: DriveService,
     private authService: AuthService,
     private router: Router,
-    private location: Location
+    private location: Location,
+    private profileService: Profile
   ) {
     addIcons({
       carOutline, locationOutline, timeOutline, cashOutline,
@@ -57,6 +65,18 @@ export class NotificationsPage implements OnInit {
 
   ngOnInit() {
     this.loadData();
+    this.loadUser();
+  }
+
+  loadUser() {
+    this.profileService.getLoggedUser().subscribe({
+      next: (data) => {
+        this.user = data;
+      },
+      error: (err) => {
+        console.error('Error loading user:', err);
+      }
+    });
   }
 
   loadData(event?: any) {
@@ -136,6 +156,26 @@ export class NotificationsPage implements OnInit {
     });
   }
 
+  getStatusBackgroundColor(status: BookingStatus): string {
+    switch (status) {
+      case BookingStatus.PENDING: return '#ffa500';
+      case BookingStatus.ACCEPTED: return '#00C36C';
+      case BookingStatus.DECLINED: return '#eb445a';
+      case BookingStatus.CANCELED: return '#666666';
+      default: return '#666666';
+    }
+  }
+
+  getStatusLabel(status: BookingStatus): string {
+    switch (status) {
+      case BookingStatus.PENDING: return 'Pending Approval';
+      case BookingStatus.ACCEPTED: return 'Request Accepted';
+      case BookingStatus.DECLINED: return 'Request Declined';
+      case BookingStatus.CANCELED: return 'Request Canceled';
+      default: return status;
+    }
+  }
+
   declineBooking(booking: BookingResponse) {
     if (confirm('Are you sure you want to decline this booking request?')) {
       this.bookingService.declineBooking(booking.driveId, booking.userId).subscribe({
@@ -154,5 +194,50 @@ export class NotificationsPage implements OnInit {
 
   goBack() {
     this.location.back();
+  }
+
+  onMenuOpen() {
+    this.isPanelOpen = true;
+  }
+
+  onPanelClosed() {
+    this.isPanelOpen = false;
+  }
+
+  onNotificationOpen() {
+    // Already on notifications
+  }
+
+  onMenuItemClick(item: string) {
+    console.log('Menu item clicked:', item);
+
+    switch(item) {
+      case 'home':
+        this.router.navigate(['/home']);
+        break;
+      case 'drives':
+        this.router.navigate(['/add-drive']);
+        break;
+      case 'my-bookings':
+        this.router.navigate(['/my-bookings']);
+        break;
+      case 'driver-requests':
+        this.router.navigate(['/driver-requests']);
+        break;
+      case 'settings':
+        console.log('Settings feature coming soon');
+        break;
+      case 'profile':
+        this.router.navigate(['/profile']);
+        break;
+      case 'logout':
+        this.logout();
+        break;
+    }
+  }
+
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/welcome']);
   }
 }

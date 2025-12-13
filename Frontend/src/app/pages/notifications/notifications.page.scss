@@ -44,7 +44,7 @@
   }
 
   .notification-icon {
-    font-size: 24px;
+    font-size: 32px;
     margin-right: 16px;
     color: #00c36c;
   }
@@ -70,7 +70,7 @@
   .actions {
     display: flex;
     justify-content: flex-end;
-    padding: 0 16px 16px 16px;
+    padding-inline: 16px;
     gap: 8px;
   }
 

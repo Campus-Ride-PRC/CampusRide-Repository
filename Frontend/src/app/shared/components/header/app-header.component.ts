@@ -9,38 +9,39 @@ import {IonHeader, IonIcon, IonToolbar} from '@ionic/angular/standalone';
   template: `
     <ion-header class="ion-no-border">
       <ion-toolbar class="bg-[#1e1e1e]">
-        <div class="flex items-center justify-between gap-4 pe-4 ps-[20px]">
-          <div class="flex items-center gap-4">
-            <!-- Modern Menu Icon -->
-            <span
-              (click)="onMenuClick()"
-              class="p-2 rounded-xl transition-colors flex items-center justify-center"
-              ion-button="false"
-              style="--background: transparent; --ripple-color: transparent;">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#e0e0e0"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round">
-                <path d="M4 6h16M4 12h10M4 18h16" />
-              </svg>
-            </span>
-            <!-- App Name -->
-            <p class="text-[#e0e0e0] text-[28px] font-[700] mt-[18px] mb-[18px] ps-[8px] tracking-tight">
-              {{menuTitle}}
-            </p>
-          </div>
+        <div class="flex items-center justify-between gap-4 pe-4 ps-[20px]" style="position: relative; min-height: 64px;">
+          <!-- Modern Menu Icon -->
+          <span
+            (click)="onMenuClick()"
+            class="p-2 rounded-xl transition-colors flex items-center justify-center"
+            ion-button="false"
+            style="--background: transparent; --ripple-color: transparent; z-index: 10;">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#e0e0e0"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M4 6h16M4 12h10M4 18h16" />
+            </svg>
+          </span>
+          
+          <!-- App Name (Centered) -->
+          <p class="text-[#e0e0e0] text-[28px] font-[700] tracking-tight" 
+             style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); margin: 0;">
+            CampusRide
+          </p>
+          
           <!-- Notification Icon -->
           <span
             (click)="onNotificationClick()"
             class="p-2 rounded-xl transition-colors flex items-center justify-center"
             ion-button="false"
-            style="--background: transparent; --ripple-color: transparent; padding-inline-end: 20px;">
+            style="--background: transparent; --ripple-color: transparent; padding-inline-end: 20px; z-index: 10;">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="22"

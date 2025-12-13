@@ -1,13 +1,8 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-buttons slot="start" style="padding-left: 5px;">
-      <ion-button (click)="goBack()" class="back-button">
-        <img src="assets/icon/arrow-back.svg" alt="Back" width="20" height="20" />
-      </ion-button>
-    </ion-buttons>
-    <ion-title class="page-title">My Ride Requests</ion-title>
-  </ion-toolbar>
-</ion-header>
+<app-header
+  menuTitle="My Ride Requests"
+  (menuClick)="onMenuOpen()"
+  (notificationClick)="onNotificationOpen()">
+</app-header>
 
 <ion-content>
   <div class="bookings-container">
@@ -18,24 +13,25 @@
 
     <div *ngIf="!loading && bookings.length === 0" class="empty-state">
       <ion-icon name="car-outline" class="empty-icon"></ion-icon>
-      <h2>No Ride Requests Yet</h2>
-      <p>You haven't requested any rides yet. Browse available rides and book your next trip!</p>
+      <h2>No Booking Requests Yet</h2>
+      <p>You haven't requested any bookings yet. Browse available rides and book your next trip!</p>
     </div>
 
-    <div *ngIf="!loading && bookings.length > 0">
-      <ion-card *ngFor="let booking of bookings" class="booking-card">
-        <ion-card-header>
-          <div class="card-header">
-            <div class="title-section">
-              <ion-icon name="car-outline"></ion-icon>
-              <ion-card-title>Ride Request #{{booking.driveId}}</ion-card-title>
+    <div *ngIf="!loading && bookings.length > 0" style="display: flex; flex-direction: column; gap: 12px; padding-bottom: 16px;">
+      <div *ngFor="let booking of bookings" style="max-width: 358px; width: 100%; margin: 0 auto;">
+        <div [style.background-color]="getStatusBackgroundColor(booking.status)" 
+             style="padding: 8px 16px; text-align: center; font-weight: 600; font-size: 14px; color: white; border-radius: 12px 12px 0 0;">
+          {{getStatusLabel(booking.status)}}
+        </div>
+        <ion-card class="booking-card" style="margin: 0; border-radius: 0 0 12px 12px;">
+          <ion-card-header>
+            <div class="card-header">
+              <div class="title-section">
+                <ion-icon name="car-outline"></ion-icon>
+                <ion-card-title>Ride Request #{{booking.driveId}}</ion-card-title>
+              </div>
             </div>
-            <ion-badge [color]="getStatusColor(booking.status)" class="status-badge">
-              <ion-icon [name]="getStatusIcon(booking.status)"></ion-icon>
-              {{booking.status}}
-            </ion-badge>
-          </div>
-        </ion-card-header>
+          </ion-card-header>
 
         <ion-card-content>
           <div class="booking-details">
@@ -82,6 +78,18 @@
           </div>
         </ion-card-content>
       </ion-card>
+      </div>
     </div>
   </div>
 </ion-content>
+
+<div class="fixed inset-0 z-[1000] pointer-events-none">
+  <app-side-panel
+    [isOpen]="isPanelOpen"
+    [userFirstName]="user?.firstName || 'Guest'"
+    [userAvatar]="user ? 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + user.firstName : ''"
+    (closed)="onPanelClosed()"
+    (itemClicked)="onMenuItemClick($event)"
+    class="pointer-events-auto">
+  </app-side-panel>
+</div>
