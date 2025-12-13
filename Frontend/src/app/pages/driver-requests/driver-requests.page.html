@@ -1,13 +1,8 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-buttons slot="start" style="padding-left: 5px;">
-      <ion-button (click)="goBack()" class="back-button">
-        <img src="assets/icon/arrow-back.svg" alt="Back" width="20" height="20" />
-      </ion-button>
-    </ion-buttons>
-    <ion-title class="page-title">Passenger Requests</ion-title>
-  </ion-toolbar>
-</ion-header>
+<app-header
+  menuTitle="Passenger Requests"
+  (menuClick)="onMenuOpen()"
+  (notificationClick)="onNotificationOpen()">
+</app-header>
 
 <ion-content>
   <div class="requests-container">
@@ -22,7 +17,7 @@
 
     <div *ngIf="!loading && drivesWithBookings.length === 0" class="empty-state">
       <ion-icon name="car-outline" class="empty-icon"></ion-icon>
-      <h2>No Pending Requests</h2>
+      <h2>No Pending Ride Requests</h2>
       <p>You don't have any pending booking requests at the moment.</p>
     </div>
 
@@ -99,3 +94,14 @@
     </div>
   </div>
 </ion-content>
+
+<div class="fixed inset-0 z-[1000] pointer-events-none">
+  <app-side-panel
+    [isOpen]="isPanelOpen"
+    [userFirstName]="user?.firstName || 'Guest'"
+    [userAvatar]="user ? 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + user.firstName : ''"
+    (closed)="onPanelClosed()"
+    (itemClicked)="onMenuItemClick($event)"
+    class="pointer-events-auto">
+  </app-side-panel>
+</div>

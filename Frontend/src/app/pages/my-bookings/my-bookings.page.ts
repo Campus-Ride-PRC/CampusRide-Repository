@@ -17,6 +17,10 @@ import {
   closeCircleOutline, checkmarkCircleOutline, hourglassOutline,
   mailOutline 
 } from 'ionicons/icons';
+import { AppHeaderComponent } from 'src/app/shared/components/header/app-header.component';
+import { SidePanelComponent } from 'src/app/shared/components/panel/side-panel.component';
+import { Profile } from 'src/app/core/services/profile';
+import { UserResponse } from 'src/app/core/models/userResponse';
 
 @Component({
   selector: 'app-my-bookings',
@@ -27,19 +31,23 @@ import {
     IonContent, IonHeader, IonTitle, IonToolbar,
     IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton,
     IonIcon, IonBadge, IonSpinner, IonButtons,
-    CommonModule, FormsModule
+    CommonModule, FormsModule,
+    AppHeaderComponent, SidePanelComponent
   ]
 })
 export class MyBookingsPage implements OnInit {
   bookings: BookingResponse[] = [];
   loading = true;
   BookingStatus = BookingStatus;
+  isPanelOpen = false;
+  user: UserResponse | null = null;
 
   constructor(
     private bookingService: BookingService,
     private authService: AuthService,
     private router: Router,
-    private location: Location
+    private location: Location,
+    private profileService: Profile
   ) {
     addIcons({ 
       carOutline, locationOutline, timeOutline, cashOutline,
@@ -50,6 +58,18 @@ export class MyBookingsPage implements OnInit {
 
   ngOnInit() {
     this.loadBookings();
+    this.loadUser();
+  }
+
+  loadUser() {
+    this.profileService.getLoggedUser().subscribe({
+      next: (data) => {
+        this.user = data;
+      },
+      error: (err) => {
+        console.error('Error loading user:', err);
+      }
+    });
   }
 
   loadBookings() {
@@ -130,6 +150,26 @@ export class MyBookingsPage implements OnInit {
     }
   }
 
+  getStatusBackgroundColor(status: BookingStatus): string {
+    switch (status) {
+      case BookingStatus.PENDING: return '#ffa500';
+      case BookingStatus.ACCEPTED: return '#00C36C';
+      case BookingStatus.DECLINED: return '#eb445a';
+      case BookingStatus.CANCELED: return '#666666';
+      default: return '#666666';
+    }
+  }
+
+  getStatusLabel(status: BookingStatus): string {
+    switch (status) {
+      case BookingStatus.PENDING: return 'Pending Approval';
+      case BookingStatus.ACCEPTED: return 'Booking Accepted';
+      case BookingStatus.DECLINED: return 'Booking Declined';
+      case BookingStatus.CANCELED: return 'Booking Canceled';
+      default: return status;
+    }
+  }
+
   getStatusIcon(status: BookingStatus): string {
     switch (status) {
       case BookingStatus.PENDING: return 'hourglass-outline';
@@ -153,5 +193,50 @@ export class MyBookingsPage implements OnInit {
 
   goBack() {
     this.location.back();
+  }
+
+  onMenuOpen() {
+    this.isPanelOpen = true;
+  }
+
+  onPanelClosed() {
+    this.isPanelOpen = false;
+  }
+
+  onNotificationOpen() {
+    this.router.navigate(['/notifications']);
+  }
+
+  onMenuItemClick(item: string) {
+    console.log('Menu item clicked:', item);
+
+    switch(item) {
+      case 'home':
+        this.router.navigate(['/home']);
+        break;
+      case 'drives':
+        this.router.navigate(['/add-drive']);
+        break;
+      case 'my-bookings':
+        // Already on my-bookings
+        break;
+      case 'driver-requests':
+        this.router.navigate(['/driver-requests']);
+        break;
+      case 'settings':
+        console.log('Settings feature coming soon');
+        break;
+      case 'profile':
+        this.router.navigate(['/profile']);
+        break;
+      case 'logout':
+        this.logout();
+        break;
+    }
+  }
+
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/welcome']);
   }
 }

@@ -1,0 +1,80 @@
+.custom-toolbar {
+  --background: #1a1a1a;
+}
+
+.page-title {
+  color: #FFFFFF;
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.back-button {
+  --background: transparent;
+  --ripple-color: transparent;
+}
+
+.notifications-container {
+  padding: 16px;
+}
+
+.loading-container, .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 80vh;
+  color: #888;
+}
+
+.empty-state .empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.notification-card {
+  margin-bottom: 16px;
+  background: #2a2a2a;
+  border-radius: 12px;
+  color: white;
+
+  .notification-content {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+  }
+
+  .notification-icon {
+    font-size: 32px;
+    margin-right: 16px;
+    color: #00c36c;
+  }
+
+  .notification-details {
+    flex-grow: 1;
+  }
+
+  .title {
+    font-weight: bold;
+    margin: 0 0 4px 0;
+  }
+
+  .subtitle {
+    margin: 0;
+    color: #aaa;
+  }
+
+  .status-badge {
+    flex-shrink: 0;
+  }
+
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    padding-inline: 16px;
+    gap: 8px;
+  }
+
+  .accept-button, .decline-button {
+    --border-radius: 8px;
+  }
+}

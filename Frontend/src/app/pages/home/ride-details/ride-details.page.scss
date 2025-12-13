@@ -858,6 +858,13 @@ $transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   gap: 8px;
   transition: background $transition-fast, opacity $transition-fast, transform $transition-fast;
 
+  span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
   &.primary {
     background: #00C36C;
     color: #ffffff;
@@ -889,6 +896,8 @@ $transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
   ion-icon {
     font-size: 18px;
+    display: flex;
+    align-items: center;
   }
 
   ion-spinner {

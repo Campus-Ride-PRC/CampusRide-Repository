@@ -10,6 +10,8 @@ import { AuthService } from 'src/app/core/services/auth.service';
 import { GoogleMapsService, ParsedAddress } from 'src/app/core/services/google-maps.service';
 import { DriveCreateRequest } from 'src/app/core/models/drive-create-request.model';
 import { catchError, of, Subject, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
+import { addIcons } from 'ionicons';
+import { calendarOutline } from 'ionicons/icons';
 
 type LocationMode = 'departure' | 'destination';
 type FlowStep = 'location' | 'details';
@@ -98,6 +100,7 @@ export class AddDrivePage implements OnInit, OnDestroy {
   ) {
     this.initializeForm();
     this.setupSearchSubscriptions();
+    addIcons({ calendarOutline });
   }
 
   async ngOnInit() {

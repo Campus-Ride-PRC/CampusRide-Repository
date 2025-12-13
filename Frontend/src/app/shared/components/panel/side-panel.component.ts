@@ -47,8 +47,30 @@ interface PanelItem {
 
       <div class="flex flex-col h-full">
 
+        <!-- User Profile Header (Non-clickable) -->
+        <div class="mt-[32px] px-4 pb-4 mb-2" style="padding-inline-start: 28px; padding-bottom: 16px;">
+          <div class="flex items-center" style="gap: 8px;">
+            <img 
+              [src]="userAvatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'" 
+              [alt]="userFirstName"
+              style="width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 2px solid #00B862; flex-shrink: 0;"
+            />
+            <div class="flex flex-col">
+              <div style="font-size: 18px;">
+                <span class="text-sm" style="font-weight: 500;">Hello, </span>
+                <span class="text-base text-white" style="font-weight: 600;">{{ userFirstName || 'Guest' }}</span>
+              </div>
+              <div class="text-xs text-gray-400" style="font-weight: 600; font-size: 12px;">
+                <span>80 rides</span>
+                <span> • </span>
+                <span>7 friends</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Butoane principale (sus) -->
-        <div class="mt-[32px] p-4 space-y-2 flex-1">
+        <div class="px-4 space-y-2 flex-1">
           <app-primary-button
             *ngFor="let item of mainItems"
             [label]="item.label"
@@ -63,7 +85,7 @@ interface PanelItem {
         </div>
 
         <!-- Butoane secundare (jos) -->
-        <div class="p-4 space-y-2 border-t border-[#2a2a2a]">
+        <div class="p-4 space-y-2">
           <app-primary-button
             *ngFor="let item of secondaryItems"
             [label]="item.label"
@@ -83,6 +105,8 @@ interface PanelItem {
 })
 export class SidePanelComponent {
   @Input() isOpen = false;
+  @Input() userFirstName: string = '';
+  @Input() userAvatar: string = '';
   @Output() closed = new EventEmitter<void>();
   @Output() itemClicked = new EventEmitter<string>();
 
@@ -154,14 +178,8 @@ export class SidePanelComponent {
     this.mainItems = [
       {id: 'home', label: 'Home', icon: this.homeIcon, iconPosition: 'left', textAlign: 'start'},
       {id: 'drives', label: 'Add a ride', icon: this.drivesIcon, iconPosition: 'left', textAlign: 'start'},
-      {id: 'my-bookings', label: 'My Ride Requests', icon: this.bookingsIcon, iconPosition: 'left', textAlign: 'start'},
-      {
-        id: 'driver-requests',
-        label: 'Passenger Requests',
-        icon: this.requestsIcon,
-        iconPosition: 'left',
-        textAlign: 'start'
-      },
+      {id: 'my-bookings', label: 'My Bookings', icon: this.bookingsIcon, iconPosition: 'left', textAlign: 'start'},
+      {id: 'driver-requests', label: 'My Rides', icon: this.requestsIcon, iconPosition: 'left', textAlign: 'start'},
     ];
 
     this.secondaryItems = [
