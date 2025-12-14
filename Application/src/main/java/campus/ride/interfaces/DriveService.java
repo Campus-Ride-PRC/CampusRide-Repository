@@ -22,4 +22,6 @@ public interface DriveService {
     CompletableFuture<Page<DriveCardDto>> getDriverCards(Pageable pageable);
     CompletableFuture<List<DriveCardDto>> getDrivesByDriverId(Long driverId);
     CompletableFuture<List<DriveCardDto>> getMyDrives();
+    CompletableFuture<List<DriveCardDto>> getMyRecentRides();
+    CompletableFuture<Page<DriveCardDto>> getUpcomingDrives(Pageable pageable);
 }

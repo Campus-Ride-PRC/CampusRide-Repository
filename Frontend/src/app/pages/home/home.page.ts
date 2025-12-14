@@ -63,7 +63,7 @@ export class HomePage implements OnInit {
     }
 
     this.loading = true;
-    this.driveService.getDriveCards(this.currentPage, this.pageSize).subscribe({
+    this.driveService.getUpcomingDrives(this.currentPage, this.pageSize).subscribe({
       next: (response) => {
         if (reset) {
           this.drives = response.content;
@@ -90,7 +90,6 @@ export class HomePage implements OnInit {
     if (event) {
       event.target.complete();
 
-      // Disable infinite scroll when all data is loaded
       if (this.isLastPage) {
         event.target.disabled = true;
       }
@@ -102,35 +101,29 @@ export class HomePage implements OnInit {
   }
 
   getFromLocation(drive: DriveCard): string {
-    // Prefer neighborhood for a short, descriptive name
     return drive.fromAddress.neighborhood || this.getShortLocationName(drive.fromAddress);
   }
 
   getToLocation(drive: DriveCard): string {
     const addr = drive.toAddress;
     
-    // Prefer neighborhood as the most descriptive short name
     if (addr.neighborhood) {
       return addr.neighborhood;
     }
     
-    // If locationName looks like a place name (not just a number or street number), use it
     const locationName = addr.locationName;
     if (locationName && !this.looksLikeStreetNumber(locationName) && !locationName.includes(',')) {
       return locationName;
     }
     
-    // Fall back to street name
     return addr.street || 'Unknown';
   }
 
   private looksLikeStreetNumber(text: string): boolean {
-    // Check if text looks like just a street number (e.g., "58-60", "23-25", "62")
     return /^[\d\-\/]+$/.test(text.trim());
   }
 
   private getShortLocationName(address: any): string {
-    // Extract a short name from locationName (take first part before comma)
     if (address.locationName && !this.looksLikeStreetNumber(address.locationName)) {
       const parts = address.locationName.split(',');
       return parts[0].trim();
@@ -195,6 +188,9 @@ export class HomePage implements OnInit {
       case 'my-bookings':
         this.router.navigate(['/my-bookings']);
         break;
+      case 'my-rides':
+        this.router.navigate(['/my-rides']);
+        break;
       case 'driver-requests':
         this.router.navigate(['/driver-requests']);
         break;
@@ -209,6 +205,12 @@ export class HomePage implements OnInit {
         this.logout();
         break;
     }
+  }
+
+  onRideClick(rideId: number) {
+    this.router.navigate(['/ride-details', rideId], {
+      queryParams: { driverMode: 'true' }
+    });
   }
 
   logout() {

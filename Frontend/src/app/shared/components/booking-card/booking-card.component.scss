@@ -76,6 +76,7 @@ ion-content {
   border-radius: 12px;
   box-shadow: var(--campus-ride-shadow);
   border: 1px solid var(--campus-ride-border);
+  cursor: pointer;
 
   &:hover {
     box-shadow: var(--campus-ride-shadow-hover);

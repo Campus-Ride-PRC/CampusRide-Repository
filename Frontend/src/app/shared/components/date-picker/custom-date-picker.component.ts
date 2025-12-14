@@ -37,9 +37,9 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
           [max]="max"
           [disabled]="disabled"
           [preferWheel]="preferWheel"
+          [showDefaultTitle]="false"
           (ionChange)="onDateChange($event)"
           class="custom-datetime">
-          <span slot="title">{{ title || 'Select Date' }}</span>
         </ion-datetime>
       </div>
       <div *ngIf="helperText" class="helper-text">{{ helperText }}</div>

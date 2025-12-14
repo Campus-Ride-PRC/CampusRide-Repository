@@ -27,7 +27,7 @@ import {AuthService} from "../../core/services/auth.service";
   templateUrl: './profile.page.html',
   styleUrls: ['./profile.page.scss'],
   standalone: true,
-  imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonButton, IonButtons, IonItem, IonLabel, IonList, RideCardComponent, BookingCardComponent, AppHeaderComponent, SidePanelComponent]
+  imports: [IonContent, CommonModule, FormsModule, RideCardComponent, BookingCardComponent, AppHeaderComponent, SidePanelComponent]
 })
 export class ProfilePage implements OnInit {
   isPanelOpen = false;
@@ -163,6 +163,13 @@ export class ProfilePage implements OnInit {
   onCardClick(drive: DriveCard) {
     this.router.navigate(['/ride-details', drive.id]);
   }
+
+  onBookingClick(booking: BookingResponse): void {
+    this.router.navigate(['/ride-details', booking.driveId], {
+      queryParams: { returnTo: 'profile' }
+    });
+  }
+
   goToAllDrives() : void {
     this.router.navigate(['/home']);
   }
@@ -196,6 +203,9 @@ export class ProfilePage implements OnInit {
       case 'my-bookings':
         this.router.navigate(['/my-bookings']);
         break;
+      case 'my-rides':
+        this.router.navigate(['/my-rides']);
+        break;
       case 'driver-requests':
         this.router.navigate(['/driver-requests']);
         break;
@@ -209,6 +219,12 @@ export class ProfilePage implements OnInit {
         this.logout();
         break;
     }
+  }
+
+  onRideClick(rideId: number) {
+    this.router.navigate(['/ride-details', rideId], {
+      queryParams: { driverMode: 'true' }
+    });
   }
 
   logout() {

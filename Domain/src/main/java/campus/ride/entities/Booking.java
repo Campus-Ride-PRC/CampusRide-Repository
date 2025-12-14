@@ -46,11 +46,16 @@ public class Booking {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "pickup_address_id")
+    private Address pickupAddress;
+
     protected Booking() {}
 
     public Booking(Long driveId, Long userId, Drive drive, User user, 
                    BookingStatus status, BookingRole role, 
-                   LocalDateTime requestedAt, LocalDateTime updatedAt) {
+                   LocalDateTime requestedAt, LocalDateTime updatedAt,
+                   Address pickupAddress) {
         this.driveId = driveId;
         this.userId = userId;
         this.drive = drive;
@@ -59,6 +64,7 @@ public class Booking {
         this.role = role;
         this.requestedAt = requestedAt;
         this.updatedAt = updatedAt;
+        this.pickupAddress = pickupAddress;
     }
 
     // Getters and Setters
@@ -85,4 +91,7 @@ public class Booking {
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    public Address getPickupAddress() { return pickupAddress; }
+    public void setPickupAddress(Address pickupAddress) { this.pickupAddress = pickupAddress; }
 }

@@ -55,6 +55,11 @@ export const routes: Routes = [
     canActivate: [authGuard]
   },
   {
+    path: 'my-rides',
+    loadComponent: () => import('./pages/my-rides/my-rides.page').then((m) => m.MyRidesPage),
+    canActivate: [authGuard]
+  },
+  {
     path: 'add-drive',
     loadComponent: () => import('./pages/add-drive/add-drive.page').then((m) => m.AddDrivePage),
     canActivate: [authGuard]

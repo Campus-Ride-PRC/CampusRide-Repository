@@ -2,6 +2,7 @@ package campus.ride.transfer.dtos.booking;
 
 import campus.ride.enums.BookingRole;
 import campus.ride.enums.BookingStatus;
+import campus.ride.transfer.dtos.address.AddressDto;
 import java.time.LocalDateTime;
 
 public class BookingResponseDto {
@@ -19,6 +20,7 @@ public class BookingResponseDto {
     private BookingRole role;
     private LocalDateTime requestedAt;
     private LocalDateTime updatedAt;
+    private AddressDto pickupAddress;
 
     public BookingResponseDto() {}
 
@@ -27,7 +29,8 @@ public class BookingResponseDto {
                              String driverEmail, String driverFirstName, String driverLastName,
                              String fromLocationName, String toLocationName,
                              BookingStatus status, BookingRole role,
-                             LocalDateTime requestedAt, LocalDateTime updatedAt) {
+                             LocalDateTime requestedAt, LocalDateTime updatedAt,
+                             AddressDto pickupAddress) {
         this.driveId = driveId;
         this.userId = userId;
         this.userEmail = userEmail;
@@ -42,6 +45,7 @@ public class BookingResponseDto {
         this.role = role;
         this.requestedAt = requestedAt;
         this.updatedAt = updatedAt;
+        this.pickupAddress = pickupAddress;
     }
 
     public Long getDriveId() { return driveId; }
@@ -85,4 +89,7 @@ public class BookingResponseDto {
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    public AddressDto getPickupAddress() { return pickupAddress; }
+    public void setPickupAddress(AddressDto pickupAddress) { this.pickupAddress = pickupAddress; }
 }

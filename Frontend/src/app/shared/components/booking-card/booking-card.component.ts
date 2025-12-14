@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input, Output, EventEmitter} from '@angular/core';
 import {BookingResponse, BookingStatus} from "../../../core/models/booking.model";
 import {
   IonBadge,
@@ -16,7 +16,6 @@ import {CommonModule} from "@angular/common";
   templateUrl: './booking-card.component.html',
   styleUrls: ['./booking-card.component.scss'],
   imports: [
-    IonIcon,
     IonBadge,
     IonCardTitle,
     IonCardHeader,
@@ -29,6 +28,7 @@ export class BookingCardComponent  {
 
 
   @Input({required:true}) booking! : BookingResponse;
+  @Output() cardClick = new EventEmitter<BookingResponse>();
    constructor() { }
 
 
@@ -61,6 +61,10 @@ export class BookingCardComponent  {
       hour: '2-digit',
       minute: '2-digit'
     });
+  }
+
+  onCardClick(): void {
+    this.cardClick.emit(this.booking);
   }
 
 }

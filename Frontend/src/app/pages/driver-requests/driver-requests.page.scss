@@ -76,10 +76,16 @@ ion-content {
   border-radius: 12px;
   box-shadow: var(--campus-ride-shadow);
   border: 1px solid var(--campus-ride-border);
+  cursor: pointer;
+  transition: all 0.2s ease;
 
   &:hover {
     box-shadow: var(--campus-ride-shadow-hover);
-    transition: box-shadow 0.3s ease;
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 
   ion-card-header {

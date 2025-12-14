@@ -12,6 +12,7 @@ public class DrivePageDto {
     private Integer totalNoSeats;
     private AddressDto fromAddress;
     private AddressDto toAddress;
+    private Long driverId;
     private String driverFirstName;
     private String driverLastName;
     private String vehicleModel;
@@ -23,7 +24,7 @@ public class DrivePageDto {
     public DrivePageDto(Long id, LocalDateTime time, BigDecimal price,
                         Integer availableSeats, Integer totalNoSeats,
                         AddressDto fromAddress, AddressDto toAddress,
-                        String driverFirstName, String driverLastName,
+                        Long driverId, String driverFirstName, String driverLastName,
                         String vehicleModel, String vehicleLicencePlate, String vehicleColor) {
         this.id = id;
         this.time = time;
@@ -32,6 +33,7 @@ public class DrivePageDto {
         this.totalNoSeats = totalNoSeats;
         this.fromAddress = fromAddress;
         this.toAddress = toAddress;
+        this.driverId = driverId;
         this.driverFirstName = driverFirstName;
         this.driverLastName = driverLastName;
         this.vehicleModel = vehicleModel;
@@ -65,6 +67,9 @@ public class DrivePageDto {
 
     public String getDriverLastName() { return driverLastName; }
     public void setDriverLastName(String driverLastName) { this.driverLastName = driverLastName; }
+
+    public Long getDriverId() { return driverId; }
+    public void setDriverId(Long driverId) { this.driverId = driverId; }
 
     public String getVehicleModel() { return vehicleModel; }
     public void setVehicleModel(String vehicleModel) { this.vehicleModel = vehicleModel; }

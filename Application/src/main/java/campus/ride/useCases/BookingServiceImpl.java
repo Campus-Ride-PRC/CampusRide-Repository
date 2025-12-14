@@ -1,8 +1,10 @@
 package campus.ride.useCases;
 
+import campus.ride.contracts.address.AddressRepository;
 import campus.ride.contracts.booking.BookingRepository;
 import campus.ride.contracts.drive.DriveRepository;
 import campus.ride.contracts.user.UserRepository;
+import campus.ride.entities.Address;
 import campus.ride.entities.Booking;
 import campus.ride.entities.BookingId;
 import campus.ride.entities.Drive;
@@ -31,13 +33,16 @@ public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final DriveRepository driveRepository;
     private final UserRepository userRepository;
+    private final AddressRepository addressRepository;
 
     public BookingServiceImpl(BookingRepository bookingRepository, 
                              DriveRepository driveRepository,
-                             UserRepository userRepository) {
+                             UserRepository userRepository,
+                             AddressRepository addressRepository) {
         this.bookingRepository = bookingRepository;
         this.driveRepository = driveRepository;
         this.userRepository = userRepository;
+        this.addressRepository = addressRepository;
     }
 
     @Override
@@ -68,6 +73,13 @@ public class BookingServiceImpl implements BookingService {
             throw new BadRequestException("No available seats for this drive");
         }
 
+        // Get pickup address if provided
+        Address pickupAddress = null;
+        if (requestDto.getPickupAddressId() != null) {
+            pickupAddress = addressRepository.findById(requestDto.getPickupAddressId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Pickup address not found with id: " + requestDto.getPickupAddressId()));
+        }
+
         // Create booking with PENDING status
         LocalDateTime now = LocalDateTime.now();
         Booking booking = new Booking(
@@ -78,7 +90,8 @@ public class BookingServiceImpl implements BookingService {
                 BookingStatus.PENDING,
                 BookingRole.CLIENT,
                 now,
-                now
+                now,
+                pickupAddress
         );
 
         Booking savedBooking = bookingRepository.save(booking);
@@ -151,7 +164,6 @@ public class BookingServiceImpl implements BookingService {
     @Async
     @Transactional
     public CompletableFuture<BookingResponseDto> cancelBooking(Long driveId, Long userId) {
-        // If userId is null, use the current authenticated user
         Long targetUserId = userId;
         if (targetUserId == null) {
             String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -194,7 +206,7 @@ public class BookingServiceImpl implements BookingService {
     @Async
     @Transactional(readOnly = true)
     public CompletableFuture<List<BookingResponseDto>> getBookingsByUser(Long userId) {
-        return CompletableFuture.completedFuture(bookingRepository.findByUserId(userId)
+        return CompletableFuture.completedFuture(bookingRepository.findByUserIdAndRole(userId, BookingRole.CLIENT)
                 .stream()
                 .map(BookingMapper::toDto)
                 .collect(Collectors.toList()));
@@ -208,7 +220,7 @@ public class BookingServiceImpl implements BookingService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        return CompletableFuture.completedFuture(bookingRepository.findByUserId(user.getId())
+        return CompletableFuture.completedFuture(bookingRepository.findByUserIdAndRole(user.getId(), BookingRole.CLIENT)
                 .stream()
                 .map(BookingMapper::toDto)
                 .collect(Collectors.toList()));

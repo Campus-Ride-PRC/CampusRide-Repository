@@ -32,9 +32,9 @@ import { UserResponse } from 'src/app/core/models/userResponse';
   styleUrls: ['./notifications.page.scss'],
   standalone: true,
   imports: [
-    IonContent, IonHeader, IonTitle, IonToolbar, IonBadge,
+    IonContent,
     IonCard, IonCardContent, IonButton,
-    IonIcon, IonSpinner, IonButtons,
+    IonIcon, IonSpinner,
     IonRefresher, IonRefresherContent,
     CommonModule, FormsModule,
     AppHeaderComponent, SidePanelComponent
@@ -221,6 +221,9 @@ export class NotificationsPage implements OnInit {
       case 'my-bookings':
         this.router.navigate(['/my-bookings']);
         break;
+      case 'my-rides':
+        this.router.navigate(['/my-rides']);
+        break;
       case 'driver-requests':
         this.router.navigate(['/driver-requests']);
         break;
@@ -234,6 +237,12 @@ export class NotificationsPage implements OnInit {
         this.logout();
         break;
     }
+  }
+
+  onRideClick(rideId: number) {
+    this.router.navigate(['/ride-details', rideId], {
+      queryParams: { driverMode: 'true' }
+    });
   }
 
   logout() {

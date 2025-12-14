@@ -1,0 +1,151 @@
+.rides-container {
+  padding: 0;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.rides-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 16px;
+  padding-top: 16px;
+  padding-inline: 16px;
+
+  app-ride-card {
+    width: 100%;
+    max-width: 400px;
+  }
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  gap: 16px;
+
+  p {
+    color: #666;
+    font-size: 14px;
+  }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+
+  .empty-icon {
+    font-size: 80px;
+    color: #ccc;
+    margin-bottom: 16px;
+  }
+
+  h2 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 8px;
+  }
+
+  p {
+    font-size: 14px;
+    color: #666;
+    max-width: 400px;
+  }
+}
+
+.ride-card {
+  margin-bottom: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .ride-header {
+    .route-section {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+
+      ion-icon {
+        font-size: 20px;
+        color: #00B862;
+      }
+
+      ion-card-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1a1a1a;
+        margin: 0;
+      }
+    }
+
+    .ride-info {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 13px;
+      color: #666;
+
+      .info-item {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+
+        ion-icon {
+          font-size: 16px;
+          color: #00B862;
+        }
+      }
+    }
+  }
+
+  .ride-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 8px;
+
+    .detail-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+
+      .label {
+        color: #666;
+        font-weight: 500;
+      }
+
+      .value {
+        color: #1a1a1a;
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .rides-container {
+    padding: 12px;
+  }
+
+  .ride-card {
+    .ride-header {
+      .ride-info {
+        gap: 12px;
+        font-size: 12px;
+      }
+    }
+  }
+}

@@ -11,6 +11,8 @@ export interface DriveCard {
   driverFirstName: string;
   driverLastName: string;
   vehicleModel: string;
+  vehicleColor: string;
+  vehicleLicencePlate: string;
 }
 
 export interface DriveCardPage {
