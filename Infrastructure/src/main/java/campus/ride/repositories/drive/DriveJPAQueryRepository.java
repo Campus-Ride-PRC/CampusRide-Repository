@@ -76,4 +76,68 @@ public interface DriveJPAQueryRepository
         ORDER BY d.time ASC
         """)
     List<DriveRow> findAllByDriverId(@Param("driverId") Long driverId);
+
+    @Override
+    @Query("""
+        SELECT d.id as id,
+               d.time as time,
+               d.price as price,
+               CAST((d.totalNoSeats - (SELECT COUNT(b2) FROM campus.ride.entities.Booking b2 WHERE b2.drive = d AND b2.status = campus.ride.enums.BookingStatus.ACCEPTED AND b2.role = campus.ride.enums.BookingRole.CLIENT)) as int) as availableSeats,
+               d.totalNoSeats as totalNoSeats,
+               fromAddr.locationName as from_LocationName,
+               fromAddr.neighborhood as from_Neighborhood,
+               fromAddr.street as from_Street,
+               fromAddr.number as from_Number,
+               toAddr.locationName as to_LocationName,
+               toAddr.neighborhood as to_Neighborhood,
+               toAddr.street as to_Street,
+               toAddr.number as to_Number,
+               u.firstName as driver_FirstName,
+               u.lastName as driver_LastName,
+               v.vehicleModel as vehicle_Model
+        FROM Drive d
+        JOIN d.from fromAddr
+        JOIN d.to toAddr
+        JOIN d.bookings b
+        JOIN b.user u
+        LEFT JOIN u.vehicle v
+        WHERE b.role = campus.ride.enums.BookingRole.DRIVER
+          AND u.id = :driverId
+          AND b.status = campus.ride.enums.BookingStatus.ACCEPTED
+          AND d.time < :currentTime
+        ORDER BY d.time DESC
+        """)
+    List<DriveRow> findPastDrivesByDriverId(@Param("driverId") Long driverId, @Param("currentTime") java.time.LocalDateTime currentTime);
+
+    @Override
+    @Query("""
+        SELECT d.id as id,
+               d.time as time,
+               d.price as price,
+               CAST((d.totalNoSeats - (SELECT COUNT(b2) FROM campus.ride.entities.Booking b2 WHERE b2.drive = d AND b2.status = campus.ride.enums.BookingStatus.ACCEPTED AND b2.role = campus.ride.enums.BookingRole.CLIENT)) as int) as availableSeats,
+               d.totalNoSeats as totalNoSeats,
+               fromAddr.locationName as from_LocationName,
+               fromAddr.neighborhood as from_Neighborhood,
+               fromAddr.street as from_Street,
+               fromAddr.number as from_Number,
+               toAddr.locationName as to_LocationName,
+               toAddr.neighborhood as to_Neighborhood,
+               toAddr.street as to_Street,
+               toAddr.number as to_Number,
+               u.firstName as driver_FirstName,
+               u.lastName as driver_LastName,
+               v.vehicleModel as vehicle_Model
+        FROM Drive d
+        JOIN d.from fromAddr
+        JOIN d.to toAddr
+        JOIN d.bookings b
+        JOIN b.user u
+        LEFT JOIN u.vehicle v
+        WHERE b.role = campus.ride.enums.BookingRole.DRIVER
+          AND b.status = campus.ride.enums.BookingStatus.ACCEPTED
+          AND d.time > :currentTime
+          AND u.id != :driverId
+        ORDER BY d.time ASC
+        """)
+    Page<DriveRow> findUpcomingDrives(@Param("driverId") Long driverId, @Param("currentTime") java.time.LocalDateTime currentTime, Pageable pageable);
 }

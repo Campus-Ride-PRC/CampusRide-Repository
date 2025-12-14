@@ -20,12 +20,26 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     @Transactional
-    public CompletableFuture<AddressDto> getOrCreate(String street, String number, String neighborhood, String locationName, String city) {
+    public CompletableFuture<AddressDto> getOrCreate(String street, String number, String neighborhood, String locationName, String city, Double latitude, Double longitude) {
         Address address = repo.findByStreetAndNumberAndNeighborhood(street, number, neighborhood)
+                .map(existing -> {
+                    if (latitude != null && existing.getLatitude() == null) {
+                        existing.setLatitude(latitude);
+                    }
+                    if (longitude != null && existing.getLongitude() == null) {
+                        existing.setLongitude(longitude);
+                    }
+                    if (locationName != null && existing.getLocationName() == null) {
+                        existing.setLocationName(locationName);
+                    }
+                    if (city != null && existing.getCity() == null) {
+                        existing.setCity(city);
+                    }
+                    return repo.save(existing);
+                })
                 .orElseGet(() -> {
-                    Address newAddress = new Address(street, number, neighborhood, locationName, city);
-                    Address saved = repo.saveAndFlush(newAddress);
-                    return saved;
+                    Address newAddress = new Address(street, number, neighborhood, locationName, city, latitude, longitude);
+                    return repo.saveAndFlush(newAddress);
                 });
         return CompletableFuture.completedFuture(AddressMapper.toDto(address));
     }

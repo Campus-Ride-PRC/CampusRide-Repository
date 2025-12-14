@@ -7,25 +7,31 @@ public class AddressDto {
     private String locationName;
     private String neighborhood;
     private String city;
+    private Double latitude;
+    private Double longitude;
 
     public AddressDto() {
     }
 
-    public AddressDto(Long id, String street, String number, String locationName, String neighborhood, String city) {
+    public AddressDto(Long id, String street, String number, String locationName, String neighborhood, String city, Double latitude, Double longitude) {
         this.id = id;
         this.street = street;
         this.number = number;
         this.locationName = locationName;
         this.neighborhood = neighborhood;
         this.city = city;
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 
-    public AddressDto(String street, String number, String locationName, String neighborhood, String city) {
+    public AddressDto(String street, String number, String locationName, String neighborhood, String city, Double latitude, Double longitude) {
         this.street = street;
         this.number = number;
         this.locationName = locationName;
         this.neighborhood = neighborhood;
         this.city = city;
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 
     public Long getId() {
@@ -72,5 +78,19 @@ public class AddressDto {
     }
     public void setCity(String city) {
         this.city = city;
+    }
+
+    public Double getLatitude() {
+        return latitude;
+    }
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
     }
 }

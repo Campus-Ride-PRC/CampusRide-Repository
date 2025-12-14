@@ -18,12 +18,14 @@ export class Profile {
 
   private apiUrl = `${environment.apiUrl}/user/me`;
   private driverURL = `${environment.apiUrl}/drives/my-drives`;
+  private recentRidesURL = `${environment.apiUrl}/drives/my-recent-rides`;
+  
   getLoggedUser(): Observable<UserResponse> {
     return this.http.get<UserResponse>(this.apiUrl);
 
   }
   getDrives() : Observable<DriveCard[]> {
-    return this.http.get<DriveCard[]>(this.driverURL);
+    return this.http.get<DriveCard[]>(this.recentRidesURL);
   }
   getBookings(): Observable<BookingResponse[]>{
     return this.http.get<BookingResponse[]>(`${environment.apiUrl}/bookings/my-bookings`);

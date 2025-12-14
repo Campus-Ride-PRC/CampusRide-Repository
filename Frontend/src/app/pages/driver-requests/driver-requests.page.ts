@@ -37,9 +37,9 @@ interface DriveWithBookings {
   styleUrls: ['./driver-requests.page.scss'],
   standalone: true,
   imports: [
-    IonContent, IonHeader, IonTitle, IonToolbar, IonBadge,
+    IonContent, IonBadge,
     IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton,
-    IonIcon, IonSpinner, IonButtons,
+    IonIcon, IonSpinner,
     IonRefresher, IonRefresherContent,
     CommonModule, FormsModule,
     AppHeaderComponent, SidePanelComponent
@@ -72,6 +72,10 @@ export class DriverRequestsPage implements OnInit {
     this.loadUser();
   }
 
+  ionViewWillEnter() {
+    this.loadDriverRequests();
+  }
+
   loadUser() {
     this.profileService.getLoggedUser().subscribe({
       next: (data) => {
@@ -92,7 +96,6 @@ export class DriverRequestsPage implements OnInit {
       return;
     }
 
-    // Get all drives for this driver
     this.driveService.getDrivesByDriver(userId).subscribe({
       next: (drives) => {
         if (drives.length === 0) {
@@ -102,7 +105,6 @@ export class DriverRequestsPage implements OnInit {
           return;
         }
 
-        // For each drive, get pending bookings
         const requests = drives.map(drive => 
           this.bookingService.getPendingBookingsByDrive(drive.id)
         );
@@ -112,7 +114,6 @@ export class DriverRequestsPage implements OnInit {
             this.drivesWithBookings = drives
               .map((drive, index) => ({
                 drive,
-                // Filter to show only CLIENT bookings (passenger requests)
                 pendingBookings: bookingsArrays[index].filter(b => b.role === BookingRole.CLIENT)
               }))
               .filter(item => item.pendingBookings.length > 0);
@@ -186,6 +187,33 @@ export class DriverRequestsPage implements OnInit {
     });
   }
 
+  getLocationName(address: any): string {
+    if (address.neighborhood && address.neighborhood.trim()) {
+      return address.neighborhood;
+    }
+    
+    const locationName = address.locationName;
+    if (locationName && !this.looksLikeStreetNumber(locationName) && !locationName.includes(',')) {
+      return locationName;
+    }
+    
+    if (address.street && address.street.trim()) {
+      return address.street;
+    }
+    
+    return locationName || 'Unknown';
+  }
+
+  viewDriveDetails(driveId: number) {
+    this.router.navigate(['/ride-details', driveId], {
+      queryParams: { driverMode: 'true' }
+    });
+  }
+
+  private looksLikeStreetNumber(text: string): boolean {
+    return /^[\d\-\/]+$/.test(text.trim());
+  }
+
   handleRefresh(event: any) {
     this.loadDriverRequests(event);
   }
@@ -219,6 +247,9 @@ export class DriverRequestsPage implements OnInit {
       case 'my-bookings':
         this.router.navigate(['/my-bookings']);
         break;
+      case 'my-rides':
+        this.router.navigate(['/my-rides']);
+        break;
       case 'driver-requests':
         // Already on driver-requests
         break;
@@ -232,6 +263,12 @@ export class DriverRequestsPage implements OnInit {
         this.logout();
         break;
     }
+  }
+
+  onRideClick(rideId: number) {
+    this.router.navigate(['/ride-details', rideId], {
+      queryParams: { driverMode: 'true' }
+    });
   }
 
   logout() {

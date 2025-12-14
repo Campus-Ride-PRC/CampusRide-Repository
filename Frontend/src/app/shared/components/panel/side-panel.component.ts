@@ -1,4 +1,4 @@
-import {Component, Input, Output, EventEmitter, SimpleChanges} from '@angular/core';
+import {Component, Input, Output, EventEmitter, SimpleChanges, OnInit} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {IonicModule} from '@ionic/angular';
 import {PrimaryButtonComponent} from '../../../shared/components/buttons/primary-button.component';
@@ -61,9 +61,9 @@ interface PanelItem {
                 <span class="text-base text-white" style="font-weight: 600;">{{ userFirstName || 'Guest' }}</span>
               </div>
               <div class="text-xs text-gray-400" style="font-weight: 600; font-size: 12px;">
-                <span>80 rides</span>
+                <span>{{ userFirstName === 'Raul' ? '80' : '12' }} rides</span>
                 <span> • </span>
-                <span>7 friends</span>
+                <span>{{ userFirstName === 'Raul' ? '7' : '3' }} friends</span>
               </div>
             </div>
           </div>
@@ -103,12 +103,13 @@ interface PanelItem {
     </div>
   `
 })
-export class SidePanelComponent {
+export class SidePanelComponent implements OnInit {
   @Input() isOpen = false;
   @Input() userFirstName: string = '';
   @Input() userAvatar: string = '';
   @Output() closed = new EventEmitter<void>();
   @Output() itemClicked = new EventEmitter<string>();
+  @Output() rideClicked = new EventEmitter<number>();
 
   /** Icon-urile vor fi SafeHtml */
   homeIcon!: SafeHtml;
@@ -117,14 +118,16 @@ export class SidePanelComponent {
   bookingsIcon!: SafeHtml;
   requestsIcon!: SafeHtml;
   profileIcon!: SafeHtml;
+  myRidesIcon!: SafeHtml;
+  drivesIcon!: SafeHtml;
 
   /** Butoanele principale și secundare */
   mainItems: PanelItem[] = [];
   secondaryItems: PanelItem[] = [];
-  drivesIcon: SafeHtml;
 
-  constructor(private sanitizer: DomSanitizer) {
-    // Sanitizăm SVG-urile pentru Angular
+  constructor(private sanitizer: DomSanitizer) {}
+
+  ngOnInit() {
     this.homeIcon = this.sanitizer.bypassSecurityTrustHtml(`
       <svg class="w-[24px] h-[24px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -164,22 +167,29 @@ export class SidePanelComponent {
           d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
       </svg>
     `);
+
     this.profileIcon = this.sanitizer.bypassSecurityTrustHtml(`
-  <svg class="w-[24px] h-[24px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-      d="M15.75 7.5a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
-    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-      d="M4.5 20.25a8.25 8.25 0 0115 0" />
-  </svg>
-`);
+      <svg class="w-[24px] h-[24px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M15.75 7.5a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M4.5 20.25a8.25 8.25 0 0115 0" />
+      </svg>
+    `);
 
+    this.myRidesIcon = this.sanitizer.bypassSecurityTrustHtml(`
+      <svg class="w-[24px] h-[24px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+      </svg>
+    `);
 
-    // Setăm array-urile de butoane
     this.mainItems = [
       {id: 'home', label: 'Home', icon: this.homeIcon, iconPosition: 'left', textAlign: 'start'},
-      {id: 'drives', label: 'Add a ride', icon: this.drivesIcon, iconPosition: 'left', textAlign: 'start'},
+      {id: 'drives', label: 'Add a Ride', icon: this.drivesIcon, iconPosition: 'left', textAlign: 'start'},
+      {id: 'driver-requests', label: 'Ride Requests', icon: this.requestsIcon, iconPosition: 'left', textAlign: 'start'},
+      {id: 'my-rides', label: 'My Rides', icon: this.myRidesIcon, iconPosition: 'left', textAlign: 'start'},
       {id: 'my-bookings', label: 'My Bookings', icon: this.bookingsIcon, iconPosition: 'left', textAlign: 'start'},
-      {id: 'driver-requests', label: 'My Rides', icon: this.requestsIcon, iconPosition: 'left', textAlign: 'start'},
     ];
 
     this.secondaryItems = [
@@ -199,6 +209,11 @@ export class SidePanelComponent {
 
   onItemClick(itemId: string) {
     this.itemClicked.emit(itemId);
+    this.closePanel();
+  }
+
+  onRideClick(rideId: number) {
+    this.rideClicked.emit(rideId);
     this.closePanel();
   }
 }
