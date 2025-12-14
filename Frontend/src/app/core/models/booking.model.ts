@@ -1,6 +1,7 @@
 export interface BookingRequest {
   driveId: number;
   userId: number;
+  pickupAddressId?: number;
 }
 
 export interface BookingResponse {
@@ -18,6 +19,16 @@ export interface BookingResponse {
   role: BookingRole;
   requestedAt: string;
   updatedAt: string;
+  pickupAddress?: {
+    id: number;
+    street: string;
+    number: string;
+    locationName: string;
+    neighborhood: string;
+    city: string;
+    latitude: number;
+    longitude: number;
+  };
 }
 
 export enum BookingStatus {

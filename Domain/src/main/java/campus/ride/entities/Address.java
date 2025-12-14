@@ -31,14 +31,22 @@ public class Address {
     @Column(nullable = true)
     private String city;
 
+    @Column(nullable = true)
+    private Double latitude;
+
+    @Column(nullable = true)
+    private Double longitude;
+
     protected Address() {} 
 
-    public Address(String street, String number, String neighborhood, String locationName, String city) {
+    public Address(String street, String number, String neighborhood, String locationName, String city, Double latitude, Double longitude) {
         this.street = street;
         this.number = number;
         this.neighborhood = neighborhood;
         this.locationName = locationName;
         this.city = city;
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 
     public Long getId() { return id; }
@@ -58,4 +66,10 @@ public class Address {
 
     public String getCity() { return city; }
     public void setCity(String city) { this.city = city; }
+
+    public Double getLatitude() { return latitude; }
+    public void setLatitude(Double latitude) { this.latitude = latitude; }
+
+    public Double getLongitude() { return longitude; }
+    public void setLongitude(Double longitude) { this.longitude = longitude; }
 }

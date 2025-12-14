@@ -22,12 +22,12 @@
     </div>
 
     <div *ngIf="!loading && drivesWithBookings.length > 0">
-      <ion-card *ngFor="let item of drivesWithBookings" class="drive-card">
+      <ion-card *ngFor="let item of drivesWithBookings" class="drive-card" (click)="viewDriveDetails(item.drive.id)">
         <ion-card-header>
           <div class="drive-header">
             <div class="route-section">
               <ion-icon name="location-outline"></ion-icon>
-              <ion-card-title>{{item.drive.fromAddress.locationName}} → {{item.drive.toAddress.locationName}}</ion-card-title>
+              <ion-card-title>{{getLocationName(item.drive.fromAddress)}} → {{getLocationName(item.drive.toAddress)}}</ion-card-title>
             </div>
             <div class="drive-info">
               <span class="info-item">
@@ -74,7 +74,7 @@
                   class="accept-button"
                   fill="solid" 
                   size="small"
-                  (click)="acceptBooking(booking)">
+                  (click)="$event.stopPropagation(); acceptBooking(booking)">
                   <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
                   Accept
                 </ion-button>
@@ -82,7 +82,7 @@
                   class="decline-button"
                   fill="outline" 
                   size="small"
-                  (click)="declineBooking(booking)">
+                  (click)="$event.stopPropagation(); declineBooking(booking)">
                   <ion-icon name="close-circle-outline" slot="start"></ion-icon>
                   Decline
                 </ion-button>
@@ -102,6 +102,7 @@
     [userAvatar]="user ? 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + user.firstName : ''"
     (closed)="onPanelClosed()"
     (itemClicked)="onMenuItemClick($event)"
+    (rideClicked)="onRideClick($event)"
     class="pointer-events-auto">
   </app-side-panel>
 </div>

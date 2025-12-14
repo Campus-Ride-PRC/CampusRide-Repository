@@ -84,6 +84,7 @@
     [userAvatar]="user ? 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + user.firstName : ''"
     (closed)="onPanelClosed()"
     (itemClicked)="onMenuItemClick($event)"
+    (rideClicked)="onRideClick($event)"
     class="pointer-events-auto">
   </app-side-panel>
 </div>

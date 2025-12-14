@@ -1,8 +1,6 @@
-<!-- Map Container (Full Screen Background) -->
 <div class="map-wrapper">
   <div #mapContainer class="map-container"></div>
-  
-  <!-- Loading Overlay -->
+
   <div class="loading-overlay" *ngIf="loading()">
     <div class="loading-content">
       <ion-spinner name="crescent" color="light"></ion-spinner>
@@ -10,7 +8,6 @@
     </div>
   </div>
 
-  <!-- Error Overlay -->
   <div class="error-overlay" *ngIf="error() && !loading()">
     <div class="error-content">
       <ion-icon name="alert-circle-outline"></ion-icon>
@@ -20,23 +17,19 @@
     </div>
   </div>
 
-  <!-- Back Button -->
   <button (click)="goBack()" class="back-button">
     <img src="assets/icon/arrow-back.svg" alt="Back" width="20" height="20" />
   </button>
 
-  <!-- Geocoding Loading Indicator -->
   <div class="geocoding-indicator" *ngIf="isGeocoding()">
     <ion-spinner name="dots" color="light"></ion-spinner>
   </div>
 
-  <!-- Map Loading Indicator -->
   <div class="map-loading" *ngIf="!loading() && !error() && !mapLoaded()">
     <ion-spinner name="crescent" color="primary"></ion-spinner>
   </div>
 </div>
 
-<!-- Bottom Sheet Panel -->
 <div 
   class="bottom-sheet"
   *ngIf="drive && !loading() && !error()"
@@ -44,7 +37,6 @@
   [class.dragging]="isDragging()"
   [class.expanded]="isExpanded()"
 >
-  <!-- Drag Handle -->
   <div 
     class="drag-handle-area"
     (touchstart)="onDragStart($event)"
@@ -53,13 +45,9 @@
     <div class="drag-handle"></div>
   </div>
 
-  <!-- ============================================ -->
-  <!-- STEP 1: RIDE DETAILS -->
-  <!-- ============================================ -->
   <div class="sheet-content details-step" *ngIf="currentStep() === 'details'">
     <h2 class="sheet-title">Ride Details</h2>
     
-    <!-- Driver Card -->
     <div class="driver-card">
       <div class="driver-avatar">
         <img [src]="'https://api.dicebear.com/7.x/avataaars/svg?seed=' + drive.driverFirstName" [alt]="getDriverName()" />
@@ -76,7 +64,6 @@
       </div>
     </div>
 
-    <!-- Vehicle Info -->
     <div class="info-card vehicle-card">
       <div class="info-header">
         <span>Vehicle</span>
@@ -88,7 +75,6 @@
       </div>
     </div>
 
-    <!-- Route Overview -->
     <div class="route-card">
       <div class="route-point start">
         <div class="point-marker">
@@ -99,6 +85,23 @@
           <span class="point-address">{{ getFromLocation() }}</span>
         </div>
       </div>
+      
+      <ng-container *ngIf="userPickupPoint()">
+        <div class="route-connector">
+          <div class="connector-line"></div>
+        </div>
+        
+        <div class="route-point pickup user-pickup">
+          <div class="point-marker">
+            <div class="marker-half-circle"></div>
+          </div>
+          <div class="point-info">
+            <span class="point-label">Your Pickup Point</span>
+            <span class="point-address">{{ userPickupPoint()!.address }}</span>
+            <span class="pickup-badge">{{ userPickupPoint()!.status }}</span>
+          </div>
+        </div>
+      </ng-container>
       
       <div class="route-connector">
         <div class="connector-line"></div>
@@ -115,7 +118,6 @@
       </div>
     </div>
 
-    <!-- Trip Stats -->
     <div class="stats-grid">
       <div class="stat-item">
         <ion-icon name="calendar-outline"></ion-icon>
@@ -129,21 +131,37 @@
       </div>
     </div>
 
-    <!-- Book Button -->
     <div class="action-button-container">
       <button 
-        class="action-button primary"
-        [disabled]="drive.availableSeats === 0"
+        class="action-button"
+        [ngClass]="{
+          'primary': !isPastRide() && drive.availableSeats > 0 && !isCurrentUserDriver() && !userBooking(),
+          'secondary': isCurrentUserDriver() || userBooking()
+        }"
+        [disabled]="drive.availableSeats === 0 || isPastRide() || isCurrentUserDriver() || userBooking()"
         (click)="proceedToPickup()"
       >
-        {{ drive.availableSeats > 0 ? 'Book a Seat' : 'No Seats Available' }}
+        <span *ngIf="isPastRide()">This Ride Has Already Departed</span>
+        <span *ngIf="!isPastRide() && isCurrentUserDriver()">Can't book, you are the driver</span>
+        <span *ngIf="!isPastRide() && !isCurrentUserDriver() && userBooking()">Already Booked</span>
+        <span *ngIf="!isPastRide() && !isCurrentUserDriver() && !userBooking() && drive.availableSeats > 0">Book a Seat</span>
+        <span *ngIf="!isPastRide() && !isCurrentUserDriver() && !userBooking() && drive.availableSeats === 0">No Seats Available</span>
       </button>
+      <p *ngIf="isPastRide()" class="past-ride-message">
+        <ion-icon name="information-circle-outline"></ion-icon>
+        This ride has already departed and is no longer available for booking.
+      </p>
+      <p *ngIf="!isPastRide() && isCurrentUserDriver()" class="info-message">
+        <ion-icon name="information-circle-outline"></ion-icon>
+        You cannot book your own ride.
+      </p>
+      <p *ngIf="!isPastRide() && !isCurrentUserDriver() && userBooking()" class="info-message">
+        <ion-icon name="checkmark-circle-outline"></ion-icon>
+        You have already booked this ride. Status: {{ userBooking()?.status }}
+      </p>
     </div>
   </div>
 
-  <!-- ============================================ -->
-  <!-- STEP 2: PICKUP LOCATION SELECTION -->
-  <!-- ============================================ -->
   <div class="sheet-content pickup-step" *ngIf="currentStep() === 'pickup'">
     <div class="step-header">
       <button class="back-btn" (click)="backToDetails()">
@@ -154,9 +172,7 @@
 
     <p class="step-description">Where do you want to be picked up on the route?</p>
 
-    <!-- Location Inputs (like the reference image) -->
     <div class="location-inputs">
-      <!-- Start Point (Driver's Origin) - Read Only -->
       <div class="location-input-row readonly">
         <div class="location-marker start">
           <div class="marker-dot"></div>
@@ -169,12 +185,10 @@
         </div>
       </div>
 
-      <!-- Route Connector -->
       <div class="route-connector">
         <div class="connector-line"></div>
       </div>
 
-      <!-- Your Pickup Point (Editable) -->
       <div 
         class="location-input-row editable"
         [class.active]="true"
@@ -204,12 +218,10 @@
         </div>
       </div>
 
-      <!-- Route Connector -->
       <div class="route-connector">
         <div class="connector-line"></div>
       </div>
 
-      <!-- Finish Point (Driver's Destination) - Read Only -->
       <div class="location-input-row readonly">
         <div class="location-marker end">
           <div class="marker-square"></div>
@@ -223,7 +235,6 @@
       </div>
     </div>
 
-    <!-- Pickup Suggestions -->
     <div class="suggestions-list" *ngIf="showPickupSuggestions() && pickupSuggestions().length > 0">
       <div 
         class="suggestion-item"
@@ -239,19 +250,16 @@
       </div>
     </div>
 
-    <!-- Existing Pickup Points Info -->
     <div class="existing-pickups-hint" *ngIf="existingPickupPoints().length > 0 && !showPickupSuggestions()">
       <ion-icon name="people-outline"></ion-icon>
       <span>Tap orange markers on the map to join existing pickup points</span>
     </div>
 
-    <!-- Map Selection Hint -->
     <div class="map-hint" *ngIf="mapLoaded() && !showPickupSuggestions() && existingPickupPoints().length === 0">
       <ion-icon name="finger-print-outline"></ion-icon>
       <span>Tap on the blue route line to select your pickup point</span>
     </div>
 
-    <!-- Continue Button -->
     <div class="action-button-container">
       <button
         class="action-button primary"
@@ -263,9 +271,6 @@
     </div>
   </div>
 
-  <!-- ============================================ -->
-  <!-- STEP 3: CONFIRMATION -->
-  <!-- ============================================ -->
   <div class="sheet-content confirmation-step" *ngIf="currentStep() === 'confirmation'">
     <div class="step-header">
       <button class="back-btn" (click)="backToPickup()">
@@ -274,11 +279,9 @@
       <h2>Confirm Booking</h2>
     </div>
 
-    <!-- Booking Summary Card -->
     <div class="summary-card">
       <h3 class="summary-title">Booking Summary</h3>
       
-      <!-- Route Summary -->
       <div class="summary-route">
         <div class="route-point">
           <div class="point-marker pickup">
@@ -305,7 +308,6 @@
         </div>
       </div>
 
-      <!-- Summary Details -->
       <div class="summary-details">
         <div class="summary-row">
           <span class="summary-label">Driver</span>
@@ -326,7 +328,6 @@
       </div>
     </div>
 
-    <!-- Action Buttons -->
     <div class="action-buttons-row">
       <button class="action-button secondary" (click)="backToPickup()">
         Edit

@@ -28,9 +28,9 @@ import { UserResponse } from 'src/app/core/models/userResponse';
   styleUrls: ['./my-bookings.page.scss'],
   standalone: true,
   imports: [
-    IonContent, IonHeader, IonTitle, IonToolbar,
+    IonContent,
     IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton,
-    IonIcon, IonBadge, IonSpinner, IonButtons,
+    IonIcon, IonSpinner,
     CommonModule, FormsModule,
     AppHeaderComponent, SidePanelComponent
   ]
@@ -83,11 +83,9 @@ export class MyBookingsPage implements OnInit {
 
     this.bookingService.getBookingsByUser(userId).subscribe({
       next: (bookings) => {
-        // Filter to show only bookings where user is CLIENT (passenger)
         this.bookings = bookings
           .filter(booking => booking.role === BookingRole.CLIENT)
           .sort((a, b) => {
-            // Sort by status priority: PENDING > ACCEPTED > others
             const statusOrder: Record<BookingStatus, number> = { 
               PENDING: 1, 
               ACCEPTED: 2, 
@@ -138,6 +136,13 @@ export class MyBookingsPage implements OnInit {
 
   canCancel(booking: BookingResponse): boolean {
     return booking.status === BookingStatus.PENDING || booking.status === BookingStatus.ACCEPTED;
+  }
+
+  viewRideDetails(driveId: number) {
+    const userId = this.authService.getCurrentUserId();
+    this.router.navigate(['/ride-details', driveId], {
+      queryParams: { returnTo: 'my-bookings', userId: userId }
+    });
   }
 
   getStatusColor(status: BookingStatus): string {
@@ -220,6 +225,9 @@ export class MyBookingsPage implements OnInit {
       case 'my-bookings':
         // Already on my-bookings
         break;
+      case 'my-rides':
+        this.router.navigate(['/my-rides']);
+        break;
       case 'driver-requests':
         this.router.navigate(['/driver-requests']);
         break;
@@ -233,6 +241,12 @@ export class MyBookingsPage implements OnInit {
         this.logout();
         break;
     }
+  }
+
+  onRideClick(rideId: number) {
+    this.router.navigate(['/ride-details', rideId], {
+      queryParams: { driverMode: 'true' }
+    });
   }
 
   logout() {

@@ -1,12 +1,13 @@
 /// <reference types="google.maps" />
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef, signal, computed, HostListener } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { IonicModule, ToastController, AlertController } from '@ionic/angular';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { DriveService } from 'src/app/core/services/drive.service';
 import { BookingService } from 'src/app/core/services/booking.service';
 import { AuthService } from 'src/app/core/services/auth.service';
+import { AddressService } from 'src/app/core/services/address.service';
 import { GoogleMapsService, ParsedAddress } from 'src/app/core/services/google-maps.service';
 import { DriveDetails } from 'src/app/core/models/drive-details.model';
 import { BookingRequest } from 'src/app/core/models/booking.model';
@@ -27,6 +28,13 @@ interface ExistingPickupPoint {
   address: string;
   passengerCount: number;
   passengerNames: string[];
+  passengers: Array<{
+    firstName: string;
+    lastName: string;
+    email: string;
+    status: string;
+  }>;
+  status: 'PENDING' | 'ACCEPTED' | 'MIXED';
 }
 
 @Component({
@@ -42,6 +50,7 @@ export class RideDetailsPage implements OnInit, OnDestroy {
 
   driveId!: number;
   drive: DriveDetails | null = null;
+  isDriverView: boolean = false;
 
   // Signals for reactive state
   readonly mapLoaded = signal(false);
@@ -58,6 +67,11 @@ export class RideDetailsPage implements OnInit, OnDestroy {
   readonly pickupLocation = signal<{ lat: number; lng: number } | null>(null);
   readonly existingPickupPoints = signal<ExistingPickupPoint[]>([]);
   
+  // Booking state
+  readonly userBooking = signal<any | null>(null);
+  readonly isCurrentUserDriver = signal(false);
+  readonly userPickupPoint = signal<ExistingPickupPoint | null>(null);
+  
   // Search suggestions
   readonly pickupSuggestions = signal<PlaceSuggestion[]>([]);
   readonly showPickupSuggestions = signal(false);
@@ -68,10 +82,20 @@ export class RideDetailsPage implements OnInit, OnDestroy {
   readonly isExpanded = signal(false);
 
   // Computed signals
+  readonly isPastRide = computed(() => {
+    if (!this.drive) return false;
+    const driveTime = new Date(this.drive.time);
+    const now = new Date();
+    return driveTime < now;
+  });
+
   readonly canBookRide = computed(() => 
     this.pickupLocation() !== null && 
     this.drive !== null && 
-    this.drive.availableSeats > 0
+    this.drive.availableSeats > 0 &&
+    !this.isPastRide() &&
+    !this.isCurrentUserDriver() &&
+    !this.userBooking()
   );
   
   readonly showDetailsPanel = computed(() => this.currentStep() === 'details');
@@ -84,6 +108,7 @@ export class RideDetailsPage implements OnInit, OnDestroy {
   private startMarker: google.maps.Marker | null = null;
   private endMarker: google.maps.Marker | null = null;
   private existingPickupMarkers: google.maps.Marker[] = [];
+  private currentInfoWindow: google.maps.InfoWindow | null = null;
   private autocompleteService: google.maps.places.AutocompleteService | null = null;
   private placesService: google.maps.places.PlacesService | null = null;
   
@@ -101,9 +126,11 @@ export class RideDetailsPage implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
+    private location: Location,
     private driveService: DriveService,
     private bookingService: BookingService,
     private authService: AuthService,
+    private addressService: AddressService,
     private mapsService: GoogleMapsService,
     private toastController: ToastController,
     private alertController: AlertController
@@ -115,6 +142,11 @@ export class RideDetailsPage implements OnInit, OnDestroy {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.driveId = parseInt(id, 10);
+      
+      // Check if this is driver view based on query parameter
+      const driverMode = this.route.snapshot.queryParamMap.get('driverMode');
+      this.isDriverView = driverMode === 'true';
+      
       this.loadDriveDetails();
     } else {
       this.error.set('Invalid drive ID');
@@ -261,6 +293,25 @@ export class RideDetailsPage implements OnInit, OnDestroy {
         this.drive = response;
         this.loading.set(false);
         
+        // Check if current user is the driver
+        let currentUserId = this.authService.getCurrentUserId();
+        
+        // Check if userId was passed via query params (from my-bookings)
+        const userIdFromQuery = this.route.snapshot.queryParamMap.get('userId');
+        if (userIdFromQuery) {
+          currentUserId = parseInt(userIdFromQuery, 10);
+        }
+        
+        if (currentUserId) {
+          const isDriver = response.driverId === currentUserId;
+          this.isCurrentUserDriver.set(isDriver);
+          
+          // Only check for user booking if user is not the driver
+          if (!isDriver) {
+            this.checkUserBooking(currentUserId);
+          }
+        }
+        
         // Mock existing pickup points (replace with actual API call)
         this.loadExistingPickupPoints();
         
@@ -277,18 +328,69 @@ export class RideDetailsPage implements OnInit, OnDestroy {
   }
 
   private loadExistingPickupPoints() {
-    // TODO: Replace with actual API call to get existing bookings with their pickup points
-    // For now, this is mock data
-    this.existingPickupPoints.set([
-      // Example mock data - in production, this would come from the API
-      // {
-      //   lat: 46.77,
-      //   lng: 23.60,
-      //   address: 'Central Station',
-      //   passengerCount: 2,
-      //   passengerNames: ['John D.', 'Maria S.']
-      // }
-    ]);
+    // Fetch bookings for this drive to show pickup points
+    this.bookingService.getBookingsByDrive(this.driveId).subscribe({
+      next: (bookings) => {
+        // Group bookings by pickup location
+        const locationMap = new Map<string, ExistingPickupPoint>();
+        
+        // For driver view, show both PENDING and ACCEPTED bookings
+        // For passenger view, show only ACCEPTED bookings
+        const filteredBookings = this.isDriverView 
+          ? bookings.filter(b => 
+              (b.status === 'ACCEPTED' || b.status === 'PENDING') && 
+              b.pickupAddress?.latitude && 
+              b.pickupAddress?.longitude
+            )
+          : bookings.filter(b => 
+              b.status === 'ACCEPTED' && 
+              b.pickupAddress?.latitude && 
+              b.pickupAddress?.longitude
+            );
+        
+        filteredBookings.forEach(booking => {
+          const key = `${booking.pickupAddress!.latitude},${booking.pickupAddress!.longitude}`;
+          const existing = locationMap.get(key);
+          
+          const passengerInfo = {
+            firstName: booking.userFirstName,
+            lastName: booking.userLastName,
+            email: booking.userEmail,
+            status: booking.status
+          };
+          
+          if (existing) {
+            existing.passengerCount++;
+            existing.passengerNames.push(`${booking.userFirstName} ${booking.userLastName.charAt(0)}.`);
+            existing.passengers.push(passengerInfo);
+            
+            // Update status: if any booking is PENDING, mark as MIXED (if already has ACCEPTED) or PENDING
+            if (booking.status === 'PENDING' && existing.status === 'ACCEPTED') {
+              existing.status = 'MIXED';
+            } else if (booking.status === 'ACCEPTED' && existing.status === 'PENDING') {
+              existing.status = 'MIXED';
+            }
+          } else {
+            locationMap.set(key, {
+              lat: booking.pickupAddress!.latitude,
+              lng: booking.pickupAddress!.longitude,
+              address: booking.pickupAddress!.locationName || booking.pickupAddress!.street || 'Pickup location',
+              passengerCount: 1,
+              passengerNames: [`${booking.userFirstName} ${booking.userLastName.charAt(0)}.`],
+              passengers: [passengerInfo],
+              status: booking.status as 'PENDING' | 'ACCEPTED'
+            });
+          }
+        });
+        
+        this.existingPickupPoints.set(Array.from(locationMap.values()));
+        this.displayExistingPickupMarkers();
+      },
+      error: (error) => {
+        console.error('Error loading pickup points:', error);
+        this.existingPickupPoints.set([]);
+      }
+    });
   }
 
   private async initializeMap() {
@@ -313,7 +415,14 @@ export class RideDetailsPage implements OnInit, OnDestroy {
       this.placesService = new google.maps.places.PlacesService(this.map);
 
       // Add click listener for pickup point selection (only active in pickup step)
+      // Also close info window when clicking on map
       this.map.addListener('click', (event: any) => {
+        // Close any open info window when clicking on the map
+        if (this.currentInfoWindow) {
+          this.currentInfoWindow.close();
+          this.currentInfoWindow = null;
+        }
+        
         if (this.currentStep() === 'pickup') {
           this.onMapClick(event);
         }
@@ -438,37 +547,316 @@ export class RideDetailsPage implements OnInit, OnDestroy {
     this.existingPickupMarkers.forEach(marker => marker.setMap(null));
     this.existingPickupMarkers = [];
 
-    const pickupPoints = this.existingPickupPoints();
+    let pickupPoints = [...this.existingPickupPoints()];
+    
+    // Add user's pickup point if it exists and not already in the list
+    const userPickup = this.userPickupPoint();
+    if (userPickup) {
+      const existingIndex = pickupPoints.findIndex(p => 
+        Math.abs(p.lat - userPickup.lat) < 0.0001 && 
+        Math.abs(p.lng - userPickup.lng) < 0.0001
+      );
+      
+      if (existingIndex === -1) {
+        // Add user's pickup point to the list
+        pickupPoints.push(userPickup);
+      }
+    }
     
     for (const point of pickupPoints) {
+      // Check if this is the user's pickup point
+      const isUserPickup = userPickup && 
+        Math.abs(point.lat - userPickup.lat) < 0.0001 && 
+        Math.abs(point.lng - userPickup.lng) < 0.0001;
+      
+      // Determine marker color based on status
+      let markerColor: string;
+      let statusLabel: string;
+      let markerScale: number = 12;
+      
+      if (isUserPickup) {
+        // Highlight user's pickup point with purple and larger size
+        markerColor = '#8B5CF6'; // Purple
+        statusLabel = 'Your Pickup';
+        markerScale = 16; // Larger marker
+      } else if (this.isDriverView) {
+        // For driver view: Green for ACCEPTED, Orange for PENDING
+        if (point.status === 'ACCEPTED') {
+          markerColor = '#10B981'; // Green
+          statusLabel = 'Accepted';
+        } else if (point.status === 'PENDING') {
+          markerColor = '#F59E0B'; // Orange
+          statusLabel = 'Pending';
+        } else {
+          markerColor = '#8B5CF6'; // Purple for mixed
+          statusLabel = 'Mixed';
+        }
+      } else {
+        // For passenger view: always orange/amber for existing pickups
+        markerColor = '#F59E0B';
+        statusLabel = 'Pickup';
+      }
+      
       const marker = await this.mapsService.createMarker(this.map, { lat: point.lat, lng: point.lng }, {
-        title: `${point.passengerCount} passenger(s) here`,
+        title: `${point.passengerCount} passenger(s) - ${statusLabel}`,
         icon: {
           path: google.maps.SymbolPath.CIRCLE,
-          scale: 12,
-          fillColor: '#F59E0B', // Orange/amber for existing pickups
+          scale: markerScale,
+          fillColor: markerColor,
           fillOpacity: 1,
-          strokeColor: '#ffffff',
-          strokeWeight: 3
+          strokeColor: isUserPickup ? '#ffffff' : '#ffffff',
+          strokeWeight: isUserPickup ? 4 : 3
         },
         label: {
-          text: point.passengerCount.toString(),
+          text: isUserPickup ? '★' : point.passengerCount.toString(),
           color: '#ffffff',
           fontWeight: 'bold',
-          fontSize: '12px'
-        }
+          fontSize: isUserPickup ? '16px' : '12px',
+          fontFamily: isUserPickup ? 'Arial, sans-serif' : undefined
+        },
+        zIndex: isUserPickup ? 1000 : undefined
       });
 
-      // Add click listener to select this point
-      marker.addListener('click', () => {
-        this.selectExistingPickupPoint(point);
-      });
+      // Add click listener
+      if (this.isDriverView) {
+        // For driver: show passenger info in info window
+        marker.addListener('click', () => {
+          this.showPassengerInfo(marker, point);
+        });
+      } else if (!isUserPickup) {
+        // For passenger: select this pickup point (but not for user's own pickup)
+        marker.addListener('click', () => {
+          this.selectExistingPickupPoint(point);
+        });
+      }
 
       this.existingPickupMarkers.push(marker);
     }
   }
 
+  private showPassengerInfo(marker: google.maps.Marker, point: ExistingPickupPoint) {
+    if (this.currentInfoWindow) {
+      this.currentInfoWindow.close();
+    }
+
+    let content = `
+      <div style="padding: 8px; max-width: 240px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+        <h3 style="margin: 0 0 6px 0; font-size: 14px; font-weight: 600; color: #1a1a1a;">
+          Pickup Location
+        </h3>
+        <p style="margin: 0 0 8px 0; font-size: 12px; color: #666;">
+          <strong>📍 ${point.address}</strong>
+        </p>
+        <div style="border-top: 1px solid #e5e5e5; padding-top: 8px;">
+          <h4 style="margin: 0 0 6px 0; font-size: 13px; font-weight: 600; color: #1a1a1a;">
+            Passengers (${point.passengerCount})
+          </h4>
+    `;
+
+    point.passengers.forEach((passenger, index) => {
+      const statusColor = passenger.status === 'ACCEPTED' ? '#10B981' : '#F59E0B';
+      const statusEmoji = passenger.status === 'ACCEPTED' ? '✓' : '⏳';
+      const isPending = passenger.status === 'PENDING';
+      
+      content += `
+        <div style="margin-bottom: ${index < point.passengers.length - 1 ? '6px' : '0'}; padding: 6px; background: #f9f9f9; border-radius: 4px;">
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <div style="flex: 1;">
+                <div style="font-size: 13px; font-weight: 500; color: #1a1a1a; margin-bottom: 2px;">
+                  ${passenger.firstName} ${passenger.lastName}
+                </div>
+                <div style="font-size: 11px; color: #666;">
+                  ${passenger.email}
+                </div>
+              </div>
+              <div style="margin-left: 6px;">
+                <span style="
+                  display: inline-block;
+                  padding: 3px 6px;
+                  font-size: 10px;
+                  font-weight: 600;
+                  color: white;
+                  background-color: ${statusColor};
+                  border-radius: 10px;
+                ">
+                  ${statusEmoji} ${passenger.status}
+                </span>
+              </div>
+            </div>
+            ${isPending ? `
+              <div style="display: flex; gap: 4px; padding-top: 4px;">
+                <button 
+                  class="accept-passenger-btn"
+                  data-passenger-email="${passenger.email}"
+                  style="
+                    flex: 1;
+                    padding: 5px 8px;
+                    font-size: 11px;
+                    font-weight: 600;
+                    color: white;
+                    background-color: #10B981;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    transition: background-color 0.2s;
+                  "
+                  onmouseover="this.style.backgroundColor='#059669'"
+                  onmouseout="this.style.backgroundColor='#10B981'"
+                >
+                  ✓ ACCEPTED
+                </button>
+                <button 
+                  class="decline-passenger-btn"
+                  data-passenger-email="${passenger.email}"
+                  style="
+                    flex: 1;
+                    padding: 5px 8px;
+                    font-size: 11px;
+                    font-weight: 600;
+                    color: white;
+                    background-color: #EF4444;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    transition: background-color 0.2s;
+                  "
+                  onmouseover="this.style.backgroundColor='#DC2626'"
+                  onmouseout="this.style.backgroundColor='#EF4444'"
+                >
+                  ✕ Decline
+                </button>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    });
+
+    content += `
+        </div>
+      </div>
+    `;
+
+    this.currentInfoWindow = new google.maps.InfoWindow({
+      content: content
+    });
+
+    this.currentInfoWindow.open(this.map!, marker);
+
+    google.maps.event.addListenerOnce(this.currentInfoWindow, 'domready', () => {
+      document.querySelectorAll('.accept-passenger-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const email = (e.target as HTMLElement).getAttribute('data-passenger-email');
+          const passenger = point.passengers.find(p => p.email === email);
+          if (passenger) {
+            this.handleAcceptPassenger(passenger);
+          }
+        });
+      });
+
+      document.querySelectorAll('.decline-passenger-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const email = (e.target as HTMLElement).getAttribute('data-passenger-email');
+          const passenger = point.passengers.find(p => p.email === email);
+          if (passenger) {
+            this.handleDeclinePassenger(passenger);
+          }
+        });
+      });
+    });
+  }
+
+  private async handleAcceptPassenger(passenger: { firstName: string; lastName: string; email: string; status: string }) {
+    if (!this.drive) return;
+
+    if (this.currentInfoWindow) {
+      this.currentInfoWindow.close();
+    }
+
+    this.bookingService.getBookingsByDrive(this.driveId).subscribe({
+      next: (bookings) => {
+        const booking = bookings.find(b => b.userEmail === passenger.email && b.status === 'PENDING');
+        if (booking) {
+          this.bookingService.acceptBooking(this.driveId, booking.userId).subscribe({
+            next: async () => {
+              await this.showToast(`Accepted ${passenger.firstName} ${passenger.lastName}`, 'success');
+              this.loadExistingPickupPoints();
+            },
+            error: async (error) => {
+              console.error('Error accepting booking:', error);
+              await this.showToast('Failed to accept booking. Please try again.', 'danger');
+            }
+          });
+        }
+      },
+      error: async (error) => {
+        console.error('Error fetching bookings:', error);
+        await this.showToast('Failed to process request', 'danger');
+      }
+    });
+  }
+
+  private async handleDeclinePassenger(passenger: { firstName: string; lastName: string; email: string; status: string }) {
+    if (!this.drive) return;
+
+    if (this.currentInfoWindow) {
+      this.currentInfoWindow.close();
+    }
+
+    const alert = await this.alertController.create({
+      header: 'Decline Booking',
+      message: `Are you sure you want to decline ${passenger.firstName} ${passenger.lastName}'s booking request?`,
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        },
+        {
+          text: 'Decline',
+          role: 'destructive',
+          handler: () => {
+            this.bookingService.getBookingsByDrive(this.driveId).subscribe({
+              next: (bookings) => {
+                const booking = bookings.find(b => b.userEmail === passenger.email && b.status === 'PENDING');
+                if (booking) {
+                  this.bookingService.declineBooking(this.driveId, booking.userId).subscribe({
+                    next: async () => {
+                      await this.showToast(`Declined ${passenger.firstName} ${passenger.lastName}`, 'success');
+                      this.loadExistingPickupPoints();
+                    },
+                    error: async (error) => {
+                      console.error('Error declining booking:', error);
+                      await this.showToast('Failed to decline booking. Please try again.', 'danger');
+                    }
+                  });
+                }
+              },
+              error: async (error) => {
+                console.error('Error fetching bookings:', error);
+                await this.showToast('Failed to process request', 'danger');
+              }
+            });
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
   private async selectExistingPickupPoint(point: ExistingPickupPoint) {
+    // Check if this is the user's own pickup point
+    const userPickup = this.userPickupPoint();
+    const isUserPickup = userPickup && 
+      Math.abs(point.lat - userPickup.lat) < 0.0001 && 
+      Math.abs(point.lng - userPickup.lng) < 0.0001;
+    
+    // Don't allow selecting user's own pickup point
+    if (isUserPickup) {
+      return;
+    }
+    
     this.pickupLocation.set({ lat: point.lat, lng: point.lng });
     
     const parsedAddress: ParsedAddress = {
@@ -558,7 +946,7 @@ export class RideDetailsPage implements OnInit, OnDestroy {
         icon: {
           path: google.maps.SymbolPath.CIRCLE,
           scale: 14,
-          fillColor: '#8B5CF6', // Purple for user's pickup
+          fillColor: '#8B5CF6', 
           fillOpacity: 1,
           strokeColor: '#ffffff',
           strokeWeight: 3
@@ -896,16 +1284,33 @@ Price: ${this.formatPrice()}`,
 
     this.requestingRide.set(true);
     
-    const request: BookingRequest = {
-      driveId: this.driveId,
-      userId: userId
-      // TODO: Add pickup point to the request when backend supports it
-      // pickupLatitude: this.pickupLocation()?.lat,
-      // pickupLongitude: this.pickupLocation()?.lng,
-      // pickupAddress: this.getPickupLocation()
-    };
+    const pickupLoc = this.pickupLocation();
+    const pickupAddr = this.pickupAddress();
+    
+    if (!pickupLoc || !pickupAddr) {
+      this.requestingRide.set(false);
+      this.showToast('Please select a pickup location', 'warning');
+      return;
+    }
 
-    this.bookingService.requestRide(request).subscribe({
+    // First create the address, then use its ID for the booking
+    this.addressService.createAddress({
+      street: pickupAddr.street || '',
+      number: pickupAddr.number || '',
+      locationName: pickupAddr.locationName || '',
+      neighborhood: pickupAddr.neighborhood || '',
+      city: pickupAddr.city || '',
+      latitude: pickupLoc.lat,
+      longitude: pickupLoc.lng
+    }).subscribe({
+      next: (address) => {
+        const request: BookingRequest = {
+          driveId: this.driveId,
+          userId: userId,
+          pickupAddressId: address.id
+        };
+
+        this.bookingService.requestRide(request).subscribe({
       next: async (response) => {
         this.requestingRide.set(false);
         await this.showToast('Booking confirmed! Status: ' + response.status, 'success');
@@ -913,20 +1318,60 @@ Price: ${this.formatPrice()}`,
           this.router.navigate(['/home']);
         }, 1500);
       },
+        error: async (error) => {
+          this.requestingRide.set(false);
+          console.error('Error booking ride:', error);
+          
+          let errorMessage = 'Failed to book ride. Please try again.';
+          if (error.error?.message) {
+            errorMessage = error.error.message;
+          } else if (error.status === 400) {
+            errorMessage = 'Bad request. Please check your information.';
+          } else if (error.status === 404) {
+            errorMessage = 'Drive or user not found.';
+          }
+          
+          await this.showToast(errorMessage, 'danger');
+        }
+      });
+      },
       error: async (error) => {
         this.requestingRide.set(false);
-        console.error('Error booking ride:', error);
+        console.error('Error creating pickup address:', error);
+        await this.showToast('Failed to create pickup address. Please try again.', 'danger');
+      }
+    });
+  }
+
+  private checkUserBooking(userId: number) {
+    this.bookingService.getBooking(this.driveId, userId).subscribe({
+      next: (booking) => {
+        this.userBooking.set(booking);
         
-        let errorMessage = 'Failed to book ride. Please try again.';
-        if (error.error?.message) {
-          errorMessage = error.error.message;
-        } else if (error.status === 400) {
-          errorMessage = 'Bad request. Please check your information.';
-        } else if (error.status === 404) {
-          errorMessage = 'Drive or user not found.';
+        // If booking has pickup address, create a pickup point for it
+        if (booking.pickupAddress) {
+          const userPickup: ExistingPickupPoint = {
+            lat: booking.pickupAddress.latitude,
+            lng: booking.pickupAddress.longitude,
+            address: booking.pickupAddress.locationName || booking.pickupAddress.street,
+            passengerCount: 1,
+            passengerNames: [`${booking.userFirstName} ${booking.userLastName}`],
+            passengers: [{
+              firstName: booking.userFirstName,
+              lastName: booking.userLastName,
+              email: booking.userEmail,
+              status: booking.status
+            }],
+            status: booking.status === 'ACCEPTED' ? 'ACCEPTED' : booking.status === 'PENDING' ? 'PENDING' : 'MIXED'
+          };
+          this.userPickupPoint.set(userPickup);
         }
-        
-        await this.showToast(errorMessage, 'danger');
+      },
+      error: (error) => {
+        // No booking found (404 is expected)
+        if (error.status !== 404) {
+          console.error('Error checking user booking:', error);
+        }
       }
     });
   }
@@ -947,11 +1392,21 @@ Price: ${this.formatPrice()}`,
     } else if (this.currentStep() === 'confirmation') {
       this.backToPickup();
     } else {
-      this.router.navigate(['/home']);
+      // Check if we should return to a specific page
+      const returnTo = this.route.snapshot.queryParamMap.get('returnTo');
+      if (returnTo === 'my-bookings') {
+        this.router.navigate(['/my-bookings']);
+      } else {
+        this.location.back();
+      }
     }
   }
 
   private cleanupMap() {
+    if (this.currentInfoWindow) {
+      this.currentInfoWindow.close();
+      this.currentInfoWindow = null;
+    }
     if (this.map) {
       this.mapsService.destroyMap(this.map);
       this.map = null;

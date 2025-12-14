@@ -23,7 +23,8 @@ public class BookingMapper {
                 booking.getStatus(),
                 booking.getRole(),
                 booking.getRequestedAt(),
-                booking.getUpdatedAt()
+                booking.getUpdatedAt(),
+                AddressMapper.toDto(booking.getPickupAddress())
         );
     }
 }

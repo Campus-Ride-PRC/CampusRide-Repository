@@ -30,7 +30,7 @@
     </div>
     <div class="button-section" style="padding-inline: 8px !important; padding-bottom: 8px !important;">
       <p class="title-b text-center">My Bookings</p>
-      <app-booking-card *ngFor="let booking of myBookings" [booking]="booking"></app-booking-card>
+      <app-booking-card *ngFor="let booking of myBookings" [booking]="booking" (cardClick)="onBookingClick($event)"></app-booking-card>
       <p *ngIf="myBookings.length === 0" class="text-[#888] text-center py-4">You don't have any bookings yet</p>
     </div>
     <div class="button-section" *ngIf="myBookings.length > 0" style="padding-inline: 8px !important; padding-bottom: 8px !important;">
@@ -73,6 +73,7 @@
     [userAvatar]="user ? 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + user.firstName : ''"
     (closed)="onPanelClosed()"
     (itemClicked)="onMenuItemClick($event)"
+    (rideClicked)="onRideClick($event)"
     class="pointer-events-auto">
   </app-side-panel>
 </div>

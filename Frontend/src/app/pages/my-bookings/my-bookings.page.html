@@ -23,7 +23,7 @@
              style="padding: 8px 16px; text-align: center; font-weight: 600; font-size: 14px; color: white; border-radius: 12px 12px 0 0;">
           {{getStatusLabel(booking.status)}}
         </div>
-        <ion-card class="booking-card" style="margin: 0; border-radius: 0 0 12px 12px;">
+        <ion-card class="booking-card" style="margin: 0; border-radius: 0 0 12px 12px; cursor: pointer;" (click)="viewRideDetails(booking.driveId)">
           <ion-card-header>
             <div class="card-header">
               <div class="title-section">
@@ -90,6 +90,7 @@
     [userAvatar]="user ? 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + user.firstName : ''"
     (closed)="onPanelClosed()"
     (itemClicked)="onMenuItemClick($event)"
+    (rideClicked)="onRideClick($event)"
     class="pointer-events-auto">
   </app-side-panel>
 </div>

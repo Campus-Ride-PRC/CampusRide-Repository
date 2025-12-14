@@ -8,6 +8,7 @@ export interface DriveDetails {
   totalNoSeats: number;
   fromAddress: Address;
   toAddress: Address;
+  driverId: number;
   driverFirstName: string;
   driverLastName: string;
   vehicleModel: string;

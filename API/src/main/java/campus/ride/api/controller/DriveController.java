@@ -144,6 +144,42 @@ public class DriveController {
     }
 
     @Operation(
+            summary = "Get my recent rides",
+            description = "Retrieves all past/completed drives for the current authenticated user where departure time is before current timestamp"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successfully retrieved recent rides",
+                    content = @Content(schema = @Schema(implementation = DriveCardDto.class))
+            )
+    })
+    @GetMapping("/my-recent-rides")
+    public CompletableFuture<ResponseEntity<java.util.List<DriveCardDto>>> getMyRecentRides() {
+        return driveService.getMyRecentRides()
+                .thenApply(ResponseEntity::ok);
+    }
+
+    @Operation(
+            summary = "Get upcoming drives",
+            description = "Retrieves all available drives with departure times in the future for the home page. Public endpoint."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successfully retrieved upcoming drives",
+                    content = @Content(schema = @Schema(implementation = Page.class))
+            )
+    })
+    @GetMapping("/upcoming")
+    public CompletableFuture<ResponseEntity<Page<DriveCardDto>>> getUpcomingDrives(
+            @Parameter(description = "Pagination parameters (page, size, sort)")
+            Pageable pageable) {
+        return driveService.getUpcomingDrives(pageable)
+                .thenApply(ResponseEntity::ok);
+    }
+
+    @Operation(
             summary = "Create new drive",
             description = "Creates a new ride/drive listing with origin, destination, time, and vehicle details"
     )
@@ -168,11 +204,23 @@ public class DriveController {
         LocalDateTime time = LocalDateTime.of(req.getDay(), req.getHour());
 
         CompletableFuture<AddressDto> fromFuture = addressService.getOrCreate(
-                req.getFromAddress().getStreet(), req.getFromAddress().getNumber(), req.getFromAddress().getNeighborhood(), req.getFromAddress().getLocationName(), req.getFromAddress().getCity()
+                req.getFromAddress().getStreet(),
+                req.getFromAddress().getNumber(),
+                req.getFromAddress().getNeighborhood(),
+                req.getFromAddress().getLocationName(),
+                req.getFromAddress().getCity(),
+                req.getFromAddress().getLatitude(),
+                req.getFromAddress().getLongitude()
         );
         
         CompletableFuture<AddressDto> toFuture = addressService.getOrCreate(
-                req.getToAddress().getStreet(), req.getToAddress().getNumber(), req.getToAddress().getNeighborhood(), req.getToAddress().getLocationName(), req.getToAddress().getCity()
+                req.getToAddress().getStreet(),
+                req.getToAddress().getNumber(),
+                req.getToAddress().getNeighborhood(),
+                req.getToAddress().getLocationName(),
+                req.getToAddress().getCity(),
+                req.getToAddress().getLatitude(),
+                req.getToAddress().getLongitude()
         );
 
         CompletableFuture<VehicleDto> vehicleFuture = vehicleService.getOrCreate(
