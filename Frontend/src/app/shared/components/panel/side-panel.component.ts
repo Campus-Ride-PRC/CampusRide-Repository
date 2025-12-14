@@ -61,9 +61,9 @@ interface PanelItem {
                 <span class="text-base text-white" style="font-weight: 600;">{{ userFirstName || 'Guest' }}</span>
               </div>
               <div class="text-xs text-gray-400" style="font-weight: 600; font-size: 12px;">
-                <span>80 rides</span>
+                <span>{{ userFirstName === 'Raul' ? '80' : '12' }} rides</span>
                 <span> • </span>
-                <span>7 friends</span>
+                <span>{{ userFirstName === 'Raul' ? '7' : '3' }} friends</span>
               </div>
             </div>
           </div>
@@ -186,8 +186,8 @@ export class SidePanelComponent implements OnInit {
 
     this.mainItems = [
       {id: 'home', label: 'Home', icon: this.homeIcon, iconPosition: 'left', textAlign: 'start'},
-      {id: 'drives', label: 'Add a ride', icon: this.drivesIcon, iconPosition: 'left', textAlign: 'start'},
-      {id: 'driver-requests', label: 'Requests', icon: this.requestsIcon, iconPosition: 'left', textAlign: 'start'},
+      {id: 'drives', label: 'Add a Ride', icon: this.drivesIcon, iconPosition: 'left', textAlign: 'start'},
+      {id: 'driver-requests', label: 'Ride Requests', icon: this.requestsIcon, iconPosition: 'left', textAlign: 'start'},
       {id: 'my-rides', label: 'My Rides', icon: this.myRidesIcon, iconPosition: 'left', textAlign: 'start'},
       {id: 'my-bookings', label: 'My Bookings', icon: this.bookingsIcon, iconPosition: 'left', textAlign: 'start'},
     ];

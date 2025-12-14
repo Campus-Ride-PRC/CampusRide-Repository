@@ -255,9 +255,9 @@
       <span>Tap orange markers on the map to join existing pickup points</span>
     </div>
 
-    <div class="map-hint" *ngIf="mapLoaded() && !showPickupSuggestions() && existingPickupPoints().length === 0">
-      <ion-icon name="finger-print-outline"></ion-icon>
-      <span>Tap on the blue route line to select your pickup point</span>
+    <div class="map-hint" *ngIf="mapLoaded() && !showPickupSuggestions() && !pickupAddress()">
+      <ion-icon name="hand-left-outline"></ion-icon>
+      <span>Tap on the map to select your pickup point or search above</span>
     </div>
 
     <div class="action-button-container">
