@@ -21,6 +21,7 @@ import {BookingCardComponent} from "../../shared/components/booking-card/booking
 import {AppHeaderComponent} from "../../shared/components/header/app-header.component";
 import {SidePanelComponent} from "../../shared/components/panel/side-panel.component";
 import {AuthService} from "../../core/services/auth.service";
+import { RedirectService } from 'src/app/core/services/redirect.service';
 
 @Component({
   selector: 'app-profile',
@@ -32,8 +33,13 @@ import {AuthService} from "../../core/services/auth.service";
 export class ProfilePage implements OnInit {
   isPanelOpen = false;
 
-  constructor(private location: Location, private service: Profile, private router: Router, private authService: AuthService) {
-  }
+  constructor(
+    private location: Location, 
+    private service: Profile, 
+    private router: Router, 
+    private authService: AuthService,
+    private redirectService: RedirectService
+  ) {}
 
   protected user!: UserResponse
   protected user_state :string = "loading"
@@ -191,45 +197,13 @@ export class ProfilePage implements OnInit {
   }
 
   onMenuItemClick(item: string) {
-    console.log('Menu item clicked:', item);
-
-    switch(item) {
-      case 'home':
-        this.router.navigate(['/home']);
-        break;
-      case 'drives':
-        this.router.navigate(['/add-drive']);
-        break;
-      case 'my-bookings':
-        this.router.navigate(['/my-bookings']);
-        break;
-      case 'my-rides':
-        this.router.navigate(['/my-rides']);
-        break;
-      case 'driver-requests':
-        this.router.navigate(['/driver-requests']);
-        break;
-      case 'settings':
-        console.log('Settings feature coming soon');
-        break;
-      case 'profile':
-        // Already on profile
-        break;
-      case 'logout':
-        this.logout();
-        break;
-    }
+    this.redirectService.redirect('profile', item);
   }
 
   onRideClick(rideId: number) {
     this.router.navigate(['/ride-details', rideId], {
       queryParams: { driverMode: 'true' }
     });
-  }
-
-  logout() {
-    this.authService.logout();
-    this.router.navigate(['/welcome']);
   }
 
 }

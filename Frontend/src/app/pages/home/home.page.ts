@@ -10,6 +10,7 @@ import { AuthService } from 'src/app/core/services/auth.service';
 import { DriveCard } from 'src/app/core/models/drive-card.model';
 import { Profile } from 'src/app/core/services/profile';
 import { UserResponse } from 'src/app/core/models/userResponse';
+import { RedirectService } from 'src/app/core/services/redirect.service';
 
 @Component({
   selector: 'app-home',
@@ -32,7 +33,8 @@ export class HomePage implements OnInit {
     private router: Router,
     private driveService: DriveService,
     private authService: AuthService,
-    private profileService: Profile
+    private profileService: Profile,
+    private redirectService: RedirectService
   ) {}
 
   ngOnInit() {
@@ -178,44 +180,13 @@ export class HomePage implements OnInit {
   onMenuItemClick(item: string) {
     console.log('Menu item clicked:', item);
 
-    switch(item) {
-      case 'home':
-        // Already on home
-        break;
-      case 'drives':
-        this.router.navigate(['/add-drive']);
-        break;
-      case 'my-bookings':
-        this.router.navigate(['/my-bookings']);
-        break;
-      case 'my-rides':
-        this.router.navigate(['/my-rides']);
-        break;
-      case 'driver-requests':
-        this.router.navigate(['/driver-requests']);
-        break;
-      case 'settings':
-        // TODO: Navigate to settings page when implemented
-        console.log('Settings feature coming soon');
-        break;
-      case 'profile':
-            this.router.navigate(['/profile']);
-            break;
-      case 'logout':
-        this.logout();
-        break;
-    }
+    this.redirectService.redirect('home', item);
   }
 
   onRideClick(rideId: number) {
     this.router.navigate(['/ride-details', rideId], {
       queryParams: { driverMode: 'true' }
     });
-  }
-
-  logout() {
-    this.authService.logout();
-    this.router.navigate(['/welcome']);
   }
 
   handleAddRide() {

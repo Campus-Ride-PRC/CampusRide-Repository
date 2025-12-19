@@ -1,0 +1,40 @@
+ion-content {
+  --background: var(--campus-ride-bg-dark);
+}
+
+.communities-container {
+  padding: 24px 16px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.coming-soon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  text-align: center;
+  color: var(--campus-ride-text-secondary);
+
+  .icon {
+    font-size: 80px;
+    margin-bottom: 1.5rem;
+    color: var(--campus-ride-primary);
+  }
+
+  h2 {
+    font-family: var(--campus-ride-font-primary);
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--campus-ride-text-primary);
+  }
+
+  p {
+    font-family: var(--campus-ride-font-secondary);
+    font-size: 1.1rem;
+    margin: 0;
+    color: var(--campus-ride-text-secondary);
+  }
+}

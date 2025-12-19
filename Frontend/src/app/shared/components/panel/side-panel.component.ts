@@ -190,6 +190,7 @@ export class SidePanelComponent implements OnInit {
       {id: 'driver-requests', label: 'Ride Requests', icon: this.requestsIcon, iconPosition: 'left', textAlign: 'start'},
       {id: 'my-rides', label: 'My Rides', icon: this.myRidesIcon, iconPosition: 'left', textAlign: 'start'},
       {id: 'my-bookings', label: 'My Bookings', icon: this.bookingsIcon, iconPosition: 'left', textAlign: 'start'},
+      {id: 'communities', label: 'Communities', icon: this.bookingsIcon, iconPosition: 'left', textAlign: 'start'},
     ];
 
     this.secondaryItems = [
