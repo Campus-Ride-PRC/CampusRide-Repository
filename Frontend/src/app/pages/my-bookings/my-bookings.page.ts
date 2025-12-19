@@ -21,6 +21,7 @@ import { SidePanelComponent } from 'src/app/shared/components/panel/side-panel.c
 import { Profile } from 'src/app/core/services/profile';
 import { UserResponse } from 'src/app/core/models/userResponse';
 import { FriendService } from 'src/app/core/services/friend.service';
+import { RedirectService } from 'src/app/core/services/redirect.service';
 
 @Component({
   selector: 'app-my-bookings',
@@ -50,7 +51,8 @@ export class MyBookingsPage implements OnInit {
     private router: Router,
     private location: Location,
     private profileService: Profile,
-    private friendService: FriendService
+    private friendService: FriendService,
+    private redirectService: RedirectService
   ) {
     addIcons({
       carOutline, locationOutline, timeOutline, cashOutline,
@@ -231,42 +233,12 @@ export class MyBookingsPage implements OnInit {
   onMenuItemClick(item: string) {
     console.log('Menu item clicked:', item);
 
-    switch(item) {
-      case 'home':
-        this.router.navigate(['/home']);
-        break;
-      case 'add-ride':
-        this.router.navigate(['/add-drive']);
-        break;
-      case 'my-bookings':
-        // Already on my-bookings
-        break;
-      case 'my-rides':
-        this.router.navigate(['/my-rides']);
-        break;
-      case 'ride-requests':
-        this.router.navigate(['/driver-requests']);
-        break;
-      case 'settings':
-        console.log('Settings feature coming soon');
-        break;
-      case 'profile':
-        this.router.navigate(['/profile']);
-        break;
-      case 'logout':
-        this.logout();
-        break;
-    }
+    this.redirectService.redirect('my-bookings', item);
   }
 
   onRideClick(rideId: number) {
     this.router.navigate(['/ride-details', rideId], {
       queryParams: { driverMode: 'true' }
     });
-  }
-
-  logout() {
-    this.authService.logout();
-    this.router.navigate(['/welcome']);
   }
 }

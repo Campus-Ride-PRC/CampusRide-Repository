@@ -18,6 +18,7 @@ import { addIcons } from 'ionicons';
 import {
   carOutline, locationOutline, timeOutline, cashOutline, peopleOutline
 } from 'ionicons/icons';
+import { RedirectService } from 'src/app/core/services/redirect.service';
 
 @Component({
   selector: 'app-my-rides',
@@ -40,7 +41,8 @@ export class MyRidesPage implements OnInit {
     private driveService: DriveService,
     private authService: AuthService,
     private router: Router,
-    private profileService: Profile
+    private profileService: Profile,
+    private redirectService: RedirectService
   ) {
     addIcons({
       carOutline, locationOutline, timeOutline, cashOutline, peopleOutline
@@ -147,44 +149,12 @@ export class MyRidesPage implements OnInit {
   }
 
   onMenuItemClick(item: string) {
-    switch (item) {
-      case 'home':
-        this.router.navigate(['/home']);
-        break;
-      case 'drives':
-        this.router.navigate(['/add-drive']);
-        break;
-      case 'my-bookings':
-        this.router.navigate(['/my-bookings']);
-        break;
-      case 'driver-requests':
-        this.router.navigate(['/driver-requests']);
-        break;
-      case 'my-rides':
-        break;
-      case 'friends':
-        this.router.navigate(['/friends']);
-        break;
-      case 'settings':
-        console.log('Settings feature coming soon');
-        break;
-      case 'profile':
-        this.router.navigate(['/profile']);
-        break;
-      case 'logout':
-        this.logout();
-        break;
-    }
+    this.redirectService.redirect('my-rides', item);
   }
 
   onRideClick(rideId: number) {
     this.router.navigate(['/ride-details', rideId], {
       queryParams: { driverMode: 'true' }
     });
-  }
-
-  logout() {
-    this.authService.logout();
-    this.router.navigate(['/welcome']);
   }
 }

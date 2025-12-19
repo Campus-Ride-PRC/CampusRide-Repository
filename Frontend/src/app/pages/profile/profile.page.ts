@@ -22,6 +22,7 @@ import {AppHeaderComponent} from "../../shared/components/header/app-header.comp
 import {SidePanelComponent} from "../../shared/components/panel/side-panel.component";
 import {AuthService} from "../../core/services/auth.service";
 import {FriendService} from "../../core/services/friend.service";
+import { RedirectService } from 'src/app/core/services/redirect.service';
 
 @Component({
   selector: 'app-profile',
@@ -40,7 +41,8 @@ export class ProfilePage implements OnInit {
     private service: Profile,
     private router: Router,
     private authService: AuthService,
-    private friendService: FriendService
+    private friendService: FriendService,
+    private redirectService: RedirectService
   ) {
   }
 
@@ -213,48 +215,13 @@ export class ProfilePage implements OnInit {
   }
 
   onMenuItemClick(item: string) {
-    console.log('Menu item clicked:', item);
-
-    switch(item) {
-      case 'home':
-        this.router.navigate(['/home']);
-        break;
-      case 'add-ride':
-        this.router.navigate(['/add-drive']);
-        break;
-      case 'my-bookings':
-        this.router.navigate(['/my-bookings']);
-        break;
-      case 'my-rides':
-        this.router.navigate(['/my-rides']);
-        break;
-      case 'ride-requests':
-        this.router.navigate(['/driver-requests']);
-        break;
-      case 'friends':
-        this.router.navigate(['/friends']);
-        break;
-      case 'settings':
-        console.log('Settings feature coming soon');
-        break;
-      case 'profile':
-        // Already on profile
-        break;
-      case 'logout':
-        this.logout();
-        break;
-    }
+    this.redirectService.redirect('profile', item);
   }
 
   onRideClick(rideId: number) {
     this.router.navigate(['/ride-details', rideId], {
       queryParams: { driverMode: 'true' }
     });
-  }
-
-  logout() {
-    this.authService.logout();
-    this.router.navigate(['/welcome']);
   }
 
 }
