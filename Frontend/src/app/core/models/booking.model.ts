@@ -19,6 +19,8 @@ export interface BookingResponse {
   role: BookingRole;
   requestedAt: string;
   updatedAt: string;
+  driveTime: string;
+  price: number;
   pickupAddress?: {
     id: number;
     street: string;

@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
   IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent,
-  IonIcon, IonSpinner, IonRefresher, IonRefresherContent
+  IonIcon, IonSpinner, IonRefresher, IonRefresherContent, IonButton
 } from '@ionic/angular/standalone';
 import { DriveService } from 'src/app/core/services/drive.service';
 import { AuthService } from 'src/app/core/services/auth.service';
@@ -14,6 +14,7 @@ import { SidePanelComponent } from 'src/app/shared/components/panel/side-panel.c
 import { RideCardComponent } from 'src/app/shared/components/cards/ride-card.component';
 import { Profile } from 'src/app/core/services/profile';
 import { UserResponse } from 'src/app/core/models/userResponse';
+import { FriendService } from 'src/app/core/services/friend.service';
 import { addIcons } from 'ionicons';
 import {
   carOutline, locationOutline, timeOutline, cashOutline, peopleOutline
@@ -25,7 +26,7 @@ import {
   styleUrls: ['./my-rides.page.scss'],
   standalone: true,
   imports: [
-    IonContent, IonIcon, IonSpinner, IonRefresher, IonRefresherContent,
+    IonContent, IonIcon, IonSpinner, IonRefresher, IonRefresherContent, IonButton,
     CommonModule, FormsModule,
     AppHeaderComponent, SidePanelComponent, RideCardComponent
   ]
@@ -35,12 +36,15 @@ export class MyRidesPage implements OnInit {
   loading = true;
   isPanelOpen = false;
   user: UserResponse | null = null;
+  friendsCount: number = 0;
+  ridesCount: number = 0;
 
   constructor(
     private driveService: DriveService,
     private authService: AuthService,
     private router: Router,
-    private profileService: Profile
+    private profileService: Profile,
+    private friendService: FriendService
   ) {
     addIcons({
       carOutline, locationOutline, timeOutline, cashOutline, peopleOutline
@@ -50,6 +54,7 @@ export class MyRidesPage implements OnInit {
   ngOnInit() {
     this.loadMyRides();
     this.loadUser();
+    this.loadFriendCount();
   }
 
   ionViewWillEnter() {
@@ -63,6 +68,17 @@ export class MyRidesPage implements OnInit {
       },
       error: (err) => {
         console.error('Error loading user:', err);
+      }
+    });
+  }
+
+  loadFriendCount() {
+    this.friendService.getFriendCount().subscribe({
+      next: (count) => {
+        this.friendsCount = count;
+      },
+      error: (err) => {
+        console.error('Error loading friend count:', err);
       }
     });
   }
@@ -136,6 +152,7 @@ export class MyRidesPage implements OnInit {
 
   onMenuOpen() {
     this.isPanelOpen = true;
+    this.loadFriendCount();
   }
 
   onPanelClosed() {
@@ -161,6 +178,9 @@ export class MyRidesPage implements OnInit {
         this.router.navigate(['/driver-requests']);
         break;
       case 'my-rides':
+        break;
+      case 'friends':
+        this.router.navigate(['/friends']);
         break;
       case 'settings':
         console.log('Settings feature coming soon');

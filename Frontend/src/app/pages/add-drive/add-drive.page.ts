@@ -12,6 +12,11 @@ import { DriveCreateRequest } from 'src/app/core/models/drive-create-request.mod
 import { catchError, of, Subject, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
 import { addIcons } from 'ionicons';
 import { calendarOutline } from 'ionicons/icons';
+import { AppHeaderComponent } from 'src/app/shared/components/header/app-header.component';
+import { SidePanelComponent } from 'src/app/shared/components/panel/side-panel.component';
+import { Profile } from 'src/app/core/services/profile';
+import { UserResponse } from 'src/app/core/models/userResponse';
+import { FriendService } from 'src/app/core/services/friend.service';
 
 type LocationMode = 'departure' | 'destination';
 type FlowStep = 'location' | 'details';
@@ -28,7 +33,7 @@ import { CustomDatePickerComponent } from 'src/app/shared/components/date-picker
 @Component({
   selector: 'app-add-drive',
   standalone: true,
-  imports: [CommonModule, IonicModule, ReactiveFormsModule, FormsModule, CustomDatePickerComponent],
+  imports: [CommonModule, IonicModule, ReactiveFormsModule, FormsModule, CustomDatePickerComponent, AppHeaderComponent, SidePanelComponent],
   templateUrl: './add-drive.page.html',
   styleUrls: ['./add-drive.page.scss']
 })
@@ -49,28 +54,32 @@ export class AddDrivePage implements OnInit, OnDestroy {
   readonly currentStep = signal<FlowStep>('location');
   readonly currentBreakpoint = signal(0.6);
   readonly isGeocoding = signal(false);
-  
+
   // Search suggestions
   readonly departureSuggestions = signal<PlaceSuggestion[]>([]);
   readonly destinationSuggestions = signal<PlaceSuggestion[]>([]);
   readonly showDepartureSuggestions = signal(false);
   readonly showDestinationSuggestions = signal(false);
-  
+
   // Bottom sheet drag state
   readonly sheetHeight = signal(60); // percentage
   readonly isDragging = signal(false);
   readonly isExpanded = signal(false);
 
   // Computed signals
-  readonly canProceedToDetails = computed(() => 
+  readonly canProceedToDetails = computed(() =>
     this.departureAddress() !== null && this.destinationAddress() !== null
   );
-  
+
   readonly showDetailsPanel = computed(() => this.currentStep() === 'details');
 
   driveForm!: FormGroup;
   userId: number | null = null;
-  
+  isPanelOpen = false;
+  user: UserResponse | null = null;
+  friendsCount: number = 0;
+  ridesCount: number = 0;
+
   private map: google.maps.Map | null = null;
   private departureMarker: google.maps.Marker | null = null;
   private destinationMarker: google.maps.Marker | null = null;
@@ -79,7 +88,7 @@ export class AddDrivePage implements OnInit, OnDestroy {
   private directionsRenderer: google.maps.DirectionsRenderer | null = null;
   private isUpdatingFromMap = false;
   private isUpdatingFromInput = false;
-  
+
   // Drag handling
   private dragStartY = 0;
   private dragStartHeight = 60;
@@ -96,7 +105,9 @@ export class AddDrivePage implements OnInit, OnDestroy {
     private mapsService: GoogleMapsService,
     private router: Router,
     private toastController: ToastController,
-    private alertController: AlertController
+    private alertController: AlertController,
+    private profileService: Profile,
+    private friendService: FriendService
   ) {
     this.initializeForm();
     this.setupSearchSubscriptions();
@@ -108,6 +119,30 @@ export class AddDrivePage implements OnInit, OnDestroy {
     if (this.userId) {
       this.loadUserVehicle(this.userId);
     }
+    this.loadUser();
+    this.loadFriendCount();
+  }
+
+  loadUser() {
+    this.profileService.getLoggedUser().subscribe({
+      next: (data) => {
+        this.user = data;
+      },
+      error: (err) => {
+        console.error('Error loading user:', err);
+      }
+    });
+  }
+
+  loadFriendCount() {
+    this.friendService.getFriendCount().subscribe({
+      next: (count) => {
+        this.friendsCount = count;
+      },
+      error: (err) => {
+        console.error('Error loading friend count:', err);
+      }
+    });
   }
 
   async ngAfterViewInit() {
@@ -165,7 +200,7 @@ export class AddDrivePage implements OnInit, OnDestroy {
           secondaryText: p.structured_formatting.secondary_text || '',
           distance: p.distance_meters ? `${(p.distance_meters / 1000).toFixed(1)} km` : undefined
         }));
-        
+
         if (mode === 'departure') {
           this.departureSuggestions.set(suggestions);
           this.showDepartureSuggestions.set(true);
@@ -204,7 +239,7 @@ export class AddDrivePage implements OnInit, OnDestroy {
         if (status === google.maps.places.PlacesServiceStatus.OK && place?.geometry?.location) {
           const lat = place.geometry.location.lat();
           const lng = place.geometry.location.lng();
-          
+
           const geocoderResult = {
             address_components: place.address_components || [],
             formatted_address: place.formatted_address || suggestion.mainText,
@@ -218,11 +253,11 @@ export class AddDrivePage implements OnInit, OnDestroy {
           } as google.maps.GeocoderResult;
 
           const parsed = this.mapsService.parseGeocoderResult(geocoderResult);
-          
+
           if (parsed) {
             // Override locationName with the place name for better UX
             parsed.locationName = suggestion.mainText;
-            
+
             if (mode === 'departure') {
               this.departureAddress.set(parsed);
               if (this.departureInput?.nativeElement) {
@@ -343,7 +378,7 @@ export class AddDrivePage implements OnInit, OnDestroy {
         { lat: this.departureAddress()!.latitude, lng: this.departureAddress()!.longitude },
         { lat: this.destinationAddress()!.latitude, lng: this.destinationAddress()!.longitude }
       ]);
-      
+
       // Display route preview between the two points
       this.displayRoutePreview();
     }
@@ -355,7 +390,7 @@ export class AddDrivePage implements OnInit, OnDestroy {
   private async displayRoutePreview() {
     const departure = this.departureAddress();
     const destination = this.destinationAddress();
-    
+
     if (!departure || !destination || !this.map) {
       return;
     }
@@ -423,10 +458,10 @@ export class AddDrivePage implements OnInit, OnDestroy {
     try {
       const lat = latLng.lat();
       const lng = latLng.lng();
-      
+
       // Use enhanced reverse geocoding with place name lookup
       const parsed = await this.mapsService.reverseGeocodeWithPlaceName(lat, lng, this.map || undefined);
-      
+
       if (!parsed || !this.mapsService.isValidParsedAddress(parsed)) {
         this.showToast('Could not find address for this location', 'warning');
         return;
@@ -441,7 +476,7 @@ export class AddDrivePage implements OnInit, OnDestroy {
         }
         await this.updateDepartureMarker(location);
         this.currentMode.set('destination');
-        
+
       } else {
         this.destinationAddress.set(parsed);
         if (this.destinationInput) {
@@ -476,10 +511,10 @@ export class AddDrivePage implements OnInit, OnDestroy {
     const deltaY = this.dragStartY - currentY;
     const screenHeight = window.innerHeight;
     const deltaPercent = (deltaY / screenHeight) * 100;
-    
+
     let newHeight = this.dragStartHeight + deltaPercent;
     newHeight = Math.max(40, Math.min(90, newHeight)); // Clamp between 40% and 90%
-    
+
     this.sheetHeight.set(newHeight);
   }
 
@@ -489,7 +524,7 @@ export class AddDrivePage implements OnInit, OnDestroy {
     if (!this.isDragging()) return;
 
     this.isDragging.set(false);
-    
+
     // Snap to nearest breakpoint
     const height = this.sheetHeight();
     if (height < 50) {
@@ -720,15 +755,15 @@ export class AddDrivePage implements OnInit, OnDestroy {
   getFormattedDepartureAddress(): string {
     const addr = this.departureAddress();
     if (!addr) return 'Unknown location';
-    
+
     // Build full address with all available fields
     const parts: string[] = [];
-    
+
     // Add location name if available
     if (addr.locationName) {
       parts.push(addr.locationName);
     }
-    
+
     // Add street and number if different from locationName
     if (addr.street && addr.street !== 'Unknown') {
       const streetPart = addr.number && addr.number !== 'S/N' ? `${addr.street} ${addr.number}` : addr.street;
@@ -736,17 +771,17 @@ export class AddDrivePage implements OnInit, OnDestroy {
         parts.push(streetPart);
       }
     }
-    
+
     // Add neighborhood if available and not already included
     if (addr.neighborhood && addr.neighborhood !== 'Unknown' && !parts.some(p => p.includes(addr.neighborhood))) {
       parts.push(addr.neighborhood);
     }
-    
+
     // Add city if available and not already included
     if (addr.city && addr.city !== 'Unknown' && !parts.some(p => p.includes(addr.city))) {
       parts.push(addr.city);
     }
-    
+
     return parts.join(', ') || 'Unknown location';
   }
 
@@ -757,15 +792,15 @@ export class AddDrivePage implements OnInit, OnDestroy {
   getFormattedDestinationAddress(): string {
     const addr = this.destinationAddress();
     if (!addr) return 'Unknown location';
-    
+
     // Build full address with all available fields
     const parts: string[] = [];
-    
+
     // Add location name if available
     if (addr.locationName) {
       parts.push(addr.locationName);
     }
-    
+
     // Add street and number if different from locationName
     if (addr.street && addr.street !== 'Unknown') {
       const streetPart = addr.number && addr.number !== 'S/N' ? `${addr.street} ${addr.number}` : addr.street;
@@ -773,17 +808,17 @@ export class AddDrivePage implements OnInit, OnDestroy {
         parts.push(streetPart);
       }
     }
-    
+
     // Add neighborhood if available and not already included
     if (addr.neighborhood && addr.neighborhood !== 'Unknown' && !parts.some(p => p.includes(addr.neighborhood))) {
       parts.push(addr.neighborhood);
     }
-    
+
     // Add city if available and not already included
     if (addr.city && addr.city !== 'Unknown' && !parts.some(p => p.includes(addr.city))) {
       parts.push(addr.city);
     }
-    
+
     return parts.join(', ') || 'Unknown location';
   }
 
@@ -804,6 +839,64 @@ export class AddDrivePage implements OnInit, OnDestroy {
 
   goBack() {
     this.router.navigate(['/home']);
+  }
+
+  onMenuOpen() {
+    this.isPanelOpen = true;
+    this.loadFriendCount();
+  }
+
+  onPanelClosed() {
+    this.isPanelOpen = false;
+  }
+
+  onNotificationOpen() {
+    this.router.navigate(['/notifications']);
+  }
+
+  onMenuItemClick(item: string) {
+    console.log('Menu item clicked:', item);
+
+    switch(item) {
+      case 'home':
+        this.router.navigate(['/home']);
+        break;
+      case 'drives':
+        // Already on add-drive
+        break;
+      case 'my-bookings':
+        this.router.navigate(['/my-bookings']);
+        break;
+      case 'my-rides':
+        this.router.navigate(['/my-rides']);
+        break;
+      case 'driver-requests':
+        this.router.navigate(['/driver-requests']);
+        break;
+      case 'friends':
+        this.router.navigate(['/friends']);
+        break;
+      case 'settings':
+        console.log('Settings feature coming soon');
+        break;
+      case 'profile':
+        this.router.navigate(['/profile']);
+        break;
+      case 'logout':
+        this.logout();
+        break;
+    }
+  }
+
+  onRideClick(rideId: number) {
+    this.router.navigate(['/ride-details', rideId], {
+      queryParams: { driverMode: 'true' }
+    });
+  }
+
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/welcome']);
   }
 
   private cleanupMap() {

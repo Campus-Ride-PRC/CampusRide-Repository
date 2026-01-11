@@ -19,7 +19,7 @@
 
     <div *ngIf="!loading && bookings.length > 0" style="display: flex; flex-direction: column; gap: 12px; padding-bottom: 16px;">
       <div *ngFor="let booking of bookings" style="max-width: 358px; width: 100%; margin: 0 auto;">
-        <div [style.background-color]="getStatusBackgroundColor(booking.status)" 
+        <div [style.background-color]="getStatusBackgroundColor(booking.status)"
              style="padding: 8px 16px; text-align: center; font-weight: 600; font-size: 14px; color: white; border-radius: 12px 12px 0 0;">
           {{getStatusLabel(booking.status)}}
         </div>
@@ -44,7 +44,7 @@
               <ion-icon name="mail-outline"></ion-icon>
               <span>{{booking.driverEmail}}</span>
             </div>
-            
+
             <div class="detail-row">
               <ion-icon name="time-outline"></ion-icon>
               <span>Requested: {{formatDate(booking.requestedAt)}}</span>
@@ -56,9 +56,9 @@
             </div>
 
             <div class="actions" *ngIf="canCancel(booking)">
-              <ion-button 
+              <ion-button
                 class="cancel-button"
-                fill="outline" 
+                fill="outline"
                 size="small"
                 (click)="cancelBooking(booking)">
                 <ion-icon name="close-circle-outline" slot="start"></ion-icon>
@@ -88,6 +88,8 @@
     [isOpen]="isPanelOpen"
     [userFirstName]="user?.firstName || 'Guest'"
     [userAvatar]="user ? 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + user.firstName : ''"
+    [friendsCount]="friendsCount"
+    [ridesCount]="ridesCount"
     (closed)="onPanelClosed()"
     (itemClicked)="onMenuItemClick($event)"
     (rideClicked)="onRideClick($event)"

@@ -23,21 +23,34 @@
   <div *ngIf="!loading && notifications.length > 0" class="notifications-container" style="display: flex; flex-direction: column; gap: 12px; padding: 16px;">
       <div *ngFor="let notification of notifications" style="max-width: 100%; width: 100%;">
         <!-- Status bar for request-sent notifications -->
-        <div *ngIf="notification.type === 'request-sent'" 
-             [style.background-color]="getStatusBackgroundColor(notification.booking.status)" 
+        <div *ngIf="notification.type === 'request-sent'"
+             [style.background-color]="getStatusBackgroundColor(notification.booking!.status)"
              style="padding: 8px 16px; text-align: center; font-weight: 600; font-size: 14px; color: white; border-radius: 12px 12px 0 0;">
-          {{getStatusLabel(notification.booking.status)}}
+          {{getStatusLabel(notification.booking!.status)}}
         </div>
-        
+
         <!-- Status bar for request-received notifications -->
-        <div *ngIf="notification.type === 'request-received'" 
+        <div *ngIf="notification.type === 'request-received'"
              style="background-color: #00C36C; padding: 8px 16px; text-align: center; font-weight: 600; font-size: 14px; color: white; border-radius: 12px 12px 0 0;">
           Request Received
         </div>
-        
-        <ion-card class="notification-card" 
+
+        <!-- Status bar for friend-request-received notifications -->
+        <div *ngIf="notification.type === 'friend-request-received'"
+             style="background-color: #8B5CF6; padding: 8px 16px; text-align: center; font-weight: 600; font-size: 14px; color: white; border-radius: 12px 12px 0 0;">
+          Friend Request
+        </div>
+
+        <!-- Status bar for friend-request-status notifications -->
+        <div *ngIf="notification.type === 'friend-request-status'"
+             [style.background-color]="getStatusBackgroundColor(notification.friendRequestStatus!.status)"
+             style="padding: 8px 16px; text-align: center; font-weight: 600; font-size: 14px; color: white; border-radius: 12px 12px 0 0;">
+          {{getStatusLabel(notification.friendRequestStatus!.status)}}
+        </div>
+
+        <ion-card class="notification-card"
                   [ngClass]="'notification-' + notification.type"
-                  [style.border-radius]="notification.type === 'request-sent' || notification.type === 'request-received' ? '0 0 12px 12px' : '12px'"
+                  [style.border-radius]="notification.type === 'request-sent' || notification.type === 'request-received' || notification.type === 'friend-request-received' || notification.type === 'friend-request-status' ? '0 0 12px 12px' : '12px'"
                   [style.margin]="'0'">
           <ion-card-content>
             <!-- Request Sent Notification -->
@@ -61,14 +74,46 @@
             </div>
           </div>
           <div class="actions" style="display: flex; justify-content: center; gap: 12px;">
-            <ion-button class="accept-button" fill="solid" size="small" (click)="acceptBooking(notification.booking)" style="--background: #00C36C; --color: white; font-weight: 700;">
+            <ion-button class="accept-button" fill="solid" size="small" (click)="acceptBooking(notification.booking!)" style="--background: #00C36C; --color: white; font-weight: 700;">
               <ion-icon name="checkmark-circle-outline" slot="start" style="font-size: 20px; font-weight: bold;"></ion-icon>
               Accept
             </ion-button>
-            <ion-button class="decline-button" fill="outline" size="small" (click)="declineBooking(notification.booking)" style="--border-color: #eb445a; --color: #eb445a; font-weight: 700;">
+            <ion-button class="decline-button" fill="outline" size="small" (click)="declineBooking(notification.booking!)" style="--border-color: #eb445a; --color: #eb445a; font-weight: 700;">
               <ion-icon name="close-circle-outline" slot="start" style="font-size: 20px; font-weight: bold;"></ion-icon>
               Decline
             </ion-button>
+          </div>
+        </div>
+
+        <!-- Friend Request Received Notification -->
+        <div *ngIf="notification.type === 'friend-request-received'">
+          <div class="notification-content">
+            <ion-icon name="person-add-outline" class="notification-icon"></ion-icon>
+            <div class="notification-details">
+              <p class="title">{{notification.title}}</p>
+              <p class="subtitle">{{notification.subtitle}}</p>
+            </div>
+          </div>
+          <div class="actions" style="display: flex; justify-content: center; gap: 12px;">
+            <ion-button class="accept-button" fill="solid" size="small" (click)="acceptFriendRequest(notification.friendRequest!)" style="--background: #00C36C; --color: white; font-weight: 700;">
+              <ion-icon name="checkmark-circle-outline" slot="start" style="font-size: 20px; font-weight: bold;"></ion-icon>
+              Accept
+            </ion-button>
+            <ion-button class="decline-button" fill="outline" size="small" (click)="declineFriendRequest(notification.friendRequest!)" style="--border-color: #eb445a; --color: #eb445a; font-weight: 700;">
+              <ion-icon name="close-circle-outline" slot="start" style="font-size: 20px; font-weight: bold;"></ion-icon>
+              Decline
+            </ion-button>
+          </div>
+        </div>
+
+        <!-- Friend Request Status Notification -->
+        <div *ngIf="notification.type === 'friend-request-status'">
+          <div class="notification-content">
+            <ion-icon name="person-add-outline" class="notification-icon"></ion-icon>
+            <div class="notification-details">
+              <p class="title">{{notification.title}}</p>
+              <p class="subtitle">{{notification.subtitle}}</p>
+            </div>
           </div>
         </div>
         </ion-card-content>
@@ -82,6 +127,8 @@
     [isOpen]="isPanelOpen"
     [userFirstName]="user?.firstName || 'Guest'"
     [userAvatar]="user ? 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + user.firstName : ''"
+    [friendsCount]="friendsCount"
+    [ridesCount]="ridesCount"
     (closed)="onPanelClosed()"
     (itemClicked)="onMenuItemClick($event)"
     (rideClicked)="onRideClick($event)"

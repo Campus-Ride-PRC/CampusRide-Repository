@@ -70,6 +70,11 @@ export const routes: Routes = [
     canActivate: [authGuard]
   },
   {
+    path: 'friends',
+    loadComponent: () => import('./pages/friends/friends.page').then((m) => m.FriendsPage),
+    canActivate: [authGuard]
+  },
+  {
     path: '',
     redirectTo: 'welcome',
     pathMatch: 'full',

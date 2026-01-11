@@ -11,7 +11,7 @@ import { BookingService } from 'src/app/core/services/booking.service';
 import { DriveService } from 'src/app/core/services/drive.service';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { BookingResponse, BookingStatus } from 'src/app/core/models/booking.model';
-import { Notification } from 'src/app/core/models/notification.model';
+import { Notification, FriendRequest } from 'src/app/core/models/notification.model';
 import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
 import {
@@ -25,6 +25,7 @@ import { AppHeaderComponent } from 'src/app/shared/components/header/app-header.
 import { SidePanelComponent } from 'src/app/shared/components/panel/side-panel.component';
 import { Profile } from 'src/app/core/services/profile';
 import { UserResponse } from 'src/app/core/models/userResponse';
+import { FriendService, FriendRequestStatus } from 'src/app/core/services/friend.service';
 
 @Component({
   selector: 'app-notifications',
@@ -46,6 +47,8 @@ export class NotificationsPage implements OnInit {
   BookingStatus = BookingStatus;
   isPanelOpen = false;
   user: UserResponse | null = null;
+  friendsCount: number = 0;
+  ridesCount: number = 0;
 
   constructor(
     private bookingService: BookingService,
@@ -53,7 +56,8 @@ export class NotificationsPage implements OnInit {
     private authService: AuthService,
     private router: Router,
     private location: Location,
-    private profileService: Profile
+    private profileService: Profile,
+    private friendService: FriendService
   ) {
     addIcons({
       carOutline, locationOutline, timeOutline, cashOutline,
@@ -66,6 +70,7 @@ export class NotificationsPage implements OnInit {
   ngOnInit() {
     this.loadData();
     this.loadUser();
+    this.loadFriendCount();
   }
 
   loadUser() {
@@ -75,6 +80,17 @@ export class NotificationsPage implements OnInit {
       },
       error: (err) => {
         console.error('Error loading user:', err);
+      }
+    });
+  }
+
+  loadFriendCount() {
+    this.friendService.getFriendCount().subscribe({
+      next: (count) => {
+        this.friendsCount = count;
+      },
+      error: (err) => {
+        console.error('Error loading friend count:', err);
       }
     });
   }
@@ -89,31 +105,29 @@ export class NotificationsPage implements OnInit {
 
     const myBookings$ = this.bookingService.getBookingsByUser(userId);
     const driverDrives$ = this.driveService.getDrivesByDriver(userId);
+    const friendRequests$ = this.friendService.getPendingFriendRequests();
+    const friendRequestStatus$ = this.friendService.getFriendRequestStatus();
 
-    forkJoin([myBookings$, driverDrives$]).subscribe({
-      next: ([myBookings, driverDrives]) => {
+    forkJoin([myBookings$, driverDrives$, friendRequests$, friendRequestStatus$]).subscribe({
+      next: ([myBookings, driverDrives, friendRequests, friendRequestStatus]) => {
         const receivedRequests$ = driverDrives.map(drive =>
           this.bookingService.getPendingBookingsByDrive(drive.id)
         );
 
-        forkJoin(receivedRequests$).subscribe({
-          next: (receivedBookingsArrays) => {
-            const flattenedReceivedBookings = receivedBookingsArrays.reduce((acc, val) => acc.concat(val), []);
-            const sentNotifications = this.transformBookingsToSentNotifications(myBookings);
-            const receivedNotifications = this.transformBookingsToReceivedNotifications(flattenedReceivedBookings);
-
-            this.notifications = [...sentNotifications, ...receivedNotifications]
-              .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-
-            this.loading = false;
-            if (event) event.target.complete();
-          },
-          error: (error) => {
-            console.error('Error loading received bookings:', error);
-            this.loading = false;
-            if (event) event.target.complete();
-          }
-        });
+        if (receivedRequests$.length > 0) {
+          forkJoin(receivedRequests$).subscribe({
+            next: (receivedBookingsArrays) => {
+              const flattenedReceivedBookings = receivedBookingsArrays.reduce((acc, val) => acc.concat(val), []);
+              this.processNotifications(myBookings, flattenedReceivedBookings, friendRequests, friendRequestStatus, event);
+            },
+            error: (error) => {
+              console.error('Error loading received bookings:', error);
+              this.processNotifications(myBookings, [], friendRequests, friendRequestStatus, event);
+            }
+          });
+        } else {
+          this.processNotifications(myBookings, [], friendRequests, friendRequestStatus, event);
+        }
       },
       error: (error) => {
         console.error('Error loading initial data:', error);
@@ -121,6 +135,25 @@ export class NotificationsPage implements OnInit {
         if (event) event.target.complete();
       }
     });
+  }
+
+  private processNotifications(
+    myBookings: BookingResponse[],
+    receivedBookings: BookingResponse[],
+    friendRequests: FriendRequest[],
+    friendRequestStatus: FriendRequestStatus[],
+    event?: any
+  ) {
+    const sentNotifications = this.transformBookingsToSentNotifications(myBookings);
+    const receivedNotifications = this.transformBookingsToReceivedNotifications(receivedBookings);
+    const friendRequestNotifications = this.transformFriendRequestsToNotifications(friendRequests);
+    const friendRequestStatusNotifications = this.transformFriendRequestStatusToNotifications(friendRequestStatus);
+
+    this.notifications = [...sentNotifications, ...receivedNotifications, ...friendRequestNotifications, ...friendRequestStatusNotifications]
+      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+
+    this.loading = false;
+    if (event) event.target.complete();
   }
 
   private transformBookingsToSentNotifications(bookings: BookingResponse[]): Notification[] {
@@ -146,6 +179,29 @@ export class NotificationsPage implements OnInit {
     }));
   }
 
+  private transformFriendRequestsToNotifications(requests: FriendRequest[]): Notification[] {
+    return requests.map(request => ({
+      id: `friend-${request.id}`,
+      type: 'friend-request-received',
+      timestamp: new Date(request.sentAt),
+      friendRequest: request,
+      title: 'New Friend Request',
+      subtitle: `${request.senderFirstName} ${request.senderLastName} sent you a friend request`,
+    }));
+  }
+
+  private transformFriendRequestStatusToNotifications(statuses: FriendRequestStatus[]): Notification[] {
+    return statuses.map(status => ({
+      id: `friend-status-${status.id}`,
+      type: 'friend-request-status',
+      timestamp: new Date(status.updatedAt),
+      friendRequestStatus: status,
+      title: `Friend Request ${status.status === 'ACCEPTED' ? 'Accepted' : 'Declined'}`,
+      subtitle: `${status.receiverFirstName} ${status.receiverLastName} has ${status.status.toLowerCase()} your friend request`,
+      status: status.status
+    }));
+  }
+
   acceptBooking(booking: BookingResponse) {
     this.bookingService.acceptBooking(booking.driveId, booking.userId).subscribe({
       next: () => this.loadData(),
@@ -156,7 +212,37 @@ export class NotificationsPage implements OnInit {
     });
   }
 
-  getStatusBackgroundColor(status: BookingStatus): string {
+  acceptFriendRequest(request: FriendRequest) {
+    this.friendService.acceptFriendRequest(request.id).subscribe({
+      next: () => {
+        this.loadData();
+        this.loadFriendCount(); // Refresh friend count
+      },
+      error: (error) => {
+        console.error('Error accepting friend request:', error);
+        alert('Failed to accept friend request.');
+      }
+    });
+  }
+
+  declineFriendRequest(request: FriendRequest) {
+    this.friendService.declineFriendRequest(request.id).subscribe({
+      next: () => this.loadData(),
+      error: (error) => {
+        console.error('Error declining friend request:', error);
+        alert('Failed to decline friend request.');
+      }
+    });
+  }
+
+  getStatusBackgroundColor(status: BookingStatus | string): string {
+    if (typeof status === 'string') {
+      switch (status) {
+        case 'ACCEPTED': return '#00C36C';
+        case 'DECLINED': return '#eb445a';
+        default: return '#666666';
+      }
+    }
     switch (status) {
       case BookingStatus.PENDING: return '#ffa500';
       case BookingStatus.ACCEPTED: return '#00C36C';
@@ -166,7 +252,14 @@ export class NotificationsPage implements OnInit {
     }
   }
 
-  getStatusLabel(status: BookingStatus): string {
+  getStatusLabel(status: BookingStatus | string): string {
+    if (typeof status === 'string') {
+      switch (status) {
+        case 'ACCEPTED': return 'Accepted';
+        case 'DECLINED': return 'Declined';
+        default: return status;
+      }
+    }
     switch (status) {
       case BookingStatus.PENDING: return 'Pending Approval';
       case BookingStatus.ACCEPTED: return 'Request Accepted';
@@ -198,6 +291,8 @@ export class NotificationsPage implements OnInit {
 
   onMenuOpen() {
     this.isPanelOpen = true;
+    this.loadFriendCount();
+
   }
 
   onPanelClosed() {

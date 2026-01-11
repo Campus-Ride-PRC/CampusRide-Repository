@@ -50,8 +50,8 @@ interface PanelItem {
         <!-- User Profile Header (Non-clickable) -->
         <div class="mt-[32px] px-4 pb-4 mb-2" style="padding-inline-start: 28px; padding-bottom: 16px;">
           <div class="flex items-center" style="gap: 8px;">
-            <img 
-              [src]="userAvatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'" 
+            <img
+              [src]="userAvatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'"
               [alt]="userFirstName"
               style="width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 2px solid #00B862; flex-shrink: 0;"
             />
@@ -61,9 +61,9 @@ interface PanelItem {
                 <span class="text-base text-white" style="font-weight: 600;">{{ userFirstName || 'Guest' }}</span>
               </div>
               <div class="text-xs text-gray-400" style="font-weight: 600; font-size: 12px;">
-                <span>{{ userFirstName === 'Raul' ? '80' : '12' }} rides</span>
+                <span>{{ ridesCount }} rides</span>
                 <span> • </span>
-                <span>{{ userFirstName === 'Raul' ? '7' : '3' }} friends</span>
+                <span>{{ friendsCount }} friends</span>
               </div>
             </div>
           </div>
@@ -107,6 +107,8 @@ export class SidePanelComponent implements OnInit {
   @Input() isOpen = false;
   @Input() userFirstName: string = '';
   @Input() userAvatar: string = '';
+  @Input() friendsCount: number = 0;
+  @Input() ridesCount: number = 0;
   @Output() closed = new EventEmitter<void>();
   @Output() itemClicked = new EventEmitter<string>();
   @Output() rideClicked = new EventEmitter<number>();
@@ -120,6 +122,7 @@ export class SidePanelComponent implements OnInit {
   profileIcon!: SafeHtml;
   myRidesIcon!: SafeHtml;
   drivesIcon!: SafeHtml;
+  friendsIcon!: SafeHtml;
 
   /** Butoanele principale și secundare */
   mainItems: PanelItem[] = [];
@@ -184,12 +187,20 @@ export class SidePanelComponent implements OnInit {
       </svg>
     `);
 
+    this.friendsIcon = this.sanitizer.bypassSecurityTrustHtml(`
+      <svg class="w-[24px] h-[24px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+      </svg>
+    `);
+
     this.mainItems = [
       {id: 'home', label: 'Home', icon: this.homeIcon, iconPosition: 'left', textAlign: 'start'},
       {id: 'drives', label: 'Add a Ride', icon: this.drivesIcon, iconPosition: 'left', textAlign: 'start'},
       {id: 'driver-requests', label: 'Ride Requests', icon: this.requestsIcon, iconPosition: 'left', textAlign: 'start'},
       {id: 'my-rides', label: 'My Rides', icon: this.myRidesIcon, iconPosition: 'left', textAlign: 'start'},
       {id: 'my-bookings', label: 'My Bookings', icon: this.bookingsIcon, iconPosition: 'left', textAlign: 'start'},
+      {id: 'friends', label: 'Friends', icon: this.friendsIcon, iconPosition: 'left', textAlign: 'start'},
     ];
 
     this.secondaryItems = [

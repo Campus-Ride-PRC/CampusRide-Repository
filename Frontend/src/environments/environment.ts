@@ -4,5 +4,5 @@ export const environment = {
   apiUrl: 'http://localhost:8080/api',  // your ip address for local network access
   // Google Maps API Key (used to dynamically load the Maps JS API)
   googleMapsApiKey: 'AIzaSyBtIxtAL_Bm3ap0Fm7JRWtjbQvVp0F7XGU'
-  
+
 };
