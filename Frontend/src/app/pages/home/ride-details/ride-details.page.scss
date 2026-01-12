@@ -369,20 +369,17 @@ $transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     margin-top: 12px;
 
     .friend-request-button {
+      // Restore original visuals
       width: 100%;
       padding: 8px 12px;
       border-radius: 8px;
       font-size: 13px;
       font-weight: 600;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
       cursor: pointer;
       transition: all 0.2s ease;
       border: none;
 
-      // Default state (Add Friend)
+      // Original default state (Add Friend)
       background: rgba(139, 92, 246, 0.15);
       color: #8B5CF6;
 
@@ -418,6 +415,27 @@ $transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       &:disabled {
         opacity: 0.8;
         cursor: default;
+      }
+
+      // Minimal layout change to guarantee the TEXT is centered
+      // 3 columns: left icon/spinner (24px), centered label (1fr), right spacer (24px)
+      display: grid;
+      grid-template-columns: 24px 1fr 24px;
+      align-items: center;
+
+      .fr-left,
+      .fr-right {
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .fr-center {
+        text-align: center;
+        justify-self: center;
+        width: 100%;
       }
 
       ion-icon {

@@ -1,9 +1,3 @@
-<app-header
-  menuTitle="Add a Ride"
-  (menuClick)="onMenuOpen()"
-  (notificationClick)="onNotificationOpen()">
-</app-header>
-
 <ion-content class="bg-[#1a1a1a]">
   <div class="map-wrapper">
     <div #mapContainer class="map-container"></div>
@@ -23,6 +17,10 @@
         <ion-button (click)="goBack()" fill="outline" color="light">Go Back</ion-button>
       </div>
     </div>
+
+    <button (click)="goBack()" class="back-button">
+      <img src="assets/icon/arrow-back.svg" alt="Back" width="20" height="20" />
+    </button>
 
     <div class="geocoding-indicator" *ngIf="isGeocoding()">
       <ion-spinner name="dots" color="light"></ion-spinner>

@@ -1,7 +1,9 @@
 <app-header
   menuTitle="Notifications"
-  (menuClick)="onMenuOpen()"
-  (notificationClick)="onNotificationOpen()">
+  [showBackArrow]="true"
+  [backArrowColor]="'#ffffff'"
+  [hideNotificationIcon]="true"
+  (backClick)="goBack()">
 </app-header>
 
 <ion-content class="bg-[#1a1a1a]">

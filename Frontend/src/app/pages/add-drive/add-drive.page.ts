@@ -9,13 +9,14 @@ import { VehicleService } from 'src/app/core/services/vehicle.service';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { GoogleMapsService, ParsedAddress } from 'src/app/core/services/google-maps.service';
 import { DriveCreateRequest } from 'src/app/core/models/drive-create-request.model';
-import { catchError, of, Subject, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
+import { catchError, of, Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 import { addIcons } from 'ionicons';
 import { calendarOutline } from 'ionicons/icons';
 import { AppHeaderComponent } from 'src/app/shared/components/header/app-header.component';
 import { SidePanelComponent } from 'src/app/shared/components/panel/side-panel.component';
 import { Profile } from 'src/app/core/services/profile';
 import { UserResponse } from 'src/app/core/models/userResponse';
+import { CustomDatePickerComponent } from 'src/app/shared/components/date-picker/custom-date-picker.component';
 import { FriendService } from 'src/app/core/services/friend.service';
 
 type LocationMode = 'departure' | 'destination';
@@ -28,10 +29,7 @@ interface PlaceSuggestion {
   distance?: string;
 }
 
-import { CustomDatePickerComponent } from 'src/app/shared/components/date-picker/custom-date-picker.component';
-
 @Component({
-  selector: 'app-add-drive',
   standalone: true,
   imports: [CommonModule, IonicModule, ReactiveFormsModule, FormsModule, CustomDatePickerComponent, AppHeaderComponent, SidePanelComponent],
   templateUrl: './add-drive.page.html',
@@ -314,6 +312,9 @@ export class AddDrivePage implements OnInit, OnDestroy {
       this.autocompleteService = new google.maps.places.AutocompleteService();
       this.placesService = new google.maps.places.PlacesService(this.map);
 
+      // AGGRESSIVELY REMOVE WHITE CIRCULAR DRAG BUTTONS
+      this.removeGoogleMapsControls();
+
       this.mapLoaded.set(true);
       this.mapError.set(null);
 
@@ -324,6 +325,72 @@ export class AddDrivePage implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Forcefully remove Google Maps drag controls and white circular buttons
+   */
+  private removeGoogleMapsControls() {
+    // Run immediately
+    this.hideMapControls();
+
+    // Run again after a delay to catch dynamically added elements
+    setTimeout(() => this.hideMapControls(), 100);
+    setTimeout(() => this.hideMapControls(), 500);
+    setTimeout(() => this.hideMapControls(), 1000);
+
+    // Set up a mutation observer to continuously remove these elements
+    if (this.mapContainer?.nativeElement) {
+      const observer = new MutationObserver(() => {
+        this.hideMapControls();
+      });
+
+      observer.observe(this.mapContainer.nativeElement, {
+        childList: true,
+        subtree: true
+      });
+    }
+  }
+
+  /**
+   * Hide all Google Maps control elements
+   */
+  private hideMapControls() {
+    const mapElement = this.mapContainer?.nativeElement;
+    if (!mapElement) return;
+
+    // Remove all images with drag-related sources
+    const dragImages = mapElement.querySelectorAll('img[src*="drag"], img[src*="onion"], img[src*="touch"], img[src*="openhand"], img[src*="closedhand"]');
+    dragImages.forEach((img: Element) => {
+      (img as HTMLElement).style.display = 'none';
+      (img as HTMLElement).style.visibility = 'hidden';
+      (img as HTMLElement).style.opacity = '0';
+    });
+
+    // Remove white circular controls (50% border radius images)
+    const circularImages = mapElement.querySelectorAll('img');
+    circularImages.forEach((img: HTMLImageElement) => {
+      const style = window.getComputedStyle(img);
+      if (style.borderRadius.includes('50%') || style.borderRadius === '50px') {
+        img.style.display = 'none';
+        img.style.visibility = 'hidden';
+      }
+    });
+
+    // Hide marker shadows
+    const shadows = mapElement.querySelectorAll('img[src*="shadow"]');
+    shadows.forEach((shadow: Element) => {
+      (shadow as HTMLElement).style.display = 'none';
+    });
+
+    // Remove any draggable divs
+    const draggableDivs = mapElement.querySelectorAll('div[draggable="true"]');
+    draggableDivs.forEach((div: Element) => {
+      const images = div.querySelectorAll('img');
+      images.forEach((img: Element) => {
+        (img as HTMLElement).style.display = 'none';
+      });
+    });
+  }
+
   private async updateDepartureMarker(location: google.maps.LatLngLiteral) {
     if (this.departureMarker) {
       this.departureMarker.setPosition(location);
@@ -331,7 +398,6 @@ export class AddDrivePage implements OnInit, OnDestroy {
       this.departureMarker = await this.mapsService.createMarker(this.map!, location, {
         label: { text: 'A', color: '#FFFFFF', fontWeight: 'bold' },
         title: 'Pickup',
-        draggable: true,
         icon: {
           path: google.maps.SymbolPath.CIRCLE,
           scale: 12,
@@ -341,10 +407,8 @@ export class AddDrivePage implements OnInit, OnDestroy {
           strokeWeight: 3
         }
       });
-      this.departureMarker.addListener('dragend', (event: any) => {
-        this.currentMode.set('departure');
-        this.onMapClick(event.latLng);
-      });
+      // Remove controls after marker is created
+      setTimeout(() => this.hideMapControls(), 50);
     }
   }
 
@@ -355,7 +419,6 @@ export class AddDrivePage implements OnInit, OnDestroy {
       this.destinationMarker = await this.mapsService.createMarker(this.map!, location, {
         label: { text: 'B', color: '#FFFFFF', fontWeight: 'bold' },
         title: 'Destination',
-        draggable: true,
         icon: {
           path: google.maps.SymbolPath.CIRCLE,
           scale: 12,
@@ -365,10 +428,8 @@ export class AddDrivePage implements OnInit, OnDestroy {
           strokeWeight: 3
         }
       });
-      this.destinationMarker.addListener('dragend', (event: any) => {
-        this.currentMode.set('destination');
-        this.onMapClick(event.latLng);
-      });
+      // Remove controls after marker is created
+      setTimeout(() => this.hideMapControls(), 50);
     }
   }
 

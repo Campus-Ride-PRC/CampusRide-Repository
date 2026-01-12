@@ -67,10 +67,13 @@
               [disabled]="friendRequestStatus() === 'sending'"
               (click)="sendFriendRequest()"
             >
-              <ion-icon *ngIf="friendRequestStatus() !== 'sending'" name="person-add-outline"></ion-icon>
-              <ion-spinner *ngIf="friendRequestStatus() === 'sending'" name="crescent" class="spinner-small"></ion-spinner>
-              <span *ngIf="friendRequestStatus() !== 'sending'">Add Friend</span>
-              <span *ngIf="friendRequestStatus() === 'sending'">Sending...</span>
+              <span class="fr-left">
+                <ion-icon *ngIf="friendRequestStatus() !== 'sending'" name="person-add-outline"></ion-icon>
+                <ion-spinner *ngIf="friendRequestStatus() === 'sending'" name="crescent" class="spinner-small"></ion-spinner>
+              </span>
+              <span class="fr-center" *ngIf="friendRequestStatus() !== 'sending'">Add Friend</span>
+              <span class="fr-center" *ngIf="friendRequestStatus() === 'sending'">Sending...</span>
+              <span class="fr-right" aria-hidden="true"></span>
             </button>
 
             <button
@@ -78,8 +81,11 @@
               class="friend-request-button sent"
               disabled
             >
-              <ion-icon name="time-outline"></ion-icon>
-              <span>Respond in Notifications</span>
+              <span class="fr-left">
+                <ion-icon name="time-outline"></ion-icon>
+              </span>
+              <span class="fr-center">Respond in Notifications</span>
+              <span class="fr-right" aria-hidden="true"></span>
             </button>
 
             <button
@@ -87,8 +93,11 @@
               class="friend-request-button received"
               disabled
             >
-              <ion-icon name="alert-circle-outline"></ion-icon>
-              <span>Request Sent</span>
+              <span class="fr-left">
+                <ion-icon name="alert-circle-outline"></ion-icon>
+              </span>
+              <span class="fr-center">Request Sent</span>
+              <span class="fr-right" aria-hidden="true"></span>
             </button>
 
             <!-- Accepted -->
@@ -97,8 +106,11 @@
               class="friend-request-button friends"
               disabled
             >
-              <ion-icon name="checkmark-circle-outline"></ion-icon>
-              <span>Friends</span>
+              <span class="fr-left">
+                <ion-icon name="checkmark-circle-outline"></ion-icon>
+              </span>
+              <span class="fr-center">Friends</span>
+              <span class="fr-right" aria-hidden="true"></span>
             </button>
           </ng-container>
         </div>
