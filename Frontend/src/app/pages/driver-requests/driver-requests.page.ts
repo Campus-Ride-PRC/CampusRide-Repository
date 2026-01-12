@@ -258,7 +258,7 @@ export class DriverRequestsPage implements OnInit {
       case 'home':
         this.router.navigate(['/home']);
         break;
-      case 'drives':
+      case 'add-ride':
         this.router.navigate(['/add-drive']);
         break;
       case 'my-bookings':
@@ -267,7 +267,7 @@ export class DriverRequestsPage implements OnInit {
       case 'my-rides':
         this.router.navigate(['/my-rides']);
         break;
-      case 'driver-requests':
+      case 'ride-requests':
         // Already on driver-requests
         break;
       case 'friends':

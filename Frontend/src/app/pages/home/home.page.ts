@@ -199,7 +199,7 @@ export class HomePage implements OnInit {
       case 'home':
         // Already on home
         break;
-      case 'drives':
+      case 'add-ride':
         this.router.navigate(['/add-drive']);
         break;
       case 'my-bookings':
@@ -208,7 +208,7 @@ export class HomePage implements OnInit {
       case 'my-rides':
         this.router.navigate(['/my-rides']);
         break;
-      case 'driver-requests':
+      case 'ride-requests':
         this.router.navigate(['/driver-requests']);
         break;
       case 'friends':

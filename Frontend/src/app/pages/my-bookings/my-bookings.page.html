@@ -90,6 +90,7 @@
     [userAvatar]="user ? 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + user.firstName : ''"
     [friendsCount]="friendsCount"
     [ridesCount]="ridesCount"
+    [currentRoute]="'/my-bookings'"
     (closed)="onPanelClosed()"
     (itemClicked)="onMenuItemClick($event)"
     (rideClicked)="onRideClick($event)"

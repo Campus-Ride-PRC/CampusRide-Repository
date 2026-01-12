@@ -310,7 +310,7 @@ export class NotificationsPage implements OnInit {
       case 'home':
         this.router.navigate(['/home']);
         break;
-      case 'drives':
+      case 'add-ride':
         this.router.navigate(['/add-drive']);
         break;
       case 'my-bookings':
@@ -319,8 +319,11 @@ export class NotificationsPage implements OnInit {
       case 'my-rides':
         this.router.navigate(['/my-rides']);
         break;
-      case 'driver-requests':
+      case 'ride-requests':
         this.router.navigate(['/driver-requests']);
+        break;
+      case 'friends':
+        this.router.navigate(['/friends']);
         break;
       case 'settings':
         console.log('Settings feature coming soon');
