@@ -9,100 +9,148 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(
-        name = "drives",
-        indexes = {
+@Table(name = "drives", indexes = {
                 @Index(name = "ix_drives_from_id", columnList = "from_id"),
                 @Index(name = "ix_drives_to_id", columnList = "to_id"),
                 @Index(name = "ix_drives_time", columnList = "time"),
                 @Index(name = "ix_drives_created_at", columnList = "created_at"),
                 @Index(name = "ix_drives_from_time", columnList = "from_id, time"),
                 @Index(name = "ix_drives_to_time", columnList = "to_id, time"),
-        }
-)
+})
 public class Drive {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "from_id", nullable = false)
-    private Address from;
+        @Column(name = "accepted_payment_types", columnDefinition = "text[]")
+        private List<String> acceptedPaymentTypes;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "to_id", nullable = false)
-    private Address to;
+        @ManyToOne(fetch = FetchType.LAZY, optional = false)
+        @JoinColumn(name = "from_id", nullable = false)
+        private Address from;
 
-    @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal price;
+        @ManyToOne(fetch = FetchType.LAZY, optional = false)
+        @JoinColumn(name = "to_id", nullable = false)
+        private Address to;
 
-    @Column(nullable = false)
-    private LocalDateTime time;
+        @Column(nullable = false, precision = 10, scale = 2)
+        private BigDecimal price;
 
-    @Column(nullable = false)
-    private Integer totalNoSeats;
+        @Column(nullable = false)
+        private LocalDateTime time;
 
-    @Column(name = "created_at", nullable = false, insertable = false, updatable = false,
-            columnDefinition = "timestamp(6) DEFAULT now()")
-    private LocalDateTime createdAt;
+        @Column(nullable = false)
+        private Integer totalNoSeats;
 
-    @OneToMany(mappedBy = "drive", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Booking> bookings = new ArrayList<>();
+        @Column(name = "created_at", nullable = false, insertable = false, updatable = false, columnDefinition = "timestamp(6) DEFAULT now()")
+        private LocalDateTime createdAt;
 
-    public User getDriver() {
-        return bookings.stream()
-                .filter(b -> b.getRole() == BookingRole.DRIVER)
-                .map(Booking::getUser)
-                .findFirst()
-                .orElse(null);
-    }
+        @OneToMany(mappedBy = "drive", cascade = CascadeType.ALL, orphanRemoval = true)
+        private List<Booking> bookings = new ArrayList<>();
 
-    public Vehicle getVehicle() {
-        User driver = getDriver();
-        return driver != null ? driver.getVehicle() : null;
-    }
+        public User getDriver() {
+                return bookings.stream()
+                                .filter(b -> b.getRole() == BookingRole.DRIVER)
+                                .map(Booking::getUser)
+                                .findFirst()
+                                .orElse(null);
+        }
 
-    public Integer getAvailableSeats() {
-        long booked = bookings.stream()
-                .filter(b -> b.getStatus() == BookingStatus.ACCEPTED && b.getRole() == BookingRole.CLIENT)
-                .count();
-        return totalNoSeats - (int) booked;
-    }
+        public Vehicle getVehicle() {
+                User driver = getDriver();
+                return driver != null ? driver.getVehicle() : null;
+        }
 
-    protected Drive() {}
+        public Integer getAvailableSeats() {
+                long booked = bookings.stream()
+                                .filter(b -> b.getStatus() == BookingStatus.ACCEPTED
+                                                && b.getRole() == BookingRole.CLIENT)
+                                .count();
+                return totalNoSeats - (int) booked;
+        }
 
-    public Drive(Address from, Address to, BigDecimal price, LocalDateTime time,
-                 Integer totalNoSeats, LocalDateTime createdAt) {
-        this.from = from;
-        this.to = to;
-        this.price = price;
-        this.time = time;
-        this.totalNoSeats = totalNoSeats;
-        this.createdAt = createdAt;
-    }
+        protected Drive() {
+        }
 
+        public Drive(Address from, Address to, BigDecimal price, LocalDateTime time,
+                        Integer totalNoSeats, LocalDateTime createdAt) {
+                this.from = from;
+                this.to = to;
+                this.price = price;
+                this.time = time;
+                this.totalNoSeats = totalNoSeats;
+                this.createdAt = createdAt;
+        }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+        public Long getId() {
+                return id;
+        }
 
-    public Address getFrom() { return from; }
-    public void setFrom(Address from) { this.from = from; }
+        public void setId(Long id) {
+                this.id = id;
+        }
 
-    public Address getTo() { return to; }
-    public void setTo(Address to) { this.to = to; }
+        public Address getFrom() {
+                return from;
+        }
 
-    public BigDecimal getPrice() { return price; }
-    public void setPrice(BigDecimal price) { this.price = price; }
+        public void setFrom(Address from) {
+                this.from = from;
+        }
 
-    public LocalDateTime getTime() { return time; }
-    public void setTime(LocalDateTime time) { this.time = time; }
+        public Address getTo() {
+                return to;
+        }
 
-    public Integer getTotalNoSeats() { return totalNoSeats; }
-    public void setTotalNoSeats(Integer totalNoSeats) { this.totalNoSeats = totalNoSeats; }
+        public void setTo(Address to) {
+                this.to = to;
+        }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+        public BigDecimal getPrice() {
+                return price;
+        }
 
-    public List<Booking> getBookings() { return bookings; }
-    public void setBookings(List<Booking> bookings) { this.bookings = bookings; }
+        public void setPrice(BigDecimal price) {
+                this.price = price;
+        }
+
+        public LocalDateTime getTime() {
+                return time;
+        }
+
+        public void setTime(LocalDateTime time) {
+                this.time = time;
+        }
+
+        public Integer getTotalNoSeats() {
+                return totalNoSeats;
+        }
+
+        public void setTotalNoSeats(Integer totalNoSeats) {
+                this.totalNoSeats = totalNoSeats;
+        }
+
+        public LocalDateTime getCreatedAt() {
+                return createdAt;
+        }
+
+        public void setCreatedAt(LocalDateTime createdAt) {
+                this.createdAt = createdAt;
+        }
+
+        public List<Booking> getBookings() {
+                return bookings;
+        }
+
+        public void setBookings(List<Booking> bookings) {
+                this.bookings = bookings;
+        }
+
+        public List<String> getAcceptedPaymentTypes() {
+                return acceptedPaymentTypes;
+        }
+
+        public void setAcceptedPaymentTypes(List<String> acceptedPaymentTypes) {
+                this.acceptedPaymentTypes = acceptedPaymentTypes;
+        }
 }
