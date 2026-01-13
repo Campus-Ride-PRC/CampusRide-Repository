@@ -22,7 +22,7 @@ import {
     templateUrl: './payment-methods.page.html',
     styleUrls: ['./payment-methods.page.scss'],
     standalone: true,
-    imports: [CommonModule, FormsModule, IonicModule, RouterLink]
+    imports: [CommonModule, FormsModule, IonicModule]
 })
 export class PaymentMethodsPage implements OnInit {
     private paymentMethodService = inject(PaymentMethodService);
