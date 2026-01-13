@@ -4,40 +4,38 @@
   (notificationClick)="onNotificationOpen()">
 </app-header>
 
-<ion-content class="bg-[#1a1a1a]">
-  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
-    <ion-refresher-content></ion-refresher-content>
-  </ion-refresher>
+<ion-content>
+  <div class="rides-container">
+    <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
 
-  <div *ngIf="loading" class="loading-container">
-    <ion-spinner color="primary"></ion-spinner>
-    <p>Loading your rides...</p>
-  </div>
+    <div *ngIf="loading" class="loading-container">
+      <ion-spinner color="primary"></ion-spinner>
+      <p>Loading your rides...</p>
+    </div>
 
-  <div *ngIf="!loading && myRides.length === 0" class="empty-state">
-    <ion-icon name="car-outline" class="empty-icon"></ion-icon>
-    <h2>No Rides Yet</h2>
-    <p>You haven't created any rides yet.</p>
-    <ion-button routerLink="/add-drive" fill="outline" class="mt-4">
-      Create a Ride
-    </ion-button>
-  </div>
+    <div *ngIf="!loading && myRides.length === 0" class="empty-state">
+      <ion-icon name="car-outline" class="empty-icon"></ion-icon>
+      <h2>No Rides Yet</h2>
+      <p>You haven't created any rides yet. Start by adding your first ride!</p>
+    </div>
 
-  <div *ngIf="!loading && myRides.length > 0" class="rides-container">
-    <app-ride-card
-      *ngFor="let drive of myRides"
-      [userName]="'You'"
-      [userAvatar]="'https://api.dicebear.com/7.x/avataaars/svg?seed=' + user?.firstName"
-      [rating]="4.8"
-      [fromLocation]="getLocationName(drive.fromAddress)"
-      [toLocation]="getLocationName(drive.toAddress)"
-      [departureTime]="formatDate(drive.time)"
-      [seatsAvailable]="drive.availableSeats"
-      [totalSeats]="drive.totalNoSeats"
-      [price]="drive.price + ' RON'"
-      (cardClick)="viewRideDetails(drive.id)"
-      class="card-item"
-    ></app-ride-card>
+    <div *ngIf="!loading && myRides.length > 0" class="rides-list">
+      <app-ride-card
+        *ngFor="let ride of myRides"
+        [userName]="ride.driverFirstName + ' ' + ride.driverLastName"
+        [userAvatar]="'https://api.dicebear.com/7.x/avataaars/svg?seed=' + ride.driverFirstName"
+        [rating]="4.5"
+        [fromLocation]="getLocationName(ride.fromAddress)"
+        [toLocation]="getLocationName(ride.toAddress)"
+        [departureTime]="formatDate(ride.time)"
+        [seatsAvailable]="ride.availableSeats"
+        [totalSeats]="ride.totalNoSeats"
+        [price]="ride.price + ' RON'"
+        (cardClick)="viewRideDetails(ride.id)">
+      </app-ride-card>
+    </div>
   </div>
 </ion-content>
 
@@ -46,9 +44,6 @@
     [isOpen]="isPanelOpen"
     [userFirstName]="user?.firstName || 'Guest'"
     [userAvatar]="user ? 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + user.firstName : ''"
-    [friendsCount]="friendsCount"
-    [ridesCount]="ridesCount"
-    [currentRoute]="'/my-rides'"
     (closed)="onPanelClosed()"
     (itemClicked)="onMenuItemClick($event)"
     (rideClicked)="onRideClick($event)"
