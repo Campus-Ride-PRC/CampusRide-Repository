@@ -304,6 +304,7 @@ $transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border-radius: $border-radius-md;
   padding: 16px;
   margin-bottom: 16px;
+  flex-wrap: wrap; // Allow wrapping for smaller screens
 
   .driver-avatar {
     width: 56px;
@@ -325,6 +326,7 @@ $transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     flex: 1;
     min-width: 0;
     text-align: left;
+    margin-right: 8px;
 
     .driver-name {
       font-size: 16px;
@@ -359,6 +361,91 @@ $transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     .price-label {
       font-size: 11px;
       color: $text-muted;
+    }
+  }
+
+  .friend-request-container {
+    width: 100%;
+    margin-top: 12px;
+
+    .friend-request-button {
+      // Restore original visuals
+      width: 100%;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+
+      // Original default state (Add Friend)
+      background: rgba(139, 92, 246, 0.15);
+      color: #8B5CF6;
+
+      &:hover:not(:disabled) {
+        background: rgba(139, 92, 246, 0.25);
+      }
+
+      &:active:not(:disabled) {
+        transform: scale(0.98);
+      }
+
+      // Sent state
+      &.sent {
+        background: rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.6);
+        cursor: default;
+      }
+
+      // Received state
+      &.received {
+        background: rgba(245, 158, 11, 0.15);
+        color: #F59E0B;
+        cursor: default;
+      }
+
+      // Friends state
+      &.friends {
+        background: rgba(16, 185, 129, 0.15);
+        color: #10B981;
+        cursor: default;
+      }
+
+      &:disabled {
+        opacity: 0.8;
+        cursor: default;
+      }
+
+      // Minimal layout change to guarantee the TEXT is centered
+      // 3 columns: left icon/spinner (24px), centered label (1fr), right spacer (24px)
+      display: grid;
+      grid-template-columns: 24px 1fr 24px;
+      align-items: center;
+
+      .fr-left,
+      .fr-right {
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .fr-center {
+        text-align: center;
+        justify-self: center;
+        width: 100%;
+      }
+
+      ion-icon {
+        font-size: 16px;
+      }
+
+      .spinner-small {
+        width: 16px;
+        height: 16px;
+      }
     }
   }
 }

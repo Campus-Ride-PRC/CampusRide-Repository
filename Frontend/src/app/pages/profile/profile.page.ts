@@ -11,16 +11,18 @@ import {
   IonTitle,
   IonToolbar
 } from '@ionic/angular/standalone';
-import { UserResponse } from "../../core/models/userResponse";
-import { Profile } from "../../core/services/profile";
-import { DriveCard } from "../../core/models/drive-card.model";
-import { RideCardComponent } from "../../shared/components/cards/ride-card.component";
-import { Router, RouterLink } from "@angular/router";
-import { BookingResponse } from "../../core/models/booking.model";
-import { BookingCardComponent } from "../../shared/components/booking-card/booking-card.component";
-import { AppHeaderComponent } from "../../shared/components/header/app-header.component";
-import { SidePanelComponent } from "../../shared/components/panel/side-panel.component";
-import { AuthService } from "../../core/services/auth.service";
+import {UserResponse} from "../../core/models/userResponse";
+import {Profile} from "../../core/services/profile";
+import {DriveCard} from "../../core/models/drive-card.model";
+import {RideCardComponent} from "../../shared/components/cards/ride-card.component";
+import {Router} from "@angular/router";
+import {BookingResponse} from "../../core/models/booking.model";
+import {BookingCardComponent} from "../../shared/components/booking-card/booking-card.component";
+import {AppHeaderComponent} from "../../shared/components/header/app-header.component";
+import {SidePanelComponent} from "../../shared/components/panel/side-panel.component";
+import {AuthService} from "../../core/services/auth.service";
+import {FriendService} from "../../core/services/friend.service";
+import {RouterLink} from "@angular/router";
 
 @Component({
   selector: 'app-profile',
@@ -31,12 +33,20 @@ import { AuthService } from "../../core/services/auth.service";
 })
 export class ProfilePage implements OnInit {
   isPanelOpen = false;
+  friendsCount: number = 0;
+  ridesCount: number = 0;
 
-  constructor(private location: Location, private service: Profile, private router: Router, private authService: AuthService) {
+  constructor(
+    private location: Location,
+    private service: Profile,
+    private router: Router,
+    private authService: AuthService,
+    private friendService: FriendService
+  ) {
   }
 
-  protected user!: UserResponse
-  protected user_state: string = "loading"
+  protected user: UserResponse | null = null;
+  protected user_state :string = "loading"
   protected drives_state: string = "loading";
   protected booking__state: string = "loading";
 
@@ -85,6 +95,18 @@ export class ProfilePage implements OnInit {
         console.log(err);
       }
     })
+    this.loadFriendCount();
+  }
+
+  loadFriendCount() {
+    this.friendService.getFriendCount().subscribe({
+      next: (count) => {
+        this.friendsCount = count;
+      },
+      error: (err) => {
+        console.error('Error loading friend count:', err);
+      }
+    });
   }
 
   goBack() {
@@ -180,6 +202,7 @@ export class ProfilePage implements OnInit {
 
   onMenuOpen() {
     this.isPanelOpen = true;
+    this.loadFriendCount();
   }
 
   onPanelClosed() {
@@ -197,7 +220,7 @@ export class ProfilePage implements OnInit {
       case 'home':
         this.router.navigate(['/home']);
         break;
-      case 'drives':
+      case 'add-ride':
         this.router.navigate(['/add-drive']);
         break;
       case 'my-bookings':
@@ -206,8 +229,11 @@ export class ProfilePage implements OnInit {
       case 'my-rides':
         this.router.navigate(['/my-rides']);
         break;
-      case 'driver-requests':
+      case 'ride-requests':
         this.router.navigate(['/driver-requests']);
+        break;
+      case 'friends':
+        this.router.navigate(['/friends']);
         break;
       case 'settings':
         console.log('Settings feature coming soon');

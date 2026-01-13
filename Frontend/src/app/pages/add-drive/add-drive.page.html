@@ -228,8 +228,12 @@
           <div class="form-field">
             <label>Vehicle Model</label>
             <div class="input-container" [class.disabled]="hasVehicle()">
-              <ion-icon name="car-outline" class="field-icon" style="padding-inline-start: 10px;"></ion-icon>
-              <input type="text" formControlName="vehicleModel" placeholder="e.g., Toyota Corolla" />
+              <ion-icon name="car-outline" class="field-icon"></ion-icon>
+              <input 
+                type="text" 
+                formControlName="vehicleModel" 
+                placeholder="e.g., Toyota Corolla"
+              />
             </div>
             <span class="error-message" *ngIf="getErrorMessage('vehicleModel')">{{ getErrorMessage('vehicleModel')
               }}</span>

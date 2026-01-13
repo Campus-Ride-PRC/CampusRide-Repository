@@ -253,6 +253,9 @@ export class DriverRequestsPage implements OnInit {
       case 'driver-requests':
         // Already on driver-requests
         break;
+      case 'friends':
+        this.router.navigate(['/friends']);
+        break;
       case 'settings':
         console.log('Settings feature coming soon');
         break;

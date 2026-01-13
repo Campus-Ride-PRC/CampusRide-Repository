@@ -162,6 +162,9 @@ export class MyRidesPage implements OnInit {
         break;
       case 'my-rides':
         break;
+      case 'friends':
+        this.router.navigate(['/friends']);
+        break;
       case 'settings':
         console.log('Settings feature coming soon');
         break;

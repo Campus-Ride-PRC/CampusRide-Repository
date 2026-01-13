@@ -17,6 +17,7 @@ import { PaymentMethod } from 'src/app/core/models/payment-method.model';
 import { PaymentService, CheckoutSessionRequest } from 'src/app/core/services/payment.service';
 import { addIcons } from 'ionicons';
 import { cashOutline, cardOutline, addCircleOutline } from 'ionicons/icons';
+import { FriendService, FriendshipStatus } from 'src/app/core/services/friend.service';
 
 type FlowStep = 'details' | 'pickup' | 'confirmation';
 
@@ -45,7 +46,7 @@ interface ExistingPickupPoint {
 @Component({
   selector: 'app-ride-details',
   standalone: true,
-  imports: [CommonModule, IonicModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, IonicModule, ReactiveFormsModule],
   templateUrl: './ride-details.page.html',
   styleUrls: ['./ride-details.page.scss'],
 })
@@ -95,6 +96,9 @@ export class RideDetailsPage implements OnInit, OnDestroy {
     const types = this.drive?.acceptedPaymentTypes;
     return types && types.length > 0 ? types : ['CASH'];
   });
+  // Friend request status
+  readonly friendRequestStatus = signal<'idle' | 'sending' | 'sent' | 'error'>('idle');
+  readonly friendshipStatus = signal<FriendshipStatus | null>(null);
 
   // Computed signals
   readonly isPastRide = computed(() => {
@@ -150,7 +154,8 @@ export class RideDetailsPage implements OnInit, OnDestroy {
     private toastController: ToastController,
     private alertController: AlertController,
     private paymentMethodService: PaymentMethodService,
-    private paymentService: PaymentService
+    private paymentService: PaymentService,
+    private friendService: FriendService
   ) {
     addIcons({ cashOutline, cardOutline, addCircleOutline });
     this.setupSearchSubscription();
@@ -253,45 +258,6 @@ export class RideDetailsPage implements OnInit, OnDestroy {
         this.requestingRide.set(false);
       }
     });
-  }
-
-  async confirmBooking() {
-    const acceptedTypes = this.acceptedDrivePaymentTypes();
-    const needsPaymentSelection = acceptedTypes.length > 0;
-
-    if (acceptedTypes.includes('CARD') && !acceptedTypes.includes('CASH') && !this.selectedPaymentMethodId()) {
-      this.showToast('Please select a payment method', 'warning');
-      return;
-    }
-
-    const alert = await this.alertController.create({
-      header: 'Confirm Booking',
-      message: 'Are you sure you want to book this ride?',
-      cssClass: 'booking-confirm-alert',
-      buttons: [
-        {
-          text: 'Cancel',
-          role: 'cancel',
-          cssClass: 'alert-button-cancel'
-        },
-        {
-          text: 'Confirm',
-          cssClass: 'alert-button-confirm',
-          handler: () => {
-            this.requestingRide.set(true);
-
-            const request: BookingRequest = {
-              driveId: this.driveId,
-              pickupAddressId: -1, 
-              paymentMethodId: this.selectedPaymentMethodId() || undefined
-            };
-
-            this.handleBookingWithAddress(request);
-          }
-        }
-      ]
-    });
-    await alert.present();
   }
 
   private handleBookingWithAddress(request: BookingRequest) {
@@ -506,6 +472,7 @@ export class RideDetailsPage implements OnInit, OnDestroy {
           // Only check for user booking if user is not the driver
           if (!isDriver) {
             this.checkUserBooking(currentUserId);
+            this.checkFriendshipStatus(response.driverId);
           }
         }
 
@@ -525,6 +492,17 @@ export class RideDetailsPage implements OnInit, OnDestroy {
         console.error('Error loading drive details:', error);
         this.error.set('Failed to load drive details');
         this.loading.set(false);
+      }
+    });
+  }
+
+  private checkFriendshipStatus(driverId: number) {
+    this.friendService.getFriendshipStatus(driverId).subscribe({
+      next: (status) => {
+        this.friendshipStatus.set(status);
+      },
+      error: (error) => {
+        console.error('Error checking friendship status:', error);
       }
     });
   }
@@ -888,7 +866,7 @@ export class RideDetailsPage implements OnInit, OnDestroy {
             </div>
             ${isPending ? `
               <div style="display: flex; gap: 4px; padding-top: 4px;">
-                <button 
+                <button
                   class="accept-passenger-btn"
                   data-passenger-email="${passenger.email}"
                   style="
@@ -908,7 +886,7 @@ export class RideDetailsPage implements OnInit, OnDestroy {
                 >
                   ✓ ACCEPTED
                 </button>
-                <button 
+                <button
                   class="decline-passenger-btn"
                   data-passenger-email="${passenger.email}"
                   style="
@@ -1440,6 +1418,68 @@ export class RideDetailsPage implements OnInit, OnDestroy {
     return this.formatDepartureTime();
   }
 
+  private submitBooking(userId: number) {
+    if (!this.drive) return;
+
+    this.requestingRide.set(true);
+
+    const pickupLoc = this.pickupLocation();
+    const pickupAddr = this.pickupAddress();
+
+    if (!pickupLoc || !pickupAddr) {
+      this.requestingRide.set(false);
+      this.showToast('Please select a pickup location', 'warning');
+      return;
+    }
+
+    // First create the address, then use its ID for the booking
+    this.addressService.createAddress({
+      street: pickupAddr.street || '',
+      number: pickupAddr.number || '',
+      locationName: pickupAddr.locationName || '',
+      neighborhood: pickupAddr.neighborhood || '',
+      city: pickupAddr.city || '',
+      latitude: pickupLoc.lat,
+      longitude: pickupLoc.lng
+    }).subscribe({
+      next: (address) => {
+        const request: BookingRequest = {
+          driveId: this.driveId,
+          pickupAddressId: address.id!
+        };
+
+        this.bookingService.requestRide(request).subscribe({
+      next: async (response) => {
+        this.requestingRide.set(false);
+        await this.showToast('Booking confirmed! Status: ' + response.status, 'success');
+        setTimeout(() => {
+          this.router.navigate(['/home']);
+        }, 1500);
+      },
+        error: async (error) => {
+          this.requestingRide.set(false);
+          console.error('Error booking ride:', error);
+
+          let errorMessage = 'Failed to book ride. Please try again.';
+          if (error.error?.message) {
+            errorMessage = error.error.message;
+          } else if (error.status === 400) {
+            errorMessage = 'Bad request. Please check your information.';
+          } else if (error.status === 404) {
+            errorMessage = 'Drive or user not found.';
+          }
+
+          await this.showToast(errorMessage, 'danger');
+        }
+      });
+      },
+      error: async (error) => {
+        this.requestingRide.set(false);
+        console.error('Error creating pickup address:', error);
+        await this.showToast('Failed to create pickup address. Please try again.', 'danger');
+      }
+    });
+  }
 
   private checkUserBooking(userId: number) {
     this.bookingService.getBooking(this.driveId, userId).subscribe({
@@ -1470,6 +1510,90 @@ export class RideDetailsPage implements OnInit, OnDestroy {
         if (error.status !== 404) {
           console.error('Error checking user booking:', error);
         }
+      }
+    });
+  }
+
+  async confirmBooking() {
+    // 1. Authentication Check
+    const userId = this.authService.getCurrentUserId();
+    if (!userId) {
+      await this.showToast('You must be logged in to book a ride', 'warning');
+      this.router.navigate(['/login/auth']);
+      return;
+    }
+
+    // 2. Pickup Validation
+    if (!this.canBookRide()) {
+      await this.showToast('Please select a pickup point', 'warning');
+      return;
+    }
+
+    // 3. Payment Validation (from Version 1)
+    const acceptedTypes = this.acceptedDrivePaymentTypes();
+    const requiresCard = acceptedTypes.includes('CARD') && !acceptedTypes.includes('CASH');
+    
+    if (requiresCard && !this.selectedPaymentMethodId()) {
+      await this.showToast('Please select a payment method', 'warning');
+      return;
+    }
+
+    // 4. Create Detailed Confirmation Alert
+    const driverName = this.getDriverName();
+    const pickupLocation = this.getPickupLocation();
+    const destination = this.getToLocation();
+    const price = this.formatPrice();
+    
+    const alert = await this.alertController.create({
+      header: 'Confirm Booking',
+      message: `Driver: ${driverName}\nPickup: ${pickupLocation}\nDestination: ${destination}\nPrice: ${price}`,
+      cssClass: 'booking-confirm-alert',
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          cssClass: 'alert-button-cancel'
+        },
+        {
+          text: 'Confirm',
+          cssClass: 'alert-button-confirm',
+          handler: () => {
+            this.requestingRide.set(true);
+
+            // Prepare the request object
+            const request: BookingRequest = {
+              driveId: this.driveId,
+              pickupAddressId: -1, // Note: Ensure this logic matches your backend needs
+              paymentMethodId: this.selectedPaymentMethodId() || undefined
+            };
+
+            // Execute booking
+            this.handleBookingWithAddress(request);
+            // If Version 2's submitBooking is the preferred method, use: 
+            // this.submitBooking(userId);
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  sendFriendRequest() {
+    if (!this.drive) return;
+
+    this.friendRequestStatus.set('sending');
+    this.friendService.sendFriendRequest(this.drive.driverId).subscribe({
+      next: () => {
+        this.friendRequestStatus.set('sent');
+        this.showToast('Friend request sent!', 'success');
+        // Update friendship status to reflect pending request
+        this.friendshipStatus.set({ status: 'PENDING', isSender: true });
+      },
+      error: (error) => {
+        this.friendRequestStatus.set('error');
+        console.error('Error sending friend request:', error);
+        this.showToast(error.error?.message || 'Failed to send friend request.', 'danger');
       }
     });
   }

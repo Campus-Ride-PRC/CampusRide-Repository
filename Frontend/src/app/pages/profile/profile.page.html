@@ -67,7 +67,12 @@
 <div class="fixed inset-0 z-[1000] pointer-events-none">
   <app-side-panel [isOpen]="isPanelOpen" [userFirstName]="user?.firstName || 'Guest'"
     [userAvatar]="user ? 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + user.firstName : ''"
-    (closed)="onPanelClosed()" (itemClicked)="onMenuItemClick($event)" (rideClicked)="onRideClick($event)"
+    [friendsCount]="friendsCount"
+    [ridesCount]="ridesCount"
+    [currentRoute]="'/profile'"
+    (closed)="onPanelClosed()"
+    (itemClicked)="onMenuItemClick($event)"
+    (rideClicked)="onRideClick($event)"
     class="pointer-events-auto">
   </app-side-panel>
 </div>
