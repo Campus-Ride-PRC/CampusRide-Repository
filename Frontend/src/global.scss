@@ -326,3 +326,76 @@ a.link-primary,
   }
 }
 
+// Booking Confirm Alert Styling
+.booking-confirm-alert {
+  .alert-wrapper {
+    background: var(--campus-ride-bg-card);
+    border-radius: 16px;
+  }
+
+  .alert-head {
+    padding: 20px 20px 12px;
+    
+    .alert-title {
+      color: var(--campus-ride-text-primary);
+      font-weight: 700;
+      font-size: 18px;
+    }
+  }
+
+  .alert-message {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 14px;
+    padding: 0 20px 24px;
+  }
+
+  .alert-button-group {
+    padding: 0;
+    border-top: 1px solid var(--campus-ride-border);
+    
+    button {
+      flex: 1;
+      min-height: 48px;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 14px;
+      letter-spacing: 0.5px;
+      
+      // Remove the ripple/indicator element padding and center text
+      .alert-button-inner {
+        justify-content: center;
+        padding: 0;
+        
+        span {
+          padding: 0;
+          margin: 0;
+        }
+      }
+    }
+  }
+
+  // Hide any pseudo-elements that appear as colored bars
+  button .alert-button-inner::before,
+  button .alert-button-inner::after {
+    display: none !important;
+    content: none !important;
+  }
+
+  .alert-button-cancel {
+    color: rgba(255, 255, 255, 0.6) !important;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+  }
+
+  .alert-button-confirm {
+    color: var(--campus-ride-primary) !important;
+    font-weight: 700;
+    
+    &:hover {
+      background: rgba(0, 195, 108, 0.1);
+    }
+  }
+}
+

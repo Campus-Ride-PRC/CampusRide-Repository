@@ -30,27 +30,19 @@
   </div>
 </div>
 
-<div 
-  class="bottom-sheet"
-  *ngIf="drive && !loading() && !error()"
-  [style.height.%]="sheetHeight()"
-  [class.dragging]="isDragging()"
-  [class.expanded]="isExpanded()"
->
-  <div 
-    class="drag-handle-area"
-    (touchstart)="onDragStart($event)"
-    (mousedown)="onDragStart($event)"
-  >
+<div class="bottom-sheet" *ngIf="drive && !loading() && !error()" [style.height.%]="sheetHeight()"
+  [class.dragging]="isDragging()" [class.expanded]="isExpanded()">
+  <div class="drag-handle-area" (touchstart)="onDragStart($event)" (mousedown)="onDragStart($event)">
     <div class="drag-handle"></div>
   </div>
 
   <div class="sheet-content details-step" *ngIf="currentStep() === 'details'">
     <h2 class="sheet-title">Ride Details</h2>
-    
+
     <div class="driver-card">
       <div class="driver-avatar">
-        <img [src]="'https://api.dicebear.com/7.x/avataaars/svg?seed=' + drive.driverFirstName" [alt]="getDriverName()" />
+        <img [src]="'https://api.dicebear.com/7.x/avataaars/svg?seed=' + drive.driverFirstName"
+          [alt]="getDriverName()" />
       </div>
       <div class="driver-info">
         <h3 class="driver-name">{{ getDriverName() }}</h3>
@@ -85,12 +77,12 @@
           <span class="point-address">{{ getFromLocation() }}</span>
         </div>
       </div>
-      
+
       <ng-container *ngIf="userPickupPoint()">
         <div class="route-connector">
           <div class="connector-line"></div>
         </div>
-        
+
         <div class="route-point pickup user-pickup">
           <div class="point-marker">
             <div class="marker-half-circle"></div>
@@ -102,11 +94,11 @@
           </div>
         </div>
       </ng-container>
-      
+
       <div class="route-connector">
         <div class="connector-line"></div>
       </div>
-      
+
       <div class="route-point end">
         <div class="point-marker">
           <div class="marker-square"></div>
@@ -132,20 +124,18 @@
     </div>
 
     <div class="action-button-container">
-      <button 
-        class="action-button"
-        [ngClass]="{
+      <button class="action-button" [ngClass]="{
           'primary': !isPastRide() && drive.availableSeats > 0 && !isCurrentUserDriver() && !userBooking(),
           'secondary': isCurrentUserDriver() || userBooking()
-        }"
-        [disabled]="drive.availableSeats === 0 || isPastRide() || isCurrentUserDriver() || userBooking()"
-        (click)="proceedToPickup()"
-      >
+        }" [disabled]="drive.availableSeats === 0 || isPastRide() || isCurrentUserDriver() || userBooking()"
+        (click)="proceedToPickup()">
         <span *ngIf="isPastRide()">This Ride Has Already Departed</span>
         <span *ngIf="!isPastRide() && isCurrentUserDriver()">Can't book, you are the driver</span>
         <span *ngIf="!isPastRide() && !isCurrentUserDriver() && userBooking()">Already Booked</span>
-        <span *ngIf="!isPastRide() && !isCurrentUserDriver() && !userBooking() && drive.availableSeats > 0">Book a Seat</span>
-        <span *ngIf="!isPastRide() && !isCurrentUserDriver() && !userBooking() && drive.availableSeats === 0">No Seats Available</span>
+        <span *ngIf="!isPastRide() && !isCurrentUserDriver() && !userBooking() && drive.availableSeats > 0">Book a
+          Seat</span>
+        <span *ngIf="!isPastRide() && !isCurrentUserDriver() && !userBooking() && drive.availableSeats === 0">No Seats
+          Available</span>
       </button>
       <p *ngIf="isPastRide()" class="past-ride-message">
         <ion-icon name="information-circle-outline"></ion-icon>
@@ -189,29 +179,15 @@
         <div class="connector-line"></div>
       </div>
 
-      <div 
-        class="location-input-row editable"
-        [class.active]="true"
-      >
+      <div class="location-input-row editable" [class.active]="true">
         <div class="location-marker pickup">
           <div class="marker-half-circle"></div>
         </div>
         <div class="input-wrapper">
-          <input
-            #pickupInput
-            type="text"
-            placeholder="Your pickup point"
-            (focus)="onInputFocus()"
-            (blur)="onInputBlur()"
-            (input)="onPickupInput($event)"
-            autocomplete="off"
-          />
-          <ion-icon
-            *ngIf="pickupAddress()"
-            name="close-circle"
-            class="clear-icon"
-            (click)="clearPickup(); $event.stopPropagation()"
-          ></ion-icon>
+          <input #pickupInput type="text" placeholder="Your pickup point" (focus)="onInputFocus()"
+            (blur)="onInputBlur()" (input)="onPickupInput($event)" autocomplete="off" />
+          <ion-icon *ngIf="pickupAddress()" name="close-circle" class="clear-icon"
+            (click)="clearPickup(); $event.stopPropagation()"></ion-icon>
         </div>
         <div class="drag-handle-icon">
           <ion-icon name="reorder-two-outline"></ion-icon>
@@ -236,11 +212,8 @@
     </div>
 
     <div class="suggestions-list" *ngIf="showPickupSuggestions() && pickupSuggestions().length > 0">
-      <div 
-        class="suggestion-item"
-        *ngFor="let suggestion of pickupSuggestions()"
-        (click)="selectSuggestion(suggestion)"
-      >
+      <div class="suggestion-item" *ngFor="let suggestion of pickupSuggestions()"
+        (click)="selectSuggestion(suggestion)">
         <ion-icon name="location-outline" class="suggestion-icon"></ion-icon>
         <div class="suggestion-text">
           <span class="main-text">{{ suggestion.mainText }}</span>
@@ -261,11 +234,7 @@
     </div>
 
     <div class="action-button-container">
-      <button
-        class="action-button primary"
-        [disabled]="!canBookRide()"
-        (click)="proceedToConfirmation()"
-      >
+      <button class="action-button primary" [disabled]="!canBookRide()" (click)="proceedToConfirmation()">
         Continue
       </button>
     </div>
@@ -281,7 +250,7 @@
 
     <div class="summary-card">
       <h3 class="summary-title">Booking Summary</h3>
-      
+
       <div class="summary-route">
         <div class="route-point">
           <div class="point-marker pickup">
@@ -292,11 +261,11 @@
             <span class="point-address">{{ getPickupLocation() }}</span>
           </div>
         </div>
-        
+
         <div class="route-connector">
           <div class="connector-line"></div>
         </div>
-        
+
         <div class="route-point">
           <div class="point-marker end">
             <div class="marker-square"></div>
@@ -328,19 +297,45 @@
       </div>
     </div>
 
+    <!-- Payment Method Selection -->
+    <div class="payment-section" *ngIf="acceptedDrivePaymentTypes().length > 0">
+      <h3 class="section-title">Payment Method</h3>
+      
+      <div class="payment-buttons-container">
+        <!-- Cash Button -->
+        <button 
+          *ngIf="isPaymentTypeAccepted('CASH')"
+          class="payment-select-btn"
+          [class.selected]="selectedPaymentType() === 'CASH'"
+          (click)="selectPaymentType('CASH')">
+          <ion-icon name="cash-outline"></ion-icon>
+          <span>Cash</span>
+        </button>
+
+        <!-- Card Button -->
+        <button 
+          *ngIf="isPaymentTypeAccepted('CARD')"
+          class="payment-select-btn"
+          [class.selected]="selectedPaymentType() === 'CARD'"
+          (click)="selectPaymentType('CARD')">
+          <ion-icon name="card-outline"></ion-icon>
+          <span>Card</span>
+        </button>
+      </div>
+    </div>
+
     <div class="action-buttons-row">
       <button class="action-button secondary" (click)="backToPickup()">
         Edit
       </button>
       <button 
-        class="action-button primary"
-        [disabled]="requestingRide()"
-        (click)="confirmBooking()"
-      >
+        class="action-button primary" 
+        [disabled]="requestingRide() || !selectedPaymentType()" 
+        (click)="selectedPaymentType() === 'CARD' ? proceedToStripeCheckout() : confirmBooking()">
         <ion-spinner *ngIf="requestingRide()" name="crescent"></ion-spinner>
-        <span *ngIf="!requestingRide()">
-          Confirm Booking
-        </span>
+        <span *ngIf="!requestingRide() && selectedPaymentType() === 'CASH'">Confirm Booking</span>
+        <span *ngIf="!requestingRide() && selectedPaymentType() === 'CARD'">Continue to Checkout</span>
+        <span *ngIf="!requestingRide() && !selectedPaymentType()">Select Payment Method</span>
       </button>
     </div>
   </div>

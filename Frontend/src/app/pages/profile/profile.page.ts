@@ -1,6 +1,6 @@
-import {Component, OnInit} from '@angular/core';
-import {CommonModule, Location} from '@angular/common';
-import {FormsModule} from '@angular/forms';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule, Location } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import {
   IonButton,
   IonButtons,
@@ -11,23 +11,23 @@ import {
   IonTitle,
   IonToolbar
 } from '@ionic/angular/standalone';
-import {UserResponse} from "../../core/models/userResponse";
-import {Profile} from "../../core/services/profile";
-import {DriveCard} from "../../core/models/drive-card.model";
-import {RideCardComponent} from "../../shared/components/cards/ride-card.component";
-import {Router} from "@angular/router";
-import {BookingResponse} from "../../core/models/booking.model";
-import {BookingCardComponent} from "../../shared/components/booking-card/booking-card.component";
-import {AppHeaderComponent} from "../../shared/components/header/app-header.component";
-import {SidePanelComponent} from "../../shared/components/panel/side-panel.component";
-import {AuthService} from "../../core/services/auth.service";
+import { UserResponse } from "../../core/models/userResponse";
+import { Profile } from "../../core/services/profile";
+import { DriveCard } from "../../core/models/drive-card.model";
+import { RideCardComponent } from "../../shared/components/cards/ride-card.component";
+import { Router, RouterLink } from "@angular/router";
+import { BookingResponse } from "../../core/models/booking.model";
+import { BookingCardComponent } from "../../shared/components/booking-card/booking-card.component";
+import { AppHeaderComponent } from "../../shared/components/header/app-header.component";
+import { SidePanelComponent } from "../../shared/components/panel/side-panel.component";
+import { AuthService } from "../../core/services/auth.service";
 
 @Component({
   selector: 'app-profile',
   templateUrl: './profile.page.html',
   styleUrls: ['./profile.page.scss'],
   standalone: true,
-  imports: [IonContent, CommonModule, FormsModule, RideCardComponent, BookingCardComponent, AppHeaderComponent, SidePanelComponent]
+  imports: [IonContent, CommonModule, FormsModule, RideCardComponent, BookingCardComponent, AppHeaderComponent, SidePanelComponent, RouterLink]
 })
 export class ProfilePage implements OnInit {
   isPanelOpen = false;
@@ -36,11 +36,11 @@ export class ProfilePage implements OnInit {
   }
 
   protected user!: UserResponse
-  protected user_state :string = "loading"
+  protected user_state: string = "loading"
   protected drives_state: string = "loading";
   protected booking__state: string = "loading";
 
-  protected myDrives! : DriveCard[];
+  protected myDrives!: DriveCard[];
   protected myBookings!: BookingResponse[];
 
   ngOnInit() {
@@ -57,7 +57,7 @@ export class ProfilePage implements OnInit {
     })
     this.service.getDrives().subscribe({
       next: data => {
-        if (data . length > 3 ){
+        if (data.length > 3) {
           this.myDrives = data.slice(0, 3);
           this.drives_state = "ready"
         }
@@ -72,7 +72,7 @@ export class ProfilePage implements OnInit {
     })
     this.service.getBookings().subscribe({
       next: data => {
-        if (data . length > 3 ){
+        if (data.length > 3) {
           this.myBookings = data.slice(0, 3);
           this.booking__state = "ready"
         }
@@ -102,18 +102,18 @@ export class ProfilePage implements OnInit {
 
   getToLocation(drive: DriveCard): string {
     const addr = drive.toAddress;
-    
+
     // Prefer neighborhood as the most descriptive short name
     if (addr.neighborhood) {
       return addr.neighborhood;
     }
-    
+
     // If locationName looks like a place name (not just a number or street number), use it
     const locationName = addr.locationName;
     if (locationName && !this.looksLikeStreetNumber(locationName) && !locationName.includes(',')) {
       return locationName;
     }
-    
+
     // Fall back to street name
     return addr.street || 'Unknown';
   }
@@ -170,7 +170,7 @@ export class ProfilePage implements OnInit {
     });
   }
 
-  goToAllDrives() : void {
+  goToAllDrives(): void {
     this.router.navigate(['/home']);
   }
 
@@ -193,7 +193,7 @@ export class ProfilePage implements OnInit {
   onMenuItemClick(item: string) {
     console.log('Menu item clicked:', item);
 
-    switch(item) {
+    switch (item) {
       case 'home':
         this.router.navigate(['/home']);
         break;

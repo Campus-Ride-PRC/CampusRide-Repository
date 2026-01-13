@@ -120,7 +120,8 @@ public class DriveServiceImpl implements DriveService {
                 d.getDriver().getLastName(),
                 d.getVehicle().getVehicleModel(),
                 d.getVehicle().getVehicleLicencePlate(),
-                d.getVehicle().getVehicleColor()));
+                d.getVehicle().getVehicleColor(),
+                d.getAcceptedPaymentTypes()));
     }
 
     @Override

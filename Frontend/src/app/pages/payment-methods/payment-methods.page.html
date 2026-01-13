@@ -1,0 +1,96 @@
+<ion-header>
+    <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-button (click)="goBack()">
+                <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+            </ion-button>
+        </ion-buttons>
+        <ion-title>Payment Methods</ion-title>
+        <ion-buttons slot="end">
+            <ion-button (click)="toggleAddForm()">
+                <ion-icon name="add-circle-outline" slot="icon-only"></ion-icon>
+            </ion-button>
+        </ion-buttons>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+    <!-- Add New Card Section -->
+    <div *ngIf="isAdding()" class="add-card-section fade-in">
+        <ion-card>
+            <ion-card-header>
+                <ion-card-title>Add New Card</ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+                <ion-item fill="outline" class="ion-margin-bottom">
+                    <ion-label position="stacked">Card Provider</ion-label>
+                    <ion-select [(ngModel)]="newCardProvider" interface="popover">
+                        <ion-select-option value="Visa">Visa</ion-select-option>
+                        <ion-select-option value="Mastercard">Mastercard</ion-select-option>
+                        <ion-select-option value="Revolut">Revolut</ion-select-option>
+                        <ion-select-option value="Ing">Ing</ion-select-option>
+                        <ion-select-option value="Bt">Bt</ion-select-option>
+                    </ion-select>
+                </ion-item>
+
+                <ion-item fill="outline" class="ion-margin-bottom">
+                    <ion-label position="stacked">Last 4 Digits</ion-label>
+                    <ion-input type="text" maxlength="4" placeholder="e.g. 4242"
+                        [(ngModel)]="newCardLastFour"></ion-input>
+                </ion-item>
+
+                <div class="form-actions">
+                    <ion-button fill="clear" color="medium" (click)="toggleAddForm()">Cancel</ion-button>
+                    <ion-button expand="block" (click)="addPaymentMethod()">Add Card</ion-button>
+                </div>
+            </ion-card-content>
+        </ion-card>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading()" class="loading-center">
+        <ion-spinner name="crescent"></ion-spinner>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!isLoading() && paymentMethods().length === 0 && !isAdding()" class="empty-state">
+        <ion-icon name="card-outline" size="large"></ion-icon>
+        <h3>No payment methods</h3>
+        <p>Add a card to pay for your rides easily.</p>
+        <ion-button (click)="toggleAddForm()">Add Payment Method</ion-button>
+    </div>
+
+    <!-- Payment Methods List -->
+    <ion-list *ngIf="!isLoading() && paymentMethods().length > 0">
+        <ion-item-group>
+            <ion-item-divider>
+                <ion-label>Your Cards</ion-label>
+            </ion-item-divider>
+
+            <ion-item *ngFor="let method of paymentMethods()" class="payment-item">
+                <ion-icon name="card-outline" slot="start" size="large"></ion-icon>
+                <ion-label>
+                    <h2>{{ method.provider }} •••• {{ method.lastFour }}</h2>
+                    <p>Added on {{ method.createdAt | date:'mediumDate' }}</p>
+                </ion-label>
+
+                <div slot="end" class="actions">
+                    <ion-chip *ngIf="method.isDefault" color="success">
+                        <ion-label>Default</ion-label>
+                    </ion-chip>
+
+                    <ion-button *ngIf="!method.isDefault" fill="clear" size="small"
+                        (click)="setDefaultPaymentMethod(method.id)">
+                        Set Default
+                    </ion-button>
+
+                    <ion-button fill="clear" color="danger" size="small" (click)="confirmDelete(method.id)">
+                        <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+                    </ion-button>
+                </div>
+            </ion-item>
+        </ion-item-group>
+    </ion-list>
+
+</ion-content>
