@@ -5,12 +5,15 @@ import java.time.LocalDateTime;
 import campus.ride.transfer.dtos.drive.DriveCreateRequest;
 
 public final class DriveValidator {
-    private DriveValidator() {}
+    private DriveValidator() {
+    }
 
     public static void validateForCreate(DriveCreateRequest r) {
-        if (r.getFromAddress() == null) throw new IllegalArgumentException("fromAddress is required");
-        if (r.getToAddress() == null) throw new IllegalArgumentException("toAddress is required");
-        
+        if (r.getFromAddress() == null)
+            throw new IllegalArgumentException("fromAddress is required");
+        if (r.getToAddress() == null)
+            throw new IllegalArgumentException("toAddress is required");
+
         require(r.getFromAddress().getStreet(), "fromAddress.street");
         require(r.getFromAddress().getNumber(), "fromAddress.number");
         require(r.getFromAddress().getNeighborhood(), "fromAddress.neighborhood");
@@ -21,18 +24,36 @@ public final class DriveValidator {
         // userId is handled via SecurityContext
         // availableSeats defaults to totalNoSeats on creation
 
-        if (r.getPrice() == null || r.getPrice().signum() <= 0) throw new IllegalArgumentException("price must be > 0");
-        if (r.getDay() == null) throw new IllegalArgumentException("day is required");
-        if (r.getHour() == null) throw new IllegalArgumentException("hour is required");
-        if (r.getTotalNoSeats() == null) throw new IllegalArgumentException("totalNoSeats is required");
+        if (r.getPrice() == null || r.getPrice().signum() <= 0)
+            throw new IllegalArgumentException("price must be > 0");
+        if (r.getDay() == null)
+            throw new IllegalArgumentException("day is required");
+        if (r.getHour() == null)
+            throw new IllegalArgumentException("hour is required");
+        if (r.getTotalNoSeats() == null)
+            throw new IllegalArgumentException("totalNoSeats is required");
 
-        if (r.getTotalNoSeats() <= 0) throw new IllegalArgumentException("totalNoSeats must be > 0");
+        if (r.getTotalNoSeats() <= 0)
+            throw new IllegalArgumentException("totalNoSeats must be > 0");
 
         var time = LocalDateTime.of(r.getDay(), r.getHour());
-        if (!time.isAfter(LocalDateTime.now())) throw new IllegalArgumentException("time must be in the future");
+        if (!time.isAfter(LocalDateTime.now()))
+            throw new IllegalArgumentException("time must be in the future");
+
+        if (r.getAcceptedPaymentTypes() != null) {
+            for (String type : r.getAcceptedPaymentTypes()) {
+                try {
+                    campus.ride.enums.PaymentMethodType.valueOf(type);
+                } catch (IllegalArgumentException e) {
+                    throw new IllegalArgumentException(
+                            "Invalid payment type: " + type + ". Allowed values are: CARD, CASH");
+                }
+            }
+        }
     }
 
     private static void require(String v, String name) {
-        if (v == null || v.isBlank()) throw new IllegalArgumentException(name + " is required");
+        if (v == null || v.isBlank())
+            throw new IllegalArgumentException(name + " is required");
     }
 }
