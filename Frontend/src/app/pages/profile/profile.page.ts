@@ -21,6 +21,7 @@ import {BookingCardComponent} from "../../shared/components/booking-card/booking
 import {AppHeaderComponent} from "../../shared/components/header/app-header.component";
 import {SidePanelComponent} from "../../shared/components/panel/side-panel.component";
 import {AuthService} from "../../core/services/auth.service";
+import {FriendService} from "../../core/services/friend.service";
 
 @Component({
   selector: 'app-profile',
@@ -31,11 +32,19 @@ import {AuthService} from "../../core/services/auth.service";
 })
 export class ProfilePage implements OnInit {
   isPanelOpen = false;
+  friendsCount: number = 0;
+  ridesCount: number = 0;
 
-  constructor(private location: Location, private service: Profile, private router: Router, private authService: AuthService) {
+  constructor(
+    private location: Location,
+    private service: Profile,
+    private router: Router,
+    private authService: AuthService,
+    private friendService: FriendService
+  ) {
   }
 
-  protected user!: UserResponse
+  protected user: UserResponse | null = null;
   protected user_state :string = "loading"
   protected drives_state: string = "loading";
   protected booking__state: string = "loading";
@@ -85,6 +94,18 @@ export class ProfilePage implements OnInit {
         console.log(err);
       }
     })
+    this.loadFriendCount();
+  }
+
+  loadFriendCount() {
+    this.friendService.getFriendCount().subscribe({
+      next: (count) => {
+        this.friendsCount = count;
+      },
+      error: (err) => {
+        console.error('Error loading friend count:', err);
+      }
+    });
   }
 
   goBack() {
@@ -102,18 +123,18 @@ export class ProfilePage implements OnInit {
 
   getToLocation(drive: DriveCard): string {
     const addr = drive.toAddress;
-    
+
     // Prefer neighborhood as the most descriptive short name
     if (addr.neighborhood) {
       return addr.neighborhood;
     }
-    
+
     // If locationName looks like a place name (not just a number or street number), use it
     const locationName = addr.locationName;
     if (locationName && !this.looksLikeStreetNumber(locationName) && !locationName.includes(',')) {
       return locationName;
     }
-    
+
     // Fall back to street name
     return addr.street || 'Unknown';
   }
@@ -180,6 +201,7 @@ export class ProfilePage implements OnInit {
 
   onMenuOpen() {
     this.isPanelOpen = true;
+    this.loadFriendCount();
   }
 
   onPanelClosed() {
@@ -197,7 +219,7 @@ export class ProfilePage implements OnInit {
       case 'home':
         this.router.navigate(['/home']);
         break;
-      case 'drives':
+      case 'add-ride':
         this.router.navigate(['/add-drive']);
         break;
       case 'my-bookings':
@@ -206,8 +228,11 @@ export class ProfilePage implements OnInit {
       case 'my-rides':
         this.router.navigate(['/my-rides']);
         break;
-      case 'driver-requests':
+      case 'ride-requests':
         this.router.navigate(['/driver-requests']);
+        break;
+      case 'friends':
+        this.router.navigate(['/friends']);
         break;
       case 'settings':
         console.log('Settings feature coming soon');

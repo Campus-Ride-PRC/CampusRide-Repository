@@ -1,0 +1,52 @@
+<app-header
+  menuTitle="Friends"
+  (menuClick)="onMenuOpen()"
+  (notificationClick)="onNotificationOpen()">
+</app-header>
+
+<ion-content class="bg-[#1a1a1a]">
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div *ngIf="loading" class="loading-container">
+    <ion-spinner color="primary"></ion-spinner>
+    <p>Loading friends...</p>
+  </div>
+
+  <div *ngIf="!loading && friends.length === 0" class="empty-state">
+    <ion-icon name="notifications-off-outline" class="empty-icon"></ion-icon>
+    <h2>No Friends Yet</h2>
+    <p>You haven't added any friends yet.</p>
+  </div>
+
+  <div *ngIf="!loading && friends.length > 0" class="friends-container" style="padding: 16px;">
+    <ion-list style="background: transparent;">
+      <ion-item *ngFor="let friend of friends" style="--background: #2a2a2a; --color: white; margin-bottom: 12px; border-radius: 12px; --border-radius: 12px;">
+        <ion-avatar slot="start">
+          <img [src]="'https://api.dicebear.com/7.x/avataaars/svg?seed=' + friend.firstName" [alt]="friend.firstName" />
+        </ion-avatar>
+        <ion-label>
+          <h2>{{ friend.firstName }} {{ friend.lastName }}</h2>
+          <p style="color: #888;">{{ friend.facultyName }}</p>
+          <p style="color: #888; font-size: 12px;">{{ friend.email }}</p>
+        </ion-label>
+      </ion-item>
+    </ion-list>
+  </div>
+</ion-content>
+
+<div class="fixed inset-0 z-[1000] pointer-events-none">
+  <app-side-panel
+    [isOpen]="isPanelOpen"
+    [userFirstName]="user?.firstName || 'Guest'"
+    [userAvatar]="user ? 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + user.firstName : ''"
+    [friendsCount]="friendsCount"
+    [ridesCount]="ridesCount"
+    [currentRoute]="'/friends'"
+    (closed)="onPanelClosed()"
+    (itemClicked)="onMenuItemClick($event)"
+    (rideClicked)="onRideClick($event)"
+    class="pointer-events-auto">
+  </app-side-panel>
+</div>

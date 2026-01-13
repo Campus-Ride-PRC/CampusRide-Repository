@@ -10,8 +10,30 @@ import {IonHeader, IonIcon, IonToolbar} from '@ionic/angular/standalone';
     <ion-header class="ion-no-border">
       <ion-toolbar class="bg-[#1e1e1e]">
         <div class="flex items-center justify-between gap-4 pe-4 ps-[20px]" style="position: relative; min-height: 64px;">
-          <!-- Modern Menu Icon -->
+          <!-- Back Arrow (when showBackArrow is true) -->
           <span
+            *ngIf="showBackArrow"
+            (click)="onBackClick()"
+            class="p-2 rounded-xl transition-colors flex items-center justify-center"
+            ion-button="false"
+            style="--background: transparent; --ripple-color: transparent; z-index: 10;">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              [attr.stroke]="backArrowColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+          </span>
+
+          <!-- Modern Menu Icon (when showBackArrow is false) -->
+          <span
+            *ngIf="!showBackArrow"
             (click)="onMenuClick()"
             class="p-2 rounded-xl transition-colors flex items-center justify-center"
             ion-button="false"
@@ -29,15 +51,16 @@ import {IonHeader, IonIcon, IonToolbar} from '@ionic/angular/standalone';
               <path d="M4 6h16M4 12h10M4 18h16" />
             </svg>
           </span>
-          
+
           <!-- App Name (Centered) -->
-          <p class="text-[#e0e0e0] text-[28px] font-[700] tracking-tight" 
+          <p class="text-[#e0e0e0] text-[28px] font-[700] tracking-tight"
              style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); margin: 0;">
             CampusRide
           </p>
-          
-          <!-- Notification Icon -->
+
+          <!-- Notification Icon (hidden when hideNotificationIcon is true) -->
           <span
+            *ngIf="!hideNotificationIcon"
             (click)="onNotificationClick()"
             class="p-2 rounded-xl transition-colors flex items-center justify-center"
             ion-button="false"
@@ -56,6 +79,9 @@ import {IonHeader, IonIcon, IonToolbar} from '@ionic/angular/standalone';
               <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
             </svg>
           </span>
+
+          <!-- Empty space when notification icon is hidden -->
+          <span *ngIf="hideNotificationIcon" style="width: 38px;"></span>
         </div>
       </ion-toolbar>
     </ion-header>
@@ -72,8 +98,12 @@ import {IonHeader, IonIcon, IonToolbar} from '@ionic/angular/standalone';
 export class AppHeaderComponent {
   @Output() menuClick = new EventEmitter<void>();
   @Output() notificationClick = new EventEmitter<void>();
+  @Output() backClick = new EventEmitter<void>();
   @Input({required:true}) menuTitle!: string;
   @Input() menuIcon!: string;
+  @Input() showBackArrow: boolean = false;
+  @Input() backArrowColor: string = '#ffffff';
+  @Input() hideNotificationIcon: boolean = false;
 
   onMenuClick() {
     this.menuClick.emit();
@@ -81,5 +111,9 @@ export class AppHeaderComponent {
 
   onNotificationClick() {
     this.notificationClick.emit();
+  }
+
+  onBackClick() {
+    this.backClick.emit();
   }
 }

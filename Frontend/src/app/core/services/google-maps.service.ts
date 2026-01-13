@@ -23,7 +23,7 @@ export interface SnapResult {
   providedIn: 'root'
 })
 export class GoogleMapsService {
-  private readonly DEFAULT_CENTER = { lat: 46.772962, lng: 23.597231 }; 
+  private readonly DEFAULT_CENTER = { lat: 46.772962, lng: 23.597231 };
   private readonly DEFAULT_ZOOM = 13;
 
   constructor() {}
@@ -32,7 +32,7 @@ export class GoogleMapsService {
    * Check if Google Maps API is loaded and ready
    */
   isGoogleMapsLoaded(): boolean {
-    return typeof google !== 'undefined' && 
+    return typeof google !== 'undefined' &&
            typeof google.maps !== 'undefined' &&
            typeof google.maps.Map !== 'undefined';
   }
@@ -118,19 +118,6 @@ export class GoogleMapsService {
     const defaultOptions: google.maps.MapOptions = {
       center: this.DEFAULT_CENTER,
       zoom: this.DEFAULT_ZOOM,
-      disableDefaultUI: true,
-      zoomControl: true,
-      mapTypeControl: false,
-      streetViewControl: false,
-      fullscreenControl: false,
-      gestureHandling: 'greedy',
-      styles: [
-        {
-          featureType: 'poi',
-          elementType: 'labels',
-          stylers: [{ visibility: 'off' }]
-        }
-      ],
       ...options
     };
 
@@ -156,13 +143,13 @@ export class GoogleMapsService {
   }
 
   /**
-   * Geocode an address string to coordinates
+   * Geocode an address to coordinates
    */
   async geocodeAddress(address: string): Promise<google.maps.GeocoderResult | null> {
     await this.waitForGoogleMaps();
 
     const geocoder = new google.maps.Geocoder();
-    
+
     return new Promise((resolve, reject) => {
       geocoder.geocode({ address }, (results: google.maps.GeocoderResult[] | null, status: google.maps.GeocoderStatus) => {
         if (status === google.maps.GeocoderStatus.OK && results && results.length > 0) {
@@ -185,7 +172,7 @@ export class GoogleMapsService {
 
     const geocoder = new google.maps.Geocoder();
     const location = { lat, lng };
-    
+
     return new Promise((resolve, reject) => {
       geocoder.geocode({ location }, (results: google.maps.GeocoderResult[] | null, status: google.maps.GeocoderStatus) => {
         if (status === google.maps.GeocoderStatus.OK && results && results.length > 0) {
@@ -208,7 +195,7 @@ export class GoogleMapsService {
     // Handle array of results
     const results = Array.isArray(result) ? result : [result];
     const mainResult = results[0];
-    
+
     if (!mainResult || !mainResult.address_components) {
       return null;
     }
@@ -239,7 +226,7 @@ export class GoogleMapsService {
 
     // Neighborhood - search across all results for the one with 'neighborhood' type
     let neighborhoodComponent: google.maps.GeocoderAddressComponent | undefined;
-    
+
     // First, try to find a result that has type 'neighborhood' in its types array
     const neighborhoodResult = results.find(r => r.types && r.types.includes('neighborhood'));
     if (neighborhoodResult && neighborhoodResult.address_components) {
@@ -247,17 +234,17 @@ export class GoogleMapsService {
         (c: google.maps.GeocoderAddressComponent) => c.types.includes('neighborhood')
       );
     }
-    
+
     // If not found in separate result, search in the main result's components
     if (!neighborhoodComponent) {
-      neighborhoodComponent = 
+      neighborhoodComponent =
         components.find((c: google.maps.GeocoderAddressComponent) => c.types.includes('neighborhood')) ||
         components.find((c: google.maps.GeocoderAddressComponent) => c.types.includes('sublocality_level_1')) ||
         components.find((c: google.maps.GeocoderAddressComponent) => c.types.includes('sublocality')) ||
         components.find((c: google.maps.GeocoderAddressComponent) => c.types.includes('locality')) ||
         components.find((c: google.maps.GeocoderAddressComponent) => c.types.includes('administrative_area_level_2'));
     }
-    
+
     if (neighborhoodComponent) {
       neighborhood = neighborhoodComponent.long_name;
     }
@@ -394,7 +381,7 @@ export class GoogleMapsService {
     }
 
     const clickPoint = new google.maps.LatLng(clickLatLng.lat, clickLatLng.lng);
-    
+
     // Get path from polyline
     let path: google.maps.LatLng[];
     if (Array.isArray(polyline)) {
@@ -463,7 +450,7 @@ export class GoogleMapsService {
     }
 
     // Calculate the parameter t of the projection
-    const t = Math.max(0, Math.min(1, 
+    const t = Math.max(0, Math.min(1,
       ((x - x1) * dx + (y - y1) * dy) / (dx * dx + dy * dy)
     ));
 
@@ -479,7 +466,7 @@ export class GoogleMapsService {
    */
   getPolylineFromDirections(directionsResult: google.maps.DirectionsResult): google.maps.LatLng[] {
     const path: google.maps.LatLng[] = [];
-    
+
     if (!directionsResult.routes || directionsResult.routes.length === 0) {
       return path;
     }
@@ -506,7 +493,7 @@ export class GoogleMapsService {
     }
 
     const point = new google.maps.LatLng(location.lat, location.lng);
-    
+
     let path: google.maps.LatLng[];
     if (Array.isArray(polyline)) {
       path = polyline;
@@ -533,9 +520,9 @@ export class GoogleMapsService {
 
     const bounds = new google.maps.LatLngBounds();
     locations.forEach(loc => bounds.extend(loc));
-    
+
     map.fitBounds(bounds);
-    
+
     // Add padding
     if (locations.length === 1) {
       map.setZoom(15);
@@ -593,8 +580,8 @@ export class GoogleMapsService {
    * Format address with city for ride details display
    */
   formatAddressWithCity(address: ParsedAddress): string {
-    const streetPart = address.number && address.number !== 'S/N' 
-      ? `${address.street} ${address.number}` 
+    const streetPart = address.number && address.number !== 'S/N'
+      ? `${address.street} ${address.number}`
       : address.street;
     const cityPart = address.city || address.neighborhood;
     return `${streetPart}, ${cityPart}`;
@@ -634,8 +621,8 @@ export class GoogleMapsService {
    * @returns Place name if found, null otherwise
    */
   async findNearbyPlaceName(
-    lat: number, 
-    lng: number, 
+    lat: number,
+    lng: number,
     map: google.maps.Map,
     radiusMeters: number = 50
   ): Promise<string | null> {
@@ -692,18 +679,18 @@ export class GoogleMapsService {
    * @returns ParsedAddress with potentially enhanced locationName
    */
   async reverseGeocodeWithPlaceName(
-    lat: number, 
-    lng: number, 
+    lat: number,
+    lng: number,
     map?: google.maps.Map
   ): Promise<ParsedAddress | null> {
     const geocodeResults = await this.reverseGeocode(lat, lng);
-    
+
     if (!geocodeResults) {
       return null;
     }
 
     const parsed = this.parseGeocoderResult(geocodeResults);
-    
+
     if (!parsed) {
       return null;
     }

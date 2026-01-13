@@ -2,8 +2,10 @@ package campus.ride.useCases;
 
 import campus.ride.config.JwtUtil;
 import campus.ride.contracts.faculty.FacultyRepository;
+import campus.ride.contracts.friend.FriendRepository;
 import campus.ride.contracts.user.UserRepository;
 import campus.ride.entities.Faculty;
+import campus.ride.entities.Friend;
 import campus.ride.entities.User;
 import campus.ride.exception.BadRequestException;
 import campus.ride.exception.ResourceNotFoundException;
@@ -11,6 +13,11 @@ import campus.ride.exception.UserAlreadyExistsException;
 import campus.ride.interfaces.EmailService;
 import campus.ride.interfaces.UserService;
 import campus.ride.transfer.dtos.user.CreateUserRequestDto;
+import campus.ride.transfer.dtos.user.FriendDto;
+import campus.ride.transfer.dtos.user.FriendRequestDto;
+import campus.ride.transfer.dtos.user.FriendRequestResponseDto;
+import campus.ride.transfer.dtos.user.FriendRequestStatusDto;
+import campus.ride.transfer.dtos.user.FriendshipStatusDto;
 import campus.ride.transfer.dtos.user.UserResponseDto;
 import campus.ride.transfer.dtos.user.VerificationRequestDto;
 import campus.ride.transfer.mappings.FacultyMapper;
@@ -36,6 +43,7 @@ public class UserServiceImpl implements UserService {
     private static final Logger logger = LogManager.getLogger(UserServiceImpl.class);
     
     private final UserRepository userRepository;
+    private final FriendRepository friendRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final Cache verificationCache;
@@ -43,13 +51,14 @@ public class UserServiceImpl implements UserService {
     private final JwtUtil jwtUtil;
 
     public UserServiceImpl(UserRepository userRepository,
-                             PasswordEncoder passwordEncoder,
+                             FriendRepository friendRepository, PasswordEncoder passwordEncoder,
                              EmailService emailService,
                              CacheManager cacheManager,
                              FacultyRepository facultyRepository,
                              JwtUtil jwtUtil) {
 
         this.userRepository = userRepository;
+        this.friendRepository = friendRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
         this.verificationCache = cacheManager.getCache("verificationCache");
@@ -196,6 +205,175 @@ public class UserServiceImpl implements UserService {
                 .stream()
                 .map(user -> new UserResponseDto(user.getId(), user.getEmail(), user.getAddress(), user.getPhoneNumber(), user.getFirstName(), user.getLastName(), FacultyMapper.toDto(user.getFaculty())))
                 .collect(Collectors.toList()));
+    }
+
+    @Override
+    @Async
+    @Transactional
+    public CompletableFuture<Void> sendFriendRequest(FriendRequestDto request) {
+        String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User sender = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        User receiver = userRepository.findById(Long.valueOf(request.getReceiverId()))
+                .orElseThrow(() -> new ResourceNotFoundException("Receiver not found"));
+
+        if (sender.getId().equals(receiver.getId())) {
+            throw new BadRequestException("You cannot send a friend request to yourself.");
+        }
+
+        friendRepository.findBySenderAndReceiver(sender, receiver).ifPresent(friend -> {
+            throw new BadRequestException("Friend request already sent.");
+        });
+
+        Friend friend = new Friend();
+        friend.setSender(sender);
+        friend.setReceiver(receiver);
+        friend.setStatus("PENDING");
+
+        friendRepository.save(friend);
+        return CompletableFuture.completedFuture(null);
+    }
+
+    @Override
+    @Async
+    @Transactional(readOnly = true)
+    public CompletableFuture<Long> getFriendCount() {
+        String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        return CompletableFuture.completedFuture(friendRepository.countAcceptedFriends(user));
+    }
+
+    @Override
+    @Async
+    @Transactional(readOnly = true)
+    public CompletableFuture<List<FriendRequestResponseDto>> getPendingFriendRequests() {
+        String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        List<Friend> pendingRequests = friendRepository.findPendingRequestsByReceiver(user);
+
+        List<FriendRequestResponseDto> dtos = pendingRequests.stream()
+                .map(friend -> new FriendRequestResponseDto(
+                        friend.getId(),
+                        friend.getSender().getId(),
+                        friend.getSender().getFirstName(),
+                        friend.getSender().getLastName(),
+                        friend.getSender().getEmail(),
+                        friend.getCreatedAt()
+                ))
+                .collect(Collectors.toList());
+
+        return CompletableFuture.completedFuture(dtos);
+    }
+
+    @Override
+    @Async
+    @Transactional
+    public CompletableFuture<Void> acceptFriendRequest(Long requestId) {
+        Friend friend = friendRepository.findById(requestId)
+                .orElseThrow(() -> new ResourceNotFoundException("Friend request not found"));
+
+        String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!friend.getReceiver().getEmail().equals(email)) {
+            throw new BadRequestException("You are not authorized to accept this request");
+        }
+
+        friend.setStatus("ACCEPTED");
+        friendRepository.save(friend);
+        return CompletableFuture.completedFuture(null);
+    }
+
+    @Override
+    @Async
+    @Transactional
+    public CompletableFuture<Void> declineFriendRequest(Long requestId) {
+        Friend friend = friendRepository.findById(requestId)
+                .orElseThrow(() -> new ResourceNotFoundException("Friend request not found"));
+
+        String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!friend.getReceiver().getEmail().equals(email)) {
+            throw new BadRequestException("You are not authorized to decline this request");
+        }
+
+        friend.setStatus("DECLINED");
+        friendRepository.save(friend);
+        return CompletableFuture.completedFuture(null);
+    }
+
+    @Override
+    @Async
+    @Transactional(readOnly = true)
+    public CompletableFuture<List<FriendRequestStatusDto>> getFriendRequestStatus() {
+        String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        List<Friend> requests = friendRepository.findCompletedRequestsBySender(user);
+
+        List<FriendRequestStatusDto> dtos = requests.stream()
+                .map(friend -> new FriendRequestStatusDto(
+                        friend.getId(),
+                        friend.getReceiver().getId(),
+                        friend.getReceiver().getFirstName(),
+                        friend.getReceiver().getLastName(),
+                        friend.getStatus(),
+                        friend.getUpdatedAt()
+                ))
+                .collect(Collectors.toList());
+
+        return CompletableFuture.completedFuture(dtos);
+    }
+
+    @Override
+    @Async
+    @Transactional(readOnly = true)
+    public CompletableFuture<List<FriendDto>> getFriends() {
+        String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        List<Friend> friends = friendRepository.findAcceptedFriends(user);
+
+        List<FriendDto> dtos = friends.stream()
+                .map(friend -> {
+                    User friendUser = friend.getSender().getId().equals(user.getId()) ? friend.getReceiver() : friend.getSender();
+                    return new FriendDto(
+                            friendUser.getId(),
+                            friendUser.getFirstName(),
+                            friendUser.getLastName(),
+                            friendUser.getEmail(),
+                            friendUser.getFaculty() != null ? friendUser.getFaculty().getName() : null
+                    );
+                })
+                .collect(Collectors.toList());
+
+        return CompletableFuture.completedFuture(dtos);
+    }
+
+    @Override
+    @Async
+    @Transactional(readOnly = true)
+    public CompletableFuture<FriendshipStatusDto> getFriendshipStatus(Long otherUserId) {
+        String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        User otherUser = userRepository.findById(otherUserId)
+                .orElseThrow(() -> new ResourceNotFoundException("Other user not found"));
+
+        Optional<Friend> friendship = friendRepository.findFriendship(currentUser, otherUser);
+
+        if (friendship.isEmpty()) {
+            return CompletableFuture.completedFuture(new FriendshipStatusDto("NONE", false));
+        }
+
+        Friend friend = friendship.get();
+        boolean isSender = friend.getSender().getId().equals(currentUser.getId());
+
+        return CompletableFuture.completedFuture(new FriendshipStatusDto(friend.getStatus(), isSender));
     }
 
     private static class PendingUserData implements java.io.Serializable {

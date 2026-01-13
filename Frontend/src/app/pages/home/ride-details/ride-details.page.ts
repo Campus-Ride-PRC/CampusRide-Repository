@@ -12,6 +12,7 @@ import { GoogleMapsService, ParsedAddress } from 'src/app/core/services/google-m
 import { DriveDetails } from 'src/app/core/models/drive-details.model';
 import { BookingRequest } from 'src/app/core/models/booking.model';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
+import { FriendService, FriendshipStatus } from 'src/app/core/services/friend.service';
 
 type FlowStep = 'details' | 'pickup' | 'confirmation';
 
@@ -61,25 +62,29 @@ export class RideDetailsPage implements OnInit, OnDestroy {
   readonly routePolyline = signal<google.maps.LatLng[] | null>(null);
   readonly currentStep = signal<FlowStep>('details');
   readonly isGeocoding = signal(false);
-  
+
   // Pickup point state
   readonly pickupAddress = signal<ParsedAddress | null>(null);
   readonly pickupLocation = signal<{ lat: number; lng: number } | null>(null);
   readonly existingPickupPoints = signal<ExistingPickupPoint[]>([]);
-  
+
   // Booking state
   readonly userBooking = signal<any | null>(null);
   readonly isCurrentUserDriver = signal(false);
   readonly userPickupPoint = signal<ExistingPickupPoint | null>(null);
-  
+
   // Search suggestions
   readonly pickupSuggestions = signal<PlaceSuggestion[]>([]);
   readonly showPickupSuggestions = signal(false);
-  
+
   // Bottom sheet drag state
   readonly sheetHeight = signal(55);
   readonly isDragging = signal(false);
   readonly isExpanded = signal(false);
+
+  // Friend request status
+  readonly friendRequestStatus = signal<'idle' | 'sending' | 'sent' | 'error'>('idle');
+  readonly friendshipStatus = signal<FriendshipStatus | null>(null);
 
   // Computed signals
   readonly isPastRide = computed(() => {
@@ -89,15 +94,15 @@ export class RideDetailsPage implements OnInit, OnDestroy {
     return driveTime < now;
   });
 
-  readonly canBookRide = computed(() => 
-    this.pickupLocation() !== null && 
-    this.drive !== null && 
+  readonly canBookRide = computed(() =>
+    this.pickupLocation() !== null &&
+    this.drive !== null &&
     this.drive.availableSeats > 0 &&
     !this.isPastRide() &&
     !this.isCurrentUserDriver() &&
     !this.userBooking()
   );
-  
+
   readonly showDetailsPanel = computed(() => this.currentStep() === 'details');
   readonly showPickupPanel = computed(() => this.currentStep() === 'pickup');
   readonly showConfirmationPanel = computed(() => this.currentStep() === 'confirmation');
@@ -111,11 +116,11 @@ export class RideDetailsPage implements OnInit, OnDestroy {
   private currentInfoWindow: google.maps.InfoWindow | null = null;
   private autocompleteService: google.maps.places.AutocompleteService | null = null;
   private placesService: google.maps.places.PlacesService | null = null;
-  
+
   // Route coordinates for validation
   private routeStartLocation: google.maps.LatLngLiteral | null = null;
   private routeEndLocation: google.maps.LatLngLiteral | null = null;
-  
+
   // Drag handling
   private dragStartY = 0;
   private dragStartHeight = 55;
@@ -133,7 +138,8 @@ export class RideDetailsPage implements OnInit, OnDestroy {
     private addressService: AddressService,
     private mapsService: GoogleMapsService,
     private toastController: ToastController,
-    private alertController: AlertController
+    private alertController: AlertController,
+    private friendService: FriendService
   ) {
     this.setupSearchSubscription();
   }
@@ -142,11 +148,11 @@ export class RideDetailsPage implements OnInit, OnDestroy {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.driveId = parseInt(id, 10);
-      
+
       // Check if this is driver view based on query parameter
       const driverMode = this.route.snapshot.queryParamMap.get('driverMode');
       this.isDriverView = driverMode === 'true';
-      
+
       this.loadDriveDetails();
     } else {
       this.error.set('Invalid drive ID');
@@ -197,7 +203,7 @@ export class RideDetailsPage implements OnInit, OnDestroy {
           secondaryText: p.structured_formatting.secondary_text || '',
           distance: p.distance_meters ? `${(p.distance_meters / 1000).toFixed(1)} km` : undefined
         }));
-        
+
         this.pickupSuggestions.set(suggestions);
         this.showPickupSuggestions.set(true);
       }
@@ -225,7 +231,7 @@ export class RideDetailsPage implements OnInit, OnDestroy {
         if (status === google.maps.places.PlacesServiceStatus.OK && place?.geometry?.location) {
           const lat = place.geometry.location.lat();
           const lng = place.geometry.location.lng();
-          
+
           // Validate and snap to route
           await this.validateAndSnapToRoute({ lat, lng }, suggestion.mainText);
         }
@@ -254,10 +260,10 @@ export class RideDetailsPage implements OnInit, OnDestroy {
 
     if (snapResult.snapped) {
       const snappedLocation = { lat: snapResult.lat, lng: snapResult.lng };
-      
+
       // Update pickup location
       this.pickupLocation.set(snappedLocation);
-      
+
       // Create parsed address
       const parsedAddress: ParsedAddress = {
         street: addressName,
@@ -269,15 +275,15 @@ export class RideDetailsPage implements OnInit, OnDestroy {
         longitude: snapResult.lng
       };
       this.pickupAddress.set(parsedAddress);
-      
+
       // Update input value
       if (this.pickupInput?.nativeElement) {
         this.pickupInput.nativeElement.value = addressName;
       }
-      
+
       // Update marker
       await this.updatePickupMarker(snappedLocation);
-      
+
       this.showToast('Pickup point set on route', 'success');
     } else {
       this.showToast('This location is too far from the route. Please select a point closer to the route.', 'warning');
@@ -287,34 +293,35 @@ export class RideDetailsPage implements OnInit, OnDestroy {
   loadDriveDetails() {
     this.loading.set(true);
     this.error.set(null);
-    
+
     this.driveService.getDriveById(this.driveId).subscribe({
       next: (response) => {
         this.drive = response;
         this.loading.set(false);
-        
+
         // Check if current user is the driver
         let currentUserId = this.authService.getCurrentUserId();
-        
+
         // Check if userId was passed via query params (from my-bookings)
         const userIdFromQuery = this.route.snapshot.queryParamMap.get('userId');
         if (userIdFromQuery) {
           currentUserId = parseInt(userIdFromQuery, 10);
         }
-        
+
         if (currentUserId) {
           const isDriver = response.driverId === currentUserId;
           this.isCurrentUserDriver.set(isDriver);
-          
+
           // Only check for user booking if user is not the driver
           if (!isDriver) {
             this.checkUserBooking(currentUserId);
+            this.checkFriendshipStatus(response.driverId);
           }
         }
-        
+
         // Mock existing pickup points (replace with actual API call)
         this.loadExistingPickupPoints();
-        
+
         if (this.mapContainer) {
           this.initializeMap();
         }
@@ -327,43 +334,54 @@ export class RideDetailsPage implements OnInit, OnDestroy {
     });
   }
 
+  private checkFriendshipStatus(driverId: number) {
+    this.friendService.getFriendshipStatus(driverId).subscribe({
+      next: (status) => {
+        this.friendshipStatus.set(status);
+      },
+      error: (error) => {
+        console.error('Error checking friendship status:', error);
+      }
+    });
+  }
+
   private loadExistingPickupPoints() {
     // Fetch bookings for this drive to show pickup points
     this.bookingService.getBookingsByDrive(this.driveId).subscribe({
       next: (bookings) => {
         // Group bookings by pickup location
         const locationMap = new Map<string, ExistingPickupPoint>();
-        
+
         // For driver view, show both PENDING and ACCEPTED bookings
         // For passenger view, show only ACCEPTED bookings
-        const filteredBookings = this.isDriverView 
-          ? bookings.filter(b => 
-              (b.status === 'ACCEPTED' || b.status === 'PENDING') && 
-              b.pickupAddress?.latitude && 
+        const filteredBookings = this.isDriverView
+          ? bookings.filter(b =>
+              (b.status === 'ACCEPTED' || b.status === 'PENDING') &&
+              b.pickupAddress?.latitude &&
               b.pickupAddress?.longitude
             )
-          : bookings.filter(b => 
-              b.status === 'ACCEPTED' && 
-              b.pickupAddress?.latitude && 
+          : bookings.filter(b =>
+              b.status === 'ACCEPTED' &&
+              b.pickupAddress?.latitude &&
               b.pickupAddress?.longitude
             );
-        
+
         filteredBookings.forEach(booking => {
           const key = `${booking.pickupAddress!.latitude},${booking.pickupAddress!.longitude}`;
           const existing = locationMap.get(key);
-          
+
           const passengerInfo = {
             firstName: booking.userFirstName,
             lastName: booking.userLastName,
             email: booking.userEmail,
             status: booking.status
           };
-          
+
           if (existing) {
             existing.passengerCount++;
             existing.passengerNames.push(`${booking.userFirstName} ${booking.userLastName.charAt(0)}.`);
             existing.passengers.push(passengerInfo);
-            
+
             // Update status: if any booking is PENDING, mark as MIXED (if already has ACCEPTED) or PENDING
             if (booking.status === 'PENDING' && existing.status === 'ACCEPTED') {
               existing.status = 'MIXED';
@@ -382,7 +400,7 @@ export class RideDetailsPage implements OnInit, OnDestroy {
             });
           }
         });
-        
+
         this.existingPickupPoints.set(Array.from(locationMap.values()));
         this.displayExistingPickupMarkers();
       },
@@ -422,7 +440,7 @@ export class RideDetailsPage implements OnInit, OnDestroy {
           this.currentInfoWindow.close();
           this.currentInfoWindow = null;
         }
-        
+
         if (this.currentStep() === 'pickup') {
           this.onMapClick(event);
         }
@@ -498,7 +516,7 @@ export class RideDetailsPage implements OnInit, OnDestroy {
 
       // Create custom start and end markers
       await this.createRouteMarkers(origin, destination);
-      
+
       // Add existing pickup point markers
       await this.displayExistingPickupMarkers();
 
@@ -548,32 +566,32 @@ export class RideDetailsPage implements OnInit, OnDestroy {
     this.existingPickupMarkers = [];
 
     let pickupPoints = [...this.existingPickupPoints()];
-    
+
     // Add user's pickup point if it exists and not already in the list
     const userPickup = this.userPickupPoint();
     if (userPickup) {
-      const existingIndex = pickupPoints.findIndex(p => 
-        Math.abs(p.lat - userPickup.lat) < 0.0001 && 
+      const existingIndex = pickupPoints.findIndex(p =>
+        Math.abs(p.lat - userPickup.lat) < 0.0001 &&
         Math.abs(p.lng - userPickup.lng) < 0.0001
       );
-      
+
       if (existingIndex === -1) {
         // Add user's pickup point to the list
         pickupPoints.push(userPickup);
       }
     }
-    
+
     for (const point of pickupPoints) {
       // Check if this is the user's pickup point
-      const isUserPickup = userPickup && 
-        Math.abs(point.lat - userPickup.lat) < 0.0001 && 
+      const isUserPickup = userPickup &&
+        Math.abs(point.lat - userPickup.lat) < 0.0001 &&
         Math.abs(point.lng - userPickup.lng) < 0.0001;
-      
+
       // Determine marker color based on status
       let markerColor: string;
       let statusLabel: string;
       let markerScale: number = 12;
-      
+
       if (isUserPickup) {
         // Highlight user's pickup point with purple and larger size
         markerColor = '#8B5CF6'; // Purple
@@ -596,7 +614,7 @@ export class RideDetailsPage implements OnInit, OnDestroy {
         markerColor = '#F59E0B';
         statusLabel = 'Pickup';
       }
-      
+
       const marker = await this.mapsService.createMarker(this.map, { lat: point.lat, lng: point.lng }, {
         title: `${point.passengerCount} passenger(s) - ${statusLabel}`,
         icon: {
@@ -657,7 +675,7 @@ export class RideDetailsPage implements OnInit, OnDestroy {
       const statusColor = passenger.status === 'ACCEPTED' ? '#10B981' : '#F59E0B';
       const statusEmoji = passenger.status === 'ACCEPTED' ? '✓' : '⏳';
       const isPending = passenger.status === 'PENDING';
-      
+
       content += `
         <div style="margin-bottom: ${index < point.passengers.length - 1 ? '6px' : '0'}; padding: 6px; background: #f9f9f9; border-radius: 4px;">
           <div style="display: flex; flex-direction: column; gap: 6px;">
@@ -686,7 +704,7 @@ export class RideDetailsPage implements OnInit, OnDestroy {
             </div>
             ${isPending ? `
               <div style="display: flex; gap: 4px; padding-top: 4px;">
-                <button 
+                <button
                   class="accept-passenger-btn"
                   data-passenger-email="${passenger.email}"
                   style="
@@ -706,7 +724,7 @@ export class RideDetailsPage implements OnInit, OnDestroy {
                 >
                   ✓ ACCEPTED
                 </button>
-                <button 
+                <button
                   class="decline-passenger-btn"
                   data-passenger-email="${passenger.email}"
                   style="
@@ -848,17 +866,17 @@ export class RideDetailsPage implements OnInit, OnDestroy {
   private async selectExistingPickupPoint(point: ExistingPickupPoint) {
     // Check if this is the user's own pickup point
     const userPickup = this.userPickupPoint();
-    const isUserPickup = userPickup && 
-      Math.abs(point.lat - userPickup.lat) < 0.0001 && 
+    const isUserPickup = userPickup &&
+      Math.abs(point.lat - userPickup.lat) < 0.0001 &&
       Math.abs(point.lng - userPickup.lng) < 0.0001;
-    
+
     // Don't allow selecting user's own pickup point
     if (isUserPickup) {
       return;
     }
-    
+
     this.pickupLocation.set({ lat: point.lat, lng: point.lng });
-    
+
     const parsedAddress: ParsedAddress = {
       street: point.address,
       number: '',
@@ -869,22 +887,22 @@ export class RideDetailsPage implements OnInit, OnDestroy {
       longitude: point.lng
     };
     this.pickupAddress.set(parsedAddress);
-    
+
     if (this.pickupInput?.nativeElement) {
       this.pickupInput.nativeElement.value = point.address;
     }
-    
+
     await this.updatePickupMarker({ lat: point.lat, lng: point.lng });
-    
+
     this.showToast(`Join ${point.passengerCount} other passenger(s) at this stop`, 'success');
   }
 
   private async onMapClick(event: any) {
     if (this.currentStep() !== 'pickup') return;
-    
-    const clickLatLng = { 
-      lat: event.latLng.lat(), 
-      lng: event.latLng.lng() 
+
+    const clickLatLng = {
+      lat: event.latLng.lat(),
+      lng: event.latLng.lng()
     };
 
     const polyline = this.routePolyline();
@@ -906,11 +924,11 @@ export class RideDetailsPage implements OnInit, OnDestroy {
       if (snapResult.snapped) {
         const snappedLocation = { lat: snapResult.lat, lng: snapResult.lng };
         this.pickupLocation.set(snappedLocation);
-        
+
         // Reverse geocode to get address with place name lookup
         const parsed = await this.mapsService.reverseGeocodeWithPlaceName(
-          snapResult.lat, 
-          snapResult.lng, 
+          snapResult.lat,
+          snapResult.lng,
           this.map || undefined
         );
         if (parsed) {
@@ -919,10 +937,10 @@ export class RideDetailsPage implements OnInit, OnDestroy {
             this.pickupInput.nativeElement.value = this.mapsService.formatAddress(parsed);
           }
         }
-        
+
         await this.updatePickupMarker(snappedLocation);
         this.showToast('Pickup point selected', 'success');
-        
+
       } else {
         this.showToast('Please click closer to the route', 'warning');
       }
@@ -946,7 +964,7 @@ export class RideDetailsPage implements OnInit, OnDestroy {
         icon: {
           path: google.maps.SymbolPath.CIRCLE,
           scale: 14,
-          fillColor: '#8B5CF6', 
+          fillColor: '#8B5CF6',
           fillOpacity: 1,
           strokeColor: '#ffffff',
           strokeWeight: 3
@@ -957,7 +975,7 @@ export class RideDetailsPage implements OnInit, OnDestroy {
       // Handle marker drag
       this.pickupMarker.addListener('dragend', async (event: any) => {
         const newLatLng = { lat: event.latLng.lat(), lng: event.latLng.lng() };
-        
+
         // Validate new position is on route
         const polyline = this.routePolyline();
         if (polyline) {
@@ -965,11 +983,11 @@ export class RideDetailsPage implements OnInit, OnDestroy {
           if (snapResult.snapped) {
             this.pickupLocation.set({ lat: snapResult.lat, lng: snapResult.lng });
             this.pickupMarker?.setPosition({ lat: snapResult.lat, lng: snapResult.lng });
-            
+
             // Reverse geocode with place name lookup
             const parsed = await this.mapsService.reverseGeocodeWithPlaceName(
-              snapResult.lat, 
-              snapResult.lng, 
+              snapResult.lat,
+              snapResult.lng,
               this.map || undefined
             );
             if (parsed) {
@@ -1011,10 +1029,10 @@ export class RideDetailsPage implements OnInit, OnDestroy {
     const deltaY = this.dragStartY - currentY;
     const screenHeight = window.innerHeight;
     const deltaPercent = (deltaY / screenHeight) * 100;
-    
+
     let newHeight = this.dragStartHeight + deltaPercent;
     newHeight = Math.max(35, Math.min(90, newHeight));
-    
+
     this.sheetHeight.set(newHeight);
   }
 
@@ -1024,7 +1042,7 @@ export class RideDetailsPage implements OnInit, OnDestroy {
     if (!this.isDragging()) return;
 
     this.isDragging.set(false);
-    
+
     const height = this.sheetHeight();
     if (height < 45) {
       this.sheetHeight.set(35);
@@ -1125,15 +1143,15 @@ export class RideDetailsPage implements OnInit, OnDestroy {
   getFromLocation(): string {
     if (!this.drive) return '';
     const addr = this.drive.fromAddress;
-    
+
     // Build full address with all available fields
     const parts: string[] = [];
-    
+
     // Add location name if available
     if (addr.locationName) {
       parts.push(addr.locationName);
     }
-    
+
     // Add street and number
     if (addr.street) {
       const streetPart = addr.number ? `${addr.street} ${addr.number}` : addr.street;
@@ -1142,12 +1160,12 @@ export class RideDetailsPage implements OnInit, OnDestroy {
         parts.push(streetPart);
       }
     }
-    
+
     // Add neighborhood if available and not already included
     if (addr.neighborhood && !parts.some(p => p.includes(addr.neighborhood))) {
       parts.push(addr.neighborhood);
     }
-    
+
     return parts.join(', ') || 'Unknown location';
   }
 
@@ -1158,15 +1176,15 @@ export class RideDetailsPage implements OnInit, OnDestroy {
   getToLocation(): string {
     if (!this.drive) return '';
     const addr = this.drive.toAddress;
-    
+
     // Build full address with all available fields
     const parts: string[] = [];
-    
+
     // Add location name if available
     if (addr.locationName) {
       parts.push(addr.locationName);
     }
-    
+
     // Add street and number
     if (addr.street) {
       const streetPart = addr.number ? `${addr.street} ${addr.number}` : addr.street;
@@ -1175,12 +1193,12 @@ export class RideDetailsPage implements OnInit, OnDestroy {
         parts.push(streetPart);
       }
     }
-    
+
     // Add neighborhood if available and not already included
     if (addr.neighborhood && !parts.some(p => p.includes(addr.neighborhood))) {
       parts.push(addr.neighborhood);
     }
-    
+
     return parts.join(', ') || 'Unknown location';
   }
 
@@ -1190,7 +1208,7 @@ export class RideDetailsPage implements OnInit, OnDestroy {
   getPickupLocation(): string {
     const addr = this.pickupAddress();
     if (!addr) return '';
-    
+
     // Use the locationName or formatted address with city
     if (addr.locationName && addr.city && !addr.locationName.includes(addr.city)) {
       return `${addr.locationName}, ${addr.city}`;
@@ -1200,7 +1218,7 @@ export class RideDetailsPage implements OnInit, OnDestroy {
 
   formatDepartureTime(): string {
     if (!this.drive) return '';
-    
+
     const date = new Date(this.drive.time);
     const today = new Date();
     const tomorrow = new Date(today);
@@ -1209,10 +1227,10 @@ export class RideDetailsPage implements OnInit, OnDestroy {
     const isToday = date.toDateString() === today.toDateString();
     const isTomorrow = date.toDateString() === tomorrow.toDateString();
 
-    const timeStr = date.toLocaleTimeString('en-US', { 
-      hour: 'numeric', 
+    const timeStr = date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
       minute: '2-digit',
-      hour12: true 
+      hour12: true
     });
 
     if (isToday) {
@@ -1220,8 +1238,8 @@ export class RideDetailsPage implements OnInit, OnDestroy {
     } else if (isTomorrow) {
       return `Tomorrow, ${timeStr}`;
     } else {
-      return `${date.toLocaleDateString('en-US', { 
-        month: 'short', 
+      return `${date.toLocaleDateString('en-US', {
+        month: 'short',
         day: 'numeric'
       })}, ${timeStr}`;
     }
@@ -1240,7 +1258,7 @@ export class RideDetailsPage implements OnInit, OnDestroy {
 
   async confirmBooking() {
     const userId = this.authService.getCurrentUserId();
-    
+
     if (!userId) {
       await this.showToast('You must be logged in to book a ride', 'warning');
       this.router.navigate(['/login/auth']);
@@ -1283,10 +1301,10 @@ Price: ${this.formatPrice()}`,
     if (!this.drive) return;
 
     this.requestingRide.set(true);
-    
+
     const pickupLoc = this.pickupLocation();
     const pickupAddr = this.pickupAddress();
-    
+
     if (!pickupLoc || !pickupAddr) {
       this.requestingRide.set(false);
       this.showToast('Please select a pickup location', 'warning');
@@ -1321,7 +1339,7 @@ Price: ${this.formatPrice()}`,
         error: async (error) => {
           this.requestingRide.set(false);
           console.error('Error booking ride:', error);
-          
+
           let errorMessage = 'Failed to book ride. Please try again.';
           if (error.error?.message) {
             errorMessage = error.error.message;
@@ -1330,7 +1348,7 @@ Price: ${this.formatPrice()}`,
           } else if (error.status === 404) {
             errorMessage = 'Drive or user not found.';
           }
-          
+
           await this.showToast(errorMessage, 'danger');
         }
       });
@@ -1347,7 +1365,7 @@ Price: ${this.formatPrice()}`,
     this.bookingService.getBooking(this.driveId, userId).subscribe({
       next: (booking) => {
         this.userBooking.set(booking);
-        
+
         // If booking has pickup address, create a pickup point for it
         if (booking.pickupAddress) {
           const userPickup: ExistingPickupPoint = {
@@ -1372,6 +1390,25 @@ Price: ${this.formatPrice()}`,
         if (error.status !== 404) {
           console.error('Error checking user booking:', error);
         }
+      }
+    });
+  }
+
+  sendFriendRequest() {
+    if (!this.drive) return;
+
+    this.friendRequestStatus.set('sending');
+    this.friendService.sendFriendRequest(this.drive.driverId).subscribe({
+      next: () => {
+        this.friendRequestStatus.set('sent');
+        this.showToast('Friend request sent!', 'success');
+        // Update friendship status to reflect pending request
+        this.friendshipStatus.set({ status: 'PENDING', isSender: true });
+      },
+      error: (error) => {
+        this.friendRequestStatus.set('error');
+        console.error('Error sending friend request:', error);
+        this.showToast(error.error?.message || 'Failed to send friend request.', 'danger');
       }
     });
   }

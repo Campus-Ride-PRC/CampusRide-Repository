@@ -18,7 +18,7 @@ export class DriveService {
       .set('page', page.toString())
       .set('size', size.toString())
       .set('sort', sort);
-    
+
     return this.http.get<DriveCardPage>(this.apiUrl, { params });
   }
 
@@ -39,7 +39,7 @@ export class DriveService {
       .set('page', page.toString())
       .set('size', size.toString())
       .set('sort', sort);
-    
+
     return this.http.get<DriveCardPage>(`${this.apiUrl}/upcoming`, { params });
   }
 

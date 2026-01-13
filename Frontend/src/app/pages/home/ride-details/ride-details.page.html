@@ -30,14 +30,14 @@
   </div>
 </div>
 
-<div 
+<div
   class="bottom-sheet"
   *ngIf="drive && !loading() && !error()"
   [style.height.%]="sheetHeight()"
   [class.dragging]="isDragging()"
   [class.expanded]="isExpanded()"
 >
-  <div 
+  <div
     class="drag-handle-area"
     (touchstart)="onDragStart($event)"
     (mousedown)="onDragStart($event)"
@@ -47,7 +47,7 @@
 
   <div class="sheet-content details-step" *ngIf="currentStep() === 'details'">
     <h2 class="sheet-title">Ride Details</h2>
-    
+
     <div class="driver-card">
       <div class="driver-avatar">
         <img [src]="'https://api.dicebear.com/7.x/avataaars/svg?seed=' + drive.driverFirstName" [alt]="getDriverName()" />
@@ -56,6 +56,63 @@
         <h3 class="driver-name">{{ getDriverName() }}</h3>
         <div class="driver-rating">
           <span>4.8 (120 trips)</span>
+        </div>
+
+        <div class="friend-request-container">
+          <ng-container *ngIf="!isCurrentUserDriver()">
+            <!-- No friendship or Declined -->
+            <button
+              *ngIf="!friendshipStatus() || friendshipStatus()?.status === 'NONE' || friendshipStatus()?.status === 'DECLINED'"
+              class="friend-request-button"
+              [disabled]="friendRequestStatus() === 'sending'"
+              (click)="sendFriendRequest()"
+            >
+              <span class="fr-left">
+                <ion-icon *ngIf="friendRequestStatus() !== 'sending'" name="person-add-outline"></ion-icon>
+                <ion-spinner *ngIf="friendRequestStatus() === 'sending'" name="crescent" class="spinner-small"></ion-spinner>
+              </span>
+              <span class="fr-center" *ngIf="friendRequestStatus() !== 'sending'">Add Friend</span>
+              <span class="fr-center" *ngIf="friendRequestStatus() === 'sending'">Sending...</span>
+              <span class="fr-right" aria-hidden="true"></span>
+            </button>
+
+            <button
+              *ngIf="friendshipStatus()?.status === 'PENDING' && friendshipStatus()?.isSender"
+              class="friend-request-button sent"
+              disabled
+            >
+              <span class="fr-left">
+                <ion-icon name="time-outline"></ion-icon>
+              </span>
+              <span class="fr-center">Respond in Notifications</span>
+              <span class="fr-right" aria-hidden="true"></span>
+            </button>
+
+            <button
+              *ngIf="friendshipStatus()?.status === 'PENDING' && !friendshipStatus()?.isSender"
+              class="friend-request-button received"
+              disabled
+            >
+              <span class="fr-left">
+                <ion-icon name="alert-circle-outline"></ion-icon>
+              </span>
+              <span class="fr-center">Request Sent</span>
+              <span class="fr-right" aria-hidden="true"></span>
+            </button>
+
+            <!-- Accepted -->
+            <button
+              *ngIf="friendshipStatus()?.status === 'ACCEPTED'"
+              class="friend-request-button friends"
+              disabled
+            >
+              <span class="fr-left">
+                <ion-icon name="checkmark-circle-outline"></ion-icon>
+              </span>
+              <span class="fr-center">Friends</span>
+              <span class="fr-right" aria-hidden="true"></span>
+            </button>
+          </ng-container>
         </div>
       </div>
       <div class="price-badge">
@@ -85,12 +142,12 @@
           <span class="point-address">{{ getFromLocation() }}</span>
         </div>
       </div>
-      
+
       <ng-container *ngIf="userPickupPoint()">
         <div class="route-connector">
           <div class="connector-line"></div>
         </div>
-        
+
         <div class="route-point pickup user-pickup">
           <div class="point-marker">
             <div class="marker-half-circle"></div>
@@ -102,11 +159,11 @@
           </div>
         </div>
       </ng-container>
-      
+
       <div class="route-connector">
         <div class="connector-line"></div>
       </div>
-      
+
       <div class="route-point end">
         <div class="point-marker">
           <div class="marker-square"></div>
@@ -132,7 +189,7 @@
     </div>
 
     <div class="action-button-container">
-      <button 
+      <button
         class="action-button"
         [ngClass]="{
           'primary': !isPastRide() && drive.availableSeats > 0 && !isCurrentUserDriver() && !userBooking(),
@@ -189,7 +246,7 @@
         <div class="connector-line"></div>
       </div>
 
-      <div 
+      <div
         class="location-input-row editable"
         [class.active]="true"
       >
@@ -236,7 +293,7 @@
     </div>
 
     <div class="suggestions-list" *ngIf="showPickupSuggestions() && pickupSuggestions().length > 0">
-      <div 
+      <div
         class="suggestion-item"
         *ngFor="let suggestion of pickupSuggestions()"
         (click)="selectSuggestion(suggestion)"
@@ -281,7 +338,7 @@
 
     <div class="summary-card">
       <h3 class="summary-title">Booking Summary</h3>
-      
+
       <div class="summary-route">
         <div class="route-point">
           <div class="point-marker pickup">
@@ -292,11 +349,11 @@
             <span class="point-address">{{ getPickupLocation() }}</span>
           </div>
         </div>
-        
+
         <div class="route-connector">
           <div class="connector-line"></div>
         </div>
-        
+
         <div class="route-point">
           <div class="point-marker end">
             <div class="marker-square"></div>
@@ -332,7 +389,7 @@
       <button class="action-button secondary" (click)="backToPickup()">
         Edit
       </button>
-      <button 
+      <button
         class="action-button primary"
         [disabled]="requestingRide()"
         (click)="confirmBooking()"
