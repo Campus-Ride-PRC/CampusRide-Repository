@@ -11,18 +11,18 @@ import {
   IonTitle,
   IonToolbar
 } from '@ionic/angular/standalone';
-import {UserResponse} from "../../core/models/userResponse";
-import {Profile} from "../../core/services/profile";
-import {DriveCard} from "../../core/models/drive-card.model";
-import {RideCardComponent} from "../../shared/components/cards/ride-card.component";
-import {Router} from "@angular/router";
-import {BookingResponse} from "../../core/models/booking.model";
-import {BookingCardComponent} from "../../shared/components/booking-card/booking-card.component";
-import {AppHeaderComponent} from "../../shared/components/header/app-header.component";
-import {SidePanelComponent} from "../../shared/components/panel/side-panel.component";
-import {AuthService} from "../../core/services/auth.service";
-import {FriendService} from "../../core/services/friend.service";
-import {RouterLink} from "@angular/router";
+import { UserResponse } from "../../core/models/userResponse";
+import { Profile } from "../../core/services/profile";
+import { DriveCard } from "../../core/models/drive-card.model";
+import { RideCardComponent } from "../../shared/components/cards/ride-card.component";
+import { Router } from "@angular/router";
+import { BookingResponse } from "../../core/models/booking.model";
+import { BookingCardComponent } from "../../shared/components/booking-card/booking-card.component";
+import { AppHeaderComponent } from "../../shared/components/header/app-header.component";
+import { SidePanelComponent } from "../../shared/components/panel/side-panel.component";
+import { AuthService } from "../../core/services/auth.service";
+import { FriendService } from "../../core/services/friend.service";
+import { RouterLink } from "@angular/router";
 
 @Component({
   selector: 'app-profile',
@@ -46,7 +46,7 @@ export class ProfilePage implements OnInit {
   }
 
   protected user: UserResponse | null = null;
-  protected user_state :string = "loading"
+  protected user_state: string = "loading"
   protected drives_state: string = "loading";
   protected booking__state: string = "loading";
 

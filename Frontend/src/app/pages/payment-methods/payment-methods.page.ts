@@ -14,7 +14,10 @@ import {
     starOutline,
     star,
     cardOutline,
-    cashOutline
+    cashOutline,
+    calendarOutline,
+    personOutline,
+    keypadOutline
 } from 'ionicons/icons';
 
 @Component({
@@ -40,8 +43,14 @@ export class PaymentMethodsPage implements OnInit {
     private returnUrl: string | null = null;
 
     // New Card Form Data
-    newCardProvider = 'Visa';
-    newCardLastFour = '';
+    cardNumber = '';
+    holderName = '';
+    cvc = '';
+    expiryYear = '';
+    expiryMonth = '';
+    cardType = 'unknown';
+
+    newCardLastFour = ''; // Computed when saving
 
     constructor() {
         addIcons({
@@ -51,7 +60,10 @@ export class PaymentMethodsPage implements OnInit {
             starOutline,
             star,
             cardOutline,
-            cashOutline
+            cashOutline,
+            calendarOutline,
+            personOutline,
+            keypadOutline
         });
     }
 
@@ -87,18 +99,59 @@ export class PaymentMethodsPage implements OnInit {
 
     toggleAddForm() {
         this.isAdding.update(v => !v);
-        this.newCardProvider = 'Visa';
+        this.resetForm();
+    }
+
+    resetForm() {
+        this.cardNumber = '';
+        this.holderName = '';
+        this.cvc = '';
+        this.expiryYear = '';
+        this.expiryMonth = '';
+        this.cardType = 'unknown';
         this.newCardLastFour = '';
     }
 
+    onCardInput(event: any) {
+        const raw = event?.target?.value || '';
+        this.cardType = this.detectCardBrand(raw);
+        // Basic formatting could go here if needed
+        this.cardNumber = raw;
+    }
+
+    detectCardBrand(raw: string): string {
+        const digits = (raw || '').replace(/\D/g, '');
+        if (!digits) return 'unknown';
+
+        if (digits.startsWith('4')) return 'visa';
+
+        const first2 = parseInt(digits.slice(0, 2), 10);
+        const first4 = parseInt(digits.slice(0, 4), 10);
+
+        if (!Number.isNaN(first2) && first2 >= 51 && first2 <= 55) return 'mastercard';
+        if (!Number.isNaN(first4) && first4 >= 2221 && first4 <= 2720) return 'mastercard';
+
+        return 'unknown';
+    }
+
     addPaymentMethod() {
-        if (!this.newCardLastFour || this.newCardLastFour.length !== 4 || isNaN(Number(this.newCardLastFour))) {
-            this.showToast('Please enter the last 4 digits of your card', 'warning');
+        // Basic validation
+        const digitsOnly = this.cardNumber.replace(/\D/g, '');
+        if (digitsOnly.length < 13) {
+            this.showToast('Please enter a valid card number', 'warning');
             return;
         }
 
+        if (!this.holderName.trim()) {
+            this.showToast('Please enter the card holder name', 'warning');
+            return;
+        }
+
+        this.newCardLastFour = digitsOnly.slice(-4);
+        const providerName = this.cardType === 'visa' ? 'Visa' : (this.cardType === 'mastercard' ? 'Mastercard' : 'Other');
+
         const request: PaymentMethodCreateRequest = {
-            provider: this.newCardProvider,
+            provider: providerName,
             methodType: PaymentMethodType.CARD,
             providerPaymentId: 'mock_pm_' + Math.random().toString(36).substr(2, 9), // Mock ID
             lastFour: this.newCardLastFour,
