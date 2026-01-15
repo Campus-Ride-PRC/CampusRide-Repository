@@ -1,0 +1,83 @@
+<ion-header class="ion-no-border">
+    <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-button (click)="goBack()" class="back-button">
+                <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+            </ion-button>
+        </ion-buttons>
+        <ion-title>Select Payment</ion-title>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content class="payment-content">
+    <div class="content-wrapper">
+        <!-- Loading State -->
+        <div *ngIf="isLoading()" class="loading-container">
+            <ion-spinner name="crescent" class="spinner"></ion-spinner>
+        </div>
+
+        <!-- Payment Methods Section -->
+        <div *ngIf="!isLoading()" class="payment-section">
+            <h2 class="section-title">Choose your payment method</h2>
+            <p class="section-subtitle">Select how you'd like to pay for this ride</p>
+
+            <div class="payment-methods-container">
+                <!-- Cash Option -->
+                <button 
+                    *ngIf="isPaymentTypeAccepted('CASH')"
+                    class="payment-card"
+                    [class.selected]="isSelected('CASH')"
+                    (click)="selectPaymentMethod('CASH')">
+                    <div class="payment-icon cash-icon">
+                        <ion-icon name="cash-outline"></ion-icon>
+                    </div>
+                    <div class="payment-info">
+                        <span class="payment-title">Cash</span>
+                        <span class="payment-subtitle">Pay directly to driver</span>
+                    </div>
+                    <div class="selection-indicator" *ngIf="isSelected('CASH')">
+                        <ion-icon name="checkmark-circle"></ion-icon>
+                    </div>
+                </button>
+
+                <!-- Card Options -->
+                <ng-container *ngIf="isPaymentTypeAccepted('CARD')">
+                    <!-- Show saved cards with generic label -->
+                    <button 
+                        *ngFor="let method of paymentMethods()"
+                        class="payment-card"
+                        [class.selected]="isSelected(method.id)"
+                        (click)="selectPaymentMethod(method.id)">
+                        <div class="payment-icon card-icon">
+                            <ion-icon name="card-outline"></ion-icon>
+                        </div>
+                        <div class="payment-info">
+                            <span class="payment-title">Card</span>
+                            <span class="payment-subtitle">Credit/Debit Card</span>
+                        </div>
+                        <div class="selection-indicator" *ngIf="isSelected(method.id)">
+                            <ion-icon name="checkmark-circle"></ion-icon>
+                        </div>
+                    </button>
+
+                    <!-- No Cards Message -->
+                    <div *ngIf="!hasCardPaymentMethods()" class="no-cards-message">
+                        <ion-icon name="card-outline" class="no-cards-icon"></ion-icon>
+                        <p>No cards added yet</p>
+                    </div>
+                </ng-container>
+            </div>
+        </div>
+
+        <!-- Continue Button -->
+        <div *ngIf="!isLoading()" class="action-container">
+            <button 
+                class="continue-button"
+                [class.enabled]="canContinue()"
+                [disabled]="!canContinue()"
+                (click)="onContinue()">
+                Continue
+            </button>
+        </div>
+    </div>
+</ion-content>

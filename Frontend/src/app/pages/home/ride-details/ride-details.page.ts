@@ -2,7 +2,7 @@
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef, signal, computed, HostListener } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { IonicModule, ToastController, AlertController } from '@ionic/angular';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { DriveService } from 'src/app/core/services/drive.service';
 import { BookingService } from 'src/app/core/services/booking.service';
@@ -12,6 +12,11 @@ import { GoogleMapsService, ParsedAddress } from 'src/app/core/services/google-m
 import { DriveDetails } from 'src/app/core/models/drive-details.model';
 import { BookingRequest } from 'src/app/core/models/booking.model';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
+import { PaymentMethodService } from 'src/app/core/services/payment-method.service';
+import { PaymentMethod } from 'src/app/core/models/payment-method.model';
+import { PaymentService, CheckoutSessionRequest } from 'src/app/core/services/payment.service';
+import { addIcons } from 'ionicons';
+import { cashOutline, cardOutline, addCircleOutline } from 'ionicons/icons';
 import { FriendService, FriendshipStatus } from 'src/app/core/services/friend.service';
 
 type FlowStep = 'details' | 'pickup' | 'confirmation';
@@ -82,6 +87,15 @@ export class RideDetailsPage implements OnInit, OnDestroy {
   readonly isDragging = signal(false);
   readonly isExpanded = signal(false);
 
+  // Payment Selection
+  readonly selectedPaymentMethodId = signal<number | null>(null); // null means nothing selected yet
+  readonly selectedPaymentType = signal<'CASH' | 'CARD' | null>(null); // Track selected payment type
+  readonly availablePaymentMethods = signal<PaymentMethod[]>([]); // To be populated from API
+  // Default to CASH if no payment types specified (for older rides)
+  readonly acceptedDrivePaymentTypes = computed(() => {
+    const types = this.drive?.acceptedPaymentTypes;
+    return types && types.length > 0 ? types : ['CASH'];
+  });
   // Friend request status
   readonly friendRequestStatus = signal<'idle' | 'sending' | 'sent' | 'error'>('idle');
   readonly friendshipStatus = signal<FriendshipStatus | null>(null);
@@ -139,9 +153,146 @@ export class RideDetailsPage implements OnInit, OnDestroy {
     private mapsService: GoogleMapsService,
     private toastController: ToastController,
     private alertController: AlertController,
+    private paymentMethodService: PaymentMethodService,
+    private paymentService: PaymentService,
     private friendService: FriendService
   ) {
+    addIcons({ cashOutline, cardOutline, addCircleOutline });
     this.setupSearchSubscription();
+  }
+
+
+  private loadPaymentMethods() {
+    this.paymentMethodService.getMyPaymentMethods().subscribe({
+      next: (methods) => {
+        this.availablePaymentMethods.set(methods);
+        // Pre-select Default if applicable for this ride (e.g. if CARD is accepted and user has default card)
+      },
+      error: (err) => console.error('Error loading payment methods', err)
+    });
+  }
+
+  onPaymentMethodSelect(methodId: number | 'CASH') {
+    if (typeof methodId === 'number') {
+      this.selectedPaymentMethodId.set(methodId);
+    } else {
+      // Handle CASH selection (maybe use -1 or null to represent cash if backend supports it, 
+      // but BookingRequest expects paymentMethodId. 
+      // If CASH is handled as a payment method in DB, we need its ID? 
+      // OR if backend handles null paymentMethodId as CASH?
+      // Looking at BookingLogic: "paymentMethodId" is optional in my updated model.
+      this.selectedPaymentMethodId.set(null); // Assuming null = CASH or manual handling
+    }
+  }
+
+  // Helper to check if a method type is accepted by the drive
+  isPaymentTypeAccepted(type: 'CARD' | 'CASH'): boolean {
+    return this.acceptedDrivePaymentTypes().includes(type);
+  }
+
+  // Method to select payment type (Cash or Card)
+  selectPaymentType(type: 'CASH' | 'CARD') {
+    this.selectedPaymentType.set(type);
+  }
+
+  // Method to select a payment method by clicking on the entire row
+  selectPaymentMethod(methodId: number | 'CASH') {
+    this.onPaymentMethodSelect(methodId);
+  }
+
+  // Navigate to payment methods page with return URL including current step
+  navigateToPaymentMethods() {
+    const currentStepValue = this.currentStep();
+    this.router.navigate(['/payment-methods'], {
+      queryParams: { returnUrl: `/ride-details/${this.driveId}?step=${currentStepValue}` }
+    });
+  }
+
+  // Proceed to Stripe checkout for card payment
+  async proceedToStripeCheckout() {
+    if (!this.pickupLocation() || !this.pickupAddress()) {
+      this.showToast('Please select a pickup location', 'warning');
+      return;
+    }
+
+    this.requestingRide.set(true);
+
+    const addr = this.pickupAddress();
+    if (!addr) {
+      this.requestingRide.set(false);
+      this.showToast('Pickup location missing', 'danger');
+      return;
+    }
+
+    // First, save the pickup address to get its ID
+    this.addressService.getOrCreate(addr).subscribe({
+      next: (addressDto: any) => {
+        this.createStripeCheckoutSession(addressDto.id);
+      },
+      error: (err) => {
+        console.error('Failed to save pickup address:', err);
+        this.requestingRide.set(false);
+        this.showToast('Failed to process pickup address', 'danger');
+      }
+    });
+  }
+
+  private createStripeCheckoutSession(pickupAddressId: number) {
+    const baseUrl = window.location.origin;
+    
+    const request: CheckoutSessionRequest = {
+      driveId: this.driveId,
+      pickupAddressId: pickupAddressId,
+      successUrl: `${baseUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}&drive_id=${this.driveId}`,
+      cancelUrl: `${baseUrl}/ride-details/${this.driveId}?step=confirmation&payment=cancelled`
+    };
+
+    this.paymentService.createCheckoutSession(request).subscribe({
+      next: (response) => {
+        // Redirect to Stripe Checkout
+        this.paymentService.redirectToCheckout(response.checkoutUrl);
+      },
+      error: (error) => {
+        console.error('Error creating checkout session:', error);
+        this.showToast(error.error?.message || 'Failed to proceed to checkout', 'danger');
+        this.requestingRide.set(false);
+      }
+    });
+  }
+
+  private handleBookingWithAddress(request: BookingRequest) {
+    const addr = this.pickupAddress();
+    if (!addr) {
+      this.requestingRide.set(false);
+      this.showToast('Pickup location missing', 'danger');
+      return;
+    }
+
+    this.addressService.getOrCreate(addr).subscribe({
+      next: (addressDto: any) => {
+        request.pickupAddressId = addressDto.id;
+        this.sendBookingRequest(request);
+      },
+      error: () => {
+        this.requestingRide.set(false);
+        this.showToast('Failed to process pickup address', 'danger');
+      }
+    });
+  }
+
+  private sendBookingRequest(request: BookingRequest) {
+    this.bookingService.requestRide(request).subscribe({
+      next: () => {
+        this.showToast('Booking request sent successfully!', 'success');
+        this.requestingRide.set(false);
+        this.router.navigate(['/home']);
+      },
+      error: (error) => {
+        console.error('Booking error:', error);
+        this.showToast('Failed to book ride', 'danger');
+        this.requestingRide.set(false);
+      }
+    });
   }
 
   ngOnInit() {
@@ -152,6 +303,12 @@ export class RideDetailsPage implements OnInit, OnDestroy {
       // Check if this is driver view based on query parameter
       const driverMode = this.route.snapshot.queryParamMap.get('driverMode');
       this.isDriverView = driverMode === 'true';
+
+      // Check for step query parameter (used when returning from payment-methods)
+      const step = this.route.snapshot.queryParamMap.get('step') as FlowStep | null;
+      if (step && ['details', 'pickup', 'confirmation'].includes(step)) {
+        this.currentStep.set(step);
+      }
 
       this.loadDriveDetails();
     } else {
@@ -325,6 +482,11 @@ export class RideDetailsPage implements OnInit, OnDestroy {
         if (this.mapContainer) {
           this.initializeMap();
         }
+
+        // Load User's payment methods if they are not the driver and haven't booked yet
+        if (!this.isCurrentUserDriver() && !this.userBooking()) {
+          this.loadPaymentMethods();
+        }
       },
       error: (error) => {
         console.error('Error loading drive details:', error);
@@ -356,15 +518,15 @@ export class RideDetailsPage implements OnInit, OnDestroy {
         // For passenger view, show only ACCEPTED bookings
         const filteredBookings = this.isDriverView
           ? bookings.filter(b =>
-              (b.status === 'ACCEPTED' || b.status === 'PENDING') &&
-              b.pickupAddress?.latitude &&
-              b.pickupAddress?.longitude
-            )
+            (b.status === 'ACCEPTED' || b.status === 'PENDING') &&
+            b.pickupAddress?.latitude &&
+            b.pickupAddress?.longitude
+          )
           : bookings.filter(b =>
-              b.status === 'ACCEPTED' &&
-              b.pickupAddress?.latitude &&
-              b.pickupAddress?.longitude
-            );
+            b.status === 'ACCEPTED' &&
+            b.pickupAddress?.latitude &&
+            b.pickupAddress?.longitude
+          );
 
         filteredBookings.forEach(booking => {
           const key = `${booking.pickupAddress!.latitude},${booking.pickupAddress!.longitude}`;
@@ -1256,47 +1418,6 @@ export class RideDetailsPage implements OnInit, OnDestroy {
     return this.formatDepartureTime();
   }
 
-  async confirmBooking() {
-    const userId = this.authService.getCurrentUserId();
-
-    if (!userId) {
-      await this.showToast('You must be logged in to book a ride', 'warning');
-      this.router.navigate(['/login/auth']);
-      return;
-    }
-
-    if (!this.canBookRide()) {
-      await this.showToast('Please select a pickup point', 'warning');
-      return;
-    }
-
-    // Show confirmation alert
-    const alert = await this.alertController.create({
-      header: 'Confirm Booking',
-      message: `Driver: ${this.getDriverName()}
-Pickup: ${this.getPickupLocation()}
-Destination: ${this.getToLocation()}
-Price: ${this.formatPrice()}`,
-      cssClass: 'confirm-booking-alert',
-      buttons: [
-        {
-          text: 'Cancel',
-          role: 'cancel',
-          cssClass: 'alert-button-cancel'
-        },
-        {
-          text: 'Confirm',
-          handler: () => {
-            this.submitBooking(userId);
-          },
-          cssClass: 'alert-button-confirm'
-        }
-      ]
-    });
-
-    await alert.present();
-  }
-
   private submitBooking(userId: number) {
     if (!this.drive) return;
 
@@ -1324,8 +1445,7 @@ Price: ${this.formatPrice()}`,
       next: (address) => {
         const request: BookingRequest = {
           driveId: this.driveId,
-          userId: userId,
-          pickupAddressId: address.id
+          pickupAddressId: address.id!
         };
 
         this.bookingService.requestRide(request).subscribe({
@@ -1392,6 +1512,71 @@ Price: ${this.formatPrice()}`,
         }
       }
     });
+  }
+
+  async confirmBooking() {
+    // 1. Authentication Check
+    const userId = this.authService.getCurrentUserId();
+    if (!userId) {
+      await this.showToast('You must be logged in to book a ride', 'warning');
+      this.router.navigate(['/login/auth']);
+      return;
+    }
+
+    // 2. Pickup Validation
+    if (!this.canBookRide()) {
+      await this.showToast('Please select a pickup point', 'warning');
+      return;
+    }
+
+    // 3. Payment Validation (from Version 1)
+    const acceptedTypes = this.acceptedDrivePaymentTypes();
+    const requiresCard = acceptedTypes.includes('CARD') && !acceptedTypes.includes('CASH');
+    
+    if (requiresCard && !this.selectedPaymentMethodId()) {
+      await this.showToast('Please select a payment method', 'warning');
+      return;
+    }
+
+    // 4. Create Detailed Confirmation Alert
+    const driverName = this.getDriverName();
+    const pickupLocation = this.getPickupLocation();
+    const destination = this.getToLocation();
+    const price = this.formatPrice();
+    
+    const alert = await this.alertController.create({
+      header: 'Confirm Booking',
+      message: `Driver: ${driverName}\nPickup: ${pickupLocation}\nDestination: ${destination}\nPrice: ${price}`,
+      cssClass: 'booking-confirm-alert',
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          cssClass: 'alert-button-cancel'
+        },
+        {
+          text: 'Confirm',
+          cssClass: 'alert-button-confirm',
+          handler: () => {
+            this.requestingRide.set(true);
+
+            // Prepare the request object
+            const request: BookingRequest = {
+              driveId: this.driveId,
+              pickupAddressId: -1, // Note: Ensure this logic matches your backend needs
+              paymentMethodId: this.selectedPaymentMethodId() || undefined
+            };
+
+            // Execute booking
+            this.handleBookingWithAddress(request);
+            // If Version 2's submitBooking is the preferred method, use: 
+            // this.submitBooking(userId);
+          }
+        }
+      ]
+    });
+
+    await alert.present();
   }
 
   sendFriendRequest() {

@@ -326,3 +326,131 @@ a.link-primary,
   }
 }
 
+// Booking Confirm Alert Styling
+.booking-confirm-alert {
+  .alert-wrapper {
+    background: var(--campus-ride-bg-card);
+    border-radius: 16px;
+  }
+
+  .alert-head {
+    padding: 20px 20px 12px;
+    
+    .alert-title {
+      color: var(--campus-ride-text-primary);
+      font-weight: 700;
+      font-size: 18px;
+    }
+  }
+
+  .alert-message {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 14px;
+    padding: 0 20px 24px;
+    white-space: pre-line;
+    line-height: 1.8;
+  }
+
+  .alert-button-group {
+    padding: 0;
+    border-top: 1px solid var(--campus-ride-border);
+    
+    button {
+      flex: 1;
+      min-height: 48px;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 14px;
+      letter-spacing: 0.5px;
+      
+      // Remove the ripple/indicator element padding and center text
+      .alert-button-inner {
+        justify-content: center;
+        padding: 0;
+        
+        span {
+          padding: 0;
+          margin: 0;
+        }
+      }
+    }
+  }
+
+  // Hide any pseudo-elements that appear as colored bars
+  button .alert-button-inner::before,
+  button .alert-button-inner::after {
+    display: none !important;
+    content: none !important;
+  }
+
+  .alert-button-cancel {
+    color: rgba(255, 255, 255, 0.6) !important;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+  }
+
+  .alert-button-confirm {
+    color: var(--campus-ride-primary) !important;
+    font-weight: 700;
+    
+    &:hover {
+      background: rgba(0, 195, 108, 0.1);
+    }
+  }
+}
+
+// ==========================================
+// Add Drive Page - Global Ionic Styles
+// ==========================================
+
+// Green checkboxes for payment methods
+.payment-methods-container {
+  ion-checkbox {
+    --background: rgba(60, 60, 67, 0.6);
+    --background-checked: var(--campus-ride-success);
+    --border-color: rgba(255, 255, 255, 0.2);
+    --border-color-checked: var(--campus-ride-success);
+    --checkmark-color: #ffffff;
+    --checkbox-background-checked: var(--campus-ride-success);
+    --size: 22px;
+    margin-right: 12px;
+  }
+
+  ion-checkbox.checkbox-checked {
+    --background: #30d158;
+    --border-color: #30d158;
+  }
+}
+
+// White back button icon with green hover
+.details-header .back-btn {
+  ion-icon {
+    color: #ffffff !important;
+    
+    svg {
+      fill: currentColor;
+      stroke: currentColor;
+    }
+  }
+}
+
+// Calendar day styling - green instead of blue
+ion-datetime {
+  --ion-color-primary: var(--campus-ride-primary);
+  --ion-color-primary-rgb: 0, 195, 108;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-shade: var(--campus-ride-primary-active);
+  --ion-color-primary-tint: var(--campus-ride-primary-hover);
+}
+
+.calendar-day-today {
+  border-color: var(--campus-ride-primary) !important;
+  color: var(--campus-ride-primary) !important;
+}
+
+.calendar-day-active {
+  background: var(--campus-ride-primary) !important;
+  color: #ffffff !important;
+}

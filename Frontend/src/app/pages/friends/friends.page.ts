@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
-  IonContent, IonButton,
+  IonContent,
   IonIcon, IonSpinner,
   IonRefresher, IonRefresherContent, IonList, IonItem, IonLabel, IonAvatar
 } from '@ionic/angular/standalone';
@@ -25,7 +25,6 @@ import { FriendService, Friend } from 'src/app/core/services/friend.service';
   standalone: true,
   imports: [
     IonContent,
-    IonButton,
     IonIcon, IonSpinner,
     IonRefresher, IonRefresherContent,
     IonList, IonItem, IonLabel, IonAvatar,

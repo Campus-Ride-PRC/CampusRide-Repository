@@ -1,6 +1,6 @@
-import {Component, OnInit} from '@angular/core';
-import {CommonModule, Location} from '@angular/common';
-import {FormsModule} from '@angular/forms';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule, Location } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import {
   IonButton,
   IonButtons,
@@ -22,13 +22,14 @@ import {AppHeaderComponent} from "../../shared/components/header/app-header.comp
 import {SidePanelComponent} from "../../shared/components/panel/side-panel.component";
 import {AuthService} from "../../core/services/auth.service";
 import {FriendService} from "../../core/services/friend.service";
+import {RouterLink} from "@angular/router";
 
 @Component({
   selector: 'app-profile',
   templateUrl: './profile.page.html',
   styleUrls: ['./profile.page.scss'],
   standalone: true,
-  imports: [IonContent, CommonModule, FormsModule, RideCardComponent, BookingCardComponent, AppHeaderComponent, SidePanelComponent]
+  imports: [IonContent, CommonModule, FormsModule, RideCardComponent, BookingCardComponent, AppHeaderComponent, SidePanelComponent, RouterLink]
 })
 export class ProfilePage implements OnInit {
   isPanelOpen = false;
@@ -49,7 +50,7 @@ export class ProfilePage implements OnInit {
   protected drives_state: string = "loading";
   protected booking__state: string = "loading";
 
-  protected myDrives! : DriveCard[];
+  protected myDrives!: DriveCard[];
   protected myBookings!: BookingResponse[];
 
   ngOnInit() {
@@ -66,7 +67,7 @@ export class ProfilePage implements OnInit {
     })
     this.service.getDrives().subscribe({
       next: data => {
-        if (data . length > 3 ){
+        if (data.length > 3) {
           this.myDrives = data.slice(0, 3);
           this.drives_state = "ready"
         }
@@ -81,7 +82,7 @@ export class ProfilePage implements OnInit {
     })
     this.service.getBookings().subscribe({
       next: data => {
-        if (data . length > 3 ){
+        if (data.length > 3) {
           this.myBookings = data.slice(0, 3);
           this.booking__state = "ready"
         }
@@ -191,7 +192,7 @@ export class ProfilePage implements OnInit {
     });
   }
 
-  goToAllDrives() : void {
+  goToAllDrives(): void {
     this.router.navigate(['/home']);
   }
 
@@ -215,7 +216,7 @@ export class ProfilePage implements OnInit {
   onMenuItemClick(item: string) {
     console.log('Menu item clicked:', item);
 
-    switch(item) {
+    switch (item) {
       case 'home':
         this.router.navigate(['/home']);
         break;

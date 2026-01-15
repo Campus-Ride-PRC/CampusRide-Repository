@@ -81,7 +81,22 @@ export const routes: Routes = [
   },
   {
     path: 'profile',
-    loadComponent: () => import('./pages/profile/profile.page').then( m => m.ProfilePage)
+    loadComponent: () => import('./pages/profile/profile.page').then(m => m.ProfilePage)
+  },
+  {
+    path: 'payment-methods',
+    loadComponent: () => import('./pages/payment-methods/payment-methods.page').then(m => m.PaymentMethodsPage),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'payment-selection',
+    loadComponent: () => import('./pages/payment-selection/payment-selection.page').then(m => m.PaymentSelectionPage),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'payment-success',
+    loadComponent: () => import('./pages/payment-success/payment-success.page').then(m => m.PaymentSuccessPage),
+    canActivate: [authGuard]
   },
   {
     path: 'profile/add-card',
