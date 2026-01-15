@@ -11,4 +11,5 @@ public interface UserRepository {
     User save(User user);
     Optional<User> findByEmailAndPassword(String email, String password);
     List<User> findAll();
+    User update(String email, String password);
 }
