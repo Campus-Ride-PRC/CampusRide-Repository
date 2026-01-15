@@ -35,6 +35,18 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/authentication/register/result/result.page').then((m) => m.ResultPage),
   },
   {
+    path: 'forgot-password/email',
+    loadComponent: () => import('./pages/authentication/forgot-password/email/forgot-password-email.page').then((m) => m.ForgotPasswordEmailPage),
+  },
+  {
+    path: 'forgot-password/code',
+    loadComponent: () => import('./pages/authentication/forgot-password/code/forgot-password-code.page').then((m) => m.ForgotPasswordCodePage),
+  },
+  {
+    path: 'forgot-password/reset',
+    loadComponent: () => import('./pages/authentication/forgot-password/reset/forgot-password-reset.page').then((m) => m.ForgotPasswordResetPage),
+  },
+  {
     path: 'home',
     loadComponent: () => import('./pages/home/home.page').then((m) => m.HomePage),
     canActivate: [authGuard]
