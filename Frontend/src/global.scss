@@ -1,4 +1,3 @@
-
 /*
  * App Global CSS
  * ----------------------------------------------------------------------------
@@ -43,12 +42,12 @@ a.link-primary,
   font-weight: 500;
   text-decoration: none;
   transition: color 0.2s ease;
-  
+
   &:hover {
     color: var(--campus-ride-primary-hover);
     text-decoration: underline;
   }
-  
+
   &:active {
     color: var(--campus-ride-primary);
   }
@@ -81,7 +80,7 @@ a.link-primary,
   flex-direction: column;
   align-items: center;
   box-shadow: var(--campus-ride-shadow);
-  
+
   @media (min-width: 768px) {
     width: 24rem;
   }
@@ -91,7 +90,7 @@ a.link-primary,
   text-align: center;
   margin-top: 0.5rem;
   padding: 0 1.5rem;
-  
+
   h2 {
     font-family: var(--campus-ride-font-primary);
     font-size: 2.75rem;
@@ -105,7 +104,7 @@ a.link-primary,
   font-size: 1rem;
   margin-top: 1.5rem;
   padding: 0 1.5rem;
-  
+
   p {
     font-size: 1.25rem;
     font-weight: 600;
@@ -143,7 +142,7 @@ a.link-primary,
   justify-content: center;
   padding: 2rem 0;
   margin-bottom: 2rem;
-  
+
   p {
     text-align: center;
     font-size: 1rem;
@@ -196,7 +195,7 @@ a.link-primary,
 .confirm-booking-alert {
   --background: var(--campus-ride-bg-card);
   --backdrop-opacity: 0.6;
-  
+
   .alert-wrapper {
     border-radius: 16px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
@@ -204,7 +203,7 @@ a.link-primary,
 
   .alert-head {
     padding-top: 20px;
-    
+
     h2 {
       color: var(--campus-ride-text-primary);
       font-weight: 700;
@@ -229,7 +228,7 @@ a.link-primary,
     border-radius: 8px !important;
     text-transform: none;
     font-weight: 600;
-    
+
     &.alert-button-cancel {
       color: var(--campus-ride-text-secondary) !important;
     }
@@ -243,7 +242,7 @@ a.link-primary,
 .confirm-alert {
   --background: var(--campus-ride-bg-card);
   --backdrop-opacity: 0.6;
-  
+
   .alert-wrapper {
     border-radius: 16px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
@@ -255,7 +254,7 @@ a.link-primary,
   .alert-head {
     padding: 24px 20px 16px;
     text-align: center;
-    
+
     h2 {
       color: var(--campus-ride-text-primary);
       font-weight: 700;
@@ -278,7 +277,7 @@ a.link-primary,
     padding: 0;
     border-top: 1px solid var(--campus-ride-border);
     display: flex;
-    
+
     button {
       flex: 1;
       margin: 0 !important;
@@ -291,12 +290,12 @@ a.link-primary,
       display: flex;
       align-items: center;
       justify-content: center;
-      
+
       &:first-child {
         border-right: 1px solid var(--campus-ride-border);
         border-radius: 0 0 0 16px !important;
       }
-      
+
       &:last-child {
         border-radius: 0 0 16px 0 !important;
       }
@@ -306,10 +305,10 @@ a.link-primary,
   button.alert-button {
     text-transform: none;
     text-align: center;
-    
+
     &.alert-button-cancel {
       color: var(--campus-ride-text-secondary) !important;
-      
+
       &:hover {
         background: rgba(255, 255, 255, 0.05);
       }
@@ -318,7 +317,7 @@ a.link-primary,
     &.alert-button-confirm {
       color: var(--campus-ride-primary) !important;
       font-weight: 700;
-      
+
       &:hover {
         background: var(--campus-ride-success-bg);
       }
@@ -335,7 +334,7 @@ a.link-primary,
 
   .alert-head {
     padding: 20px 20px 12px;
-    
+
     .alert-title {
       color: var(--campus-ride-text-primary);
       font-weight: 700;
@@ -354,7 +353,7 @@ a.link-primary,
   .alert-button-group {
     padding: 0;
     border-top: 1px solid var(--campus-ride-border);
-    
+
     button {
       flex: 1;
       min-height: 48px;
@@ -362,12 +361,12 @@ a.link-primary,
       text-transform: uppercase;
       font-size: 14px;
       letter-spacing: 0.5px;
-      
+
       // Remove the ripple/indicator element padding and center text
       .alert-button-inner {
         justify-content: center;
         padding: 0;
-        
+
         span {
           padding: 0;
           margin: 0;
@@ -385,7 +384,7 @@ a.link-primary,
 
   .alert-button-cancel {
     color: rgba(255, 255, 255, 0.6) !important;
-    
+
     &:hover {
       background: rgba(255, 255, 255, 0.05);
     }
@@ -394,7 +393,7 @@ a.link-primary,
   .alert-button-confirm {
     color: var(--campus-ride-primary) !important;
     font-weight: 700;
-    
+
     &:hover {
       background: rgba(0, 195, 108, 0.1);
     }
@@ -428,12 +427,31 @@ a.link-primary,
 .details-header .back-btn {
   ion-icon {
     color: #ffffff !important;
-    
+
     svg {
       fill: currentColor;
       stroke: currentColor;
     }
   }
+}
+
+// Properly center button text in Ionic alerts (Material Design)
+.alert-button-inner,
+.alert-button-inner.sc-ion-alert-md,
+ion-alert .alert-button-inner,
+.sc-ion-alert-md .alert-button-inner {
+  justify-content: center !important;
+  width: 100% !important;
+  text-align: center !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+// Also style the button itself to ensure centering
+ion-alert .alert-button,
+.alert-button.sc-ion-alert-md {
+  justify-content: center !important;
+  text-align: center !important;
 }
 
 // Calendar day styling - green instead of blue
