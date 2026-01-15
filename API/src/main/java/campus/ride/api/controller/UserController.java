@@ -1,10 +1,7 @@
 package campus.ride.api.controller;
 
 import campus.ride.interfaces.UserService;
-import campus.ride.transfer.dtos.user.CreateUserRequestDto;
-import campus.ride.transfer.dtos.user.EmailRequestDto;
-import campus.ride.transfer.dtos.user.UserResponseDto;
-import campus.ride.transfer.dtos.user.LoginRequestDto;
+import campus.ride.transfer.dtos.user.*;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -12,7 +9,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import campus.ride.transfer.dtos.user.VerificationRequestDto;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
@@ -28,7 +24,7 @@ import java.util.concurrent.CompletableFuture;
 public class UserController {
 
     private static final Logger logger = LogManager.getLogger(UserController.class);
-    
+
     private final UserService userService;
 
     public UserController(UserService userService) {
@@ -52,7 +48,7 @@ public class UserController {
     public CompletableFuture<ResponseEntity<UserResponseDto>> findByEmail(@RequestBody EmailRequestDto request) {
         logger.info("Received request to find user by email");
         logger.debug("Searching for user with email: {}", request.getEmail());
-        
+
         return userService.findByEmail(request.getEmail())
                 .thenApply(user -> {
                     logger.info("User found with email: {}", request.getEmail());
@@ -78,7 +74,7 @@ public class UserController {
 
     @PostMapping("/register/create")
     public CompletableFuture<ResponseEntity<String>> registerUser(@RequestBody CreateUserRequestDto request) {
-       logger.info("Received request to register new user");
+        logger.info("Received request to register new user");
         logger.debug("Registering user with email: {}", request.getEmail());
 
         return userService.registerUser(request)
@@ -87,9 +83,9 @@ public class UserController {
                     return ResponseEntity.ok(message);
                 });
     }
-    
+
     @PostMapping("/register/verify")
-    public CompletableFuture<ResponseEntity<UserResponseDto>> verifyUSer(@RequestBody VerificationRequestDto request){
+    public CompletableFuture<ResponseEntity<UserResponseDto>> verifyUSer(@RequestBody VerificationRequestDto request) {
         logger.info("Received request to verify user");
         logger.debug("Verifying user with email: {}", request.getEmail());
 
@@ -167,4 +163,31 @@ public class UserController {
                     return ResponseEntity.ok(users);
                 });
     }
+
+    @PostMapping("/reset/password/verify-email")
+    public CompletableFuture<String> forgotPasswordVerifyCode(@RequestBody EmailRequestDto request) {
+        logger.info("Received request to send password reset verification code");
+        logger.debug("Sending password reset code to email: {}", request.getEmail());
+
+        return userService.forgotPasswordVerifyCode(request);
+    }
+
+    @PostMapping("/reset/password/verify-code")
+    public CompletableFuture<ResponseEntity<ResetPasswordRequestDto>> verifyVerificationCode(@RequestBody VerificationRequestDto request) {
+        logger.info("Received request to verify password reset code");
+        logger.debug("Verifying password reset code for email: {}", request.getEmail());
+
+
+        return userService.verifyVerificationCode(request)
+            .thenApply(ResponseEntity::ok);
+    }
+
+    @PostMapping("/reset/password/confirm")
+    public CompletableFuture<ResponseEntity<UserResponseDto>> resetPassword(@RequestBody ResetPasswordRequestDto request) {
+        logger.info("Received request to set new password for email: {}", request.getEmail());
+
+        return userService.resetPassword(request)
+                .thenApply(ResponseEntity::ok);
+    }
+
 }

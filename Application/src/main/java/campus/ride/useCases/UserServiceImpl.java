@@ -12,14 +12,7 @@ import campus.ride.exception.ResourceNotFoundException;
 import campus.ride.exception.UserAlreadyExistsException;
 import campus.ride.interfaces.EmailService;
 import campus.ride.interfaces.UserService;
-import campus.ride.transfer.dtos.user.CreateUserRequestDto;
-import campus.ride.transfer.dtos.user.FriendDto;
-import campus.ride.transfer.dtos.user.FriendRequestDto;
-import campus.ride.transfer.dtos.user.FriendRequestResponseDto;
-import campus.ride.transfer.dtos.user.FriendRequestStatusDto;
-import campus.ride.transfer.dtos.user.FriendshipStatusDto;
-import campus.ride.transfer.dtos.user.UserResponseDto;
-import campus.ride.transfer.dtos.user.VerificationRequestDto;
+import campus.ride.transfer.dtos.user.*;
 import campus.ride.transfer.mappings.FacultyMapper;
 import campus.ride.transfer.mappings.UserMapper;
 import org.apache.logging.log4j.LogManager;
@@ -376,6 +369,60 @@ public class UserServiceImpl implements UserService {
         return CompletableFuture.completedFuture(new FriendshipStatusDto(friend.getStatus(), isSender));
     }
 
+    @Override
+    public CompletableFuture<String> forgotPasswordVerifyCode(EmailRequestDto request) {
+        logger.info("Attempting to reset password for email: {}", request.getEmail());
+
+        String email = request.getEmail().trim();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+
+        String verificationCode = generateVerificationCode();
+        PendingUserChangeData pendingData = new PendingUserChangeData(
+                email,
+                verificationCode,
+                null
+        );
+
+        verificationCache.put(email, pendingData);
+        emailService.sendVerificationEmailResetPassword(email, verificationCode, user.getFirstName(), user.getLastName());
+
+        logger.info("Successfully sent verification code to: {}", email);
+        return CompletableFuture.completedFuture("Sent verification code. Please check your email.");
+    }
+
+    @Override
+    public CompletableFuture<ResetPasswordRequestDto> verifyVerificationCode(VerificationRequestDto request){
+        logger.info("Attempting to verify password reset for email: {}", request.getEmail());
+        String email = request.getEmail().trim();
+        PendingUserChangeData pendingData = verificationCache.get(email, PendingUserChangeData.class);
+        if (pendingData == null) {
+            throw new BadRequestException("Invalid or expired verification code.");
+        }
+
+        logger.info("Successfully verified password reset for email: {}", email);
+        return CompletableFuture.completedFuture(new ResetPasswordRequestDto(
+                pendingData.getEmail(),
+                null
+        ));
+    }
+
+    @Override
+    public CompletableFuture<UserResponseDto> resetPassword(ResetPasswordRequestDto request){
+        logger.info("Attempting to reset password for email: {}", request.getEmail());
+        String email = request.getEmail().trim();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+        String hashedPassword = passwordEncoder.encode(request.getNewPassword());
+        user.setPassword(hashedPassword);
+        User updatedUser = userRepository.save(user);
+        verificationCache.evict(email);
+        logger.info("Successfully reset password for email: {}", email);
+        return CompletableFuture.completedFuture(UserMapper.toDto(updatedUser));
+    }
+
+
     private static class PendingUserData implements java.io.Serializable {
         private String hashedPassword;
         private String verificationCode;
@@ -402,10 +449,28 @@ public class UserServiceImpl implements UserService {
         public Faculty getFaculty() { return faculty; }
     }
 
+    private class PendingUserChangeData implements  java.io.Serializable{
+        private String email;
+        private String verificationCode;
+        private String password;
+
+        public PendingUserChangeData(String email, String verificationCode, String password) {
+            this.email = email;
+            this.verificationCode = verificationCode;
+            this.password = password;
+        }
+
+        public String getEmail() { return email; }
+        public String getVerificationCode() { return verificationCode; }
+        public String getPassword() { return password; }
+    }
+
     private String generateVerificationCode() {
         java.util.Random random = new java.util.Random();
         int code = 100000 + random.nextInt(900000);
         return String.valueOf(code);
     }
+
+
 
 }
