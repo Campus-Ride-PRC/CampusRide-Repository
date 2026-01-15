@@ -335,6 +335,18 @@ public class DriveServiceImpl implements DriveService {
     @Override
     @Async
     @Transactional(readOnly = true)
+    public CompletableFuture<Long> getMyDrivesCount() {
+        String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + email));
+
+        List<DriveRow> rows = driveQueryRepo.findAllByDriverId(user.getId());
+        return CompletableFuture.completedFuture((long) rows.size());
+    }
+
+    @Override
+    @Async
+    @Transactional(readOnly = true)
     public CompletableFuture<List<DriveCardDto>> getMyRecentRides() {
         String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userRepository.findByEmail(email)

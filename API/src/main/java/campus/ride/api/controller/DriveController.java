@@ -114,6 +114,16 @@ public class DriveController {
                                 .thenApply(ResponseEntity::ok);
         }
 
+        @Operation(summary = "Get my drives count", description = "Returns the total count of drives created by the current authenticated user")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Successfully retrieved drives count")
+        })
+        @GetMapping("/my-drives/count")
+        public CompletableFuture<ResponseEntity<Long>> getMyDrivesCount() {
+                return driveService.getMyDrivesCount()
+                                .thenApply(ResponseEntity::ok);
+        }
+
         @Operation(summary = "Get upcoming drives", description = "Retrieves all available drives with departure times in the future for the home page. Public endpoint.")
         @ApiResponses(value = {
                         @ApiResponse(responseCode = "200", description = "Successfully retrieved upcoming drives", content = @Content(schema = @Schema(implementation = Page.class)))

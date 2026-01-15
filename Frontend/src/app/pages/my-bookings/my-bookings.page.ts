@@ -21,7 +21,7 @@ import { SidePanelComponent } from 'src/app/shared/components/panel/side-panel.c
 import { Profile } from 'src/app/core/services/profile';
 import { UserResponse } from 'src/app/core/models/userResponse';
 import { FriendService } from 'src/app/core/services/friend.service';
-
+import { DriveService } from 'src/app/core/services/drive.service';
 @Component({
   selector: 'app-my-bookings',
   templateUrl: './my-bookings.page.html',
@@ -50,7 +50,8 @@ export class MyBookingsPage implements OnInit {
     private router: Router,
     private location: Location,
     private profileService: Profile,
-    private friendService: FriendService
+    private friendService: FriendService,
+    private driveService: DriveService
   ) {
     addIcons({
       carOutline, locationOutline, timeOutline, cashOutline,
@@ -63,6 +64,7 @@ export class MyBookingsPage implements OnInit {
     this.loadBookings();
     this.loadUser();
     this.loadFriendCount();
+    this.loadRidesCount();
   }
 
   loadUser() {
@@ -114,6 +116,17 @@ export class MyBookingsPage implements OnInit {
       error: (error) => {
         console.error('Error loading bookings:', error);
         this.loading = false;
+      }
+    });
+  }
+
+  loadRidesCount() {
+    this.driveService.getMyDrivesCount().subscribe({
+      next: (count) => {
+        this.ridesCount = count;
+      },
+      error: (err) => {
+        console.error('Error loading rides count:', err);
       }
     });
   }

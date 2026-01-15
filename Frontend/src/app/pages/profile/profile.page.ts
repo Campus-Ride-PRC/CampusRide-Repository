@@ -22,6 +22,7 @@ import { AppHeaderComponent } from "../../shared/components/header/app-header.co
 import { SidePanelComponent } from "../../shared/components/panel/side-panel.component";
 import { AuthService } from "../../core/services/auth.service";
 import { FriendService } from "../../core/services/friend.service";
+import { DriveService } from "../../core/services/drive.service";
 import { RouterLink } from "@angular/router";
 
 @Component({
@@ -41,7 +42,8 @@ export class ProfilePage implements OnInit {
     private service: Profile,
     private router: Router,
     private authService: AuthService,
-    private friendService: FriendService
+    private friendService: FriendService,
+    private driveService: DriveService
   ) {
   }
 
@@ -96,6 +98,7 @@ export class ProfilePage implements OnInit {
       }
     })
     this.loadFriendCount();
+    this.loadRidesCount();
   }
 
   loadFriendCount() {
@@ -105,6 +108,17 @@ export class ProfilePage implements OnInit {
       },
       error: (err) => {
         console.error('Error loading friend count:', err);
+      }
+    });
+  }
+
+  loadRidesCount() {
+    this.driveService.getMyDrivesCount().subscribe({
+      next: (count) => {
+        this.ridesCount = count;
+      },
+      error: (err) => {
+        console.error('Error loading rides count:', err);
       }
     });
   }
@@ -203,6 +217,7 @@ export class ProfilePage implements OnInit {
   onMenuOpen() {
     this.isPanelOpen = true;
     this.loadFriendCount();
+    this.loadRidesCount();
   }
 
   onPanelClosed() {

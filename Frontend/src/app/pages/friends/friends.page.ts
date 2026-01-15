@@ -17,6 +17,7 @@ import { SidePanelComponent } from 'src/app/shared/components/panel/side-panel.c
 import { Profile } from 'src/app/core/services/profile';
 import { UserResponse } from 'src/app/core/models/userResponse';
 import { FriendService, Friend } from 'src/app/core/services/friend.service';
+import { DriveService } from 'src/app/core/services/drive.service';
 
 @Component({
   selector: 'app-friends',
@@ -44,7 +45,8 @@ export class FriendsPage implements OnInit {
     private router: Router,
     private location: Location,
     private profileService: Profile,
-    private friendService: FriendService
+    private friendService: FriendService,
+    private driveService: DriveService
   ) {
     addIcons({
       personOutline, mailOutline, schoolOutline,
@@ -56,6 +58,7 @@ export class FriendsPage implements OnInit {
     this.loadData();
     this.loadUser();
     this.loadFriendCount();
+    this.loadRidesCount();
   }
 
   loadUser() {
@@ -92,6 +95,18 @@ export class FriendsPage implements OnInit {
         console.error('Error loading friends:', error);
         this.loading = false;
         if (event) event.target.complete();
+      }
+    });
+    this.loadRidesCount();
+  }
+
+  loadRidesCount() {
+    this.driveService.getMyDrivesCount().subscribe({
+      next: (count) => {
+        this.ridesCount = count;
+      },
+      error: (err) => {
+        console.error('Error loading rides count:', err);
       }
     });
   }
