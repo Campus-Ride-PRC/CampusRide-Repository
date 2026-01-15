@@ -68,4 +68,42 @@ public class EmailService implements campus.ride.interfaces.EmailService {
             return bufferedReader.lines().collect(Collectors.joining("\n"));
         }
     }
+
+    @Override
+    @Async
+    public void sendVerificationEmailResetPassword(String toEmail, String code, String firstName, String lastName) {
+        logger.info("Starting to send HTML verification email to {}", toEmail);
+        try {
+            String htmlBody = loadHtmlTemplateResetPassword();
+
+            String fullName = firstName + " " + lastName;
+            htmlBody = htmlBody.replace("{{USER_NAME}}", fullName);
+            htmlBody = htmlBody.replace("{{VERIFICATION_CODE}}", code);
+
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());
+
+            helper.setFrom(fromEmail);
+            helper.setTo(toEmail);
+            helper.setSubject("CampusRide - Verification code");
+
+            helper.setText(htmlBody, true);
+
+            mailSender.send(message);
+            logger.info("HTML Verification email sent to {} with code {}", toEmail, code);
+
+        } catch (MessagingException | IOException e) {
+            logger.error("Failed to send HTML email to " + toEmail, e);
+        }
+    }
+
+     private String loadHtmlTemplateResetPassword() throws IOException {
+        ClassPathResource resource = new ClassPathResource("verificationEmailResetPassword.html");
+
+        try (InputStreamReader reader = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8);
+             BufferedReader bufferedReader = new BufferedReader(reader)) {
+
+            return bufferedReader.lines().collect(Collectors.joining("\n"));
+        }
+    }
 }
