@@ -24,4 +24,5 @@ public interface UserRepositoryJpa extends JpaRepository<User, Long>, UserReposi
 
     @Override
     java.util.List<User> findAll();
+
 }
