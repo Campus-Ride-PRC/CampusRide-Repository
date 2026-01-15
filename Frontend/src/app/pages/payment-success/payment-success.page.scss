@@ -1,3 +1,4 @@
+@use 'sass:color';
 // ==========================================
 // Payment Success Page Styling
 // ==========================================
@@ -131,7 +132,7 @@ $transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         color: $text-primary;
 
         &:hover {
-            background: lighten($bg-card, 5%);
+            background: color.adjust($bg-card, $lightness: 5%);
             transform: translateY(-2px);
         }
 

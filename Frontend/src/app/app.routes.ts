@@ -99,5 +99,9 @@ export const routes: Routes = [
     canActivate: [authGuard]
   },
 
-
+  {
+    path: 'messages/chat',
+    loadComponent: () => import('./pages/messages/chat/chat.page').then(m => m.ChatPage),
+    canActivate: [authGuard]
+  },
 ];

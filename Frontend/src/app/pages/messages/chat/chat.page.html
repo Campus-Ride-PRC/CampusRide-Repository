@@ -1,0 +1,57 @@
+<ion-header>
+  <ion-toolbar class="chat-header">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home" text="" color="light"></ion-back-button>
+    </ion-buttons>
+    <ion-title>
+      <div class="user-info">
+        <span class="name">{{ receiverName }}</span>
+        <span *ngIf="driveId" class="drive-badge">Ride #{{driveId}}</span>
+      </div>
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding chat-content" [scrollEvents]="true">
+
+  <div *ngIf="isLoading" class="loading-spinner">
+    <ion-spinner name="crescent"></ion-spinner>
+  </div>
+
+  <div class="messages-list" *ngIf="!isLoading">
+    <div *ngIf="messages.length === 0" class="empty-state">
+      <ion-icon name="chatbubbles-outline"></ion-icon>
+      <p>No messages yet. Say hello!</p>
+    </div>
+
+    <div *ngFor="let msg of messages" class="message-wrapper" [class.my-message]="msg.senderId === currentUserId"
+      [class.other-message]="msg.senderId !== currentUserId">
+
+      <div class="message-bubble">
+        <p>{{ msg.content }}</p>
+        <div class="meta-info">
+          <span class="time">{{ msg.sentAt | date:'shortTime' }}</span>
+          <span *ngIf="msg.senderId === currentUserId" class="status-icon">
+            <ion-icon *ngIf="msg.isReadByReceiver" name="checkmark-done-outline" color="secondary"></ion-icon>
+            <ion-icon *ngIf="!msg.isReadByReceiver" name="checkmark-outline"></ion-icon>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</ion-content>
+
+<ion-footer class="ion-no-border">
+  <ion-toolbar>
+    <div class="input-area">
+      <ion-textarea autoGrow="true" rows="1" placeholder="Type a message..." [(ngModel)]="newMessage"
+        (keydown.enter)="sendMessage()">
+      </ion-textarea>
+
+      <ion-button fill="clear" (click)="sendMessage()" [disabled]="!newMessage.trim()">
+        <ion-icon slot="icon-only" name="send"></ion-icon>
+      </ion-button>
+    </div>
+  </ion-toolbar>
+</ion-footer>

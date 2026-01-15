@@ -35,6 +35,7 @@ interface ExistingPickupPoint {
   passengerCount: number;
   passengerNames: string[];
   passengers: Array<{
+    userId: number;
     firstName: string;
     lastName: string;
     email: string;
@@ -99,6 +100,20 @@ export class RideDetailsPage implements OnInit, OnDestroy {
   // Friend request status
   readonly friendRequestStatus = signal<'idle' | 'sending' | 'sent' | 'error'>('idle');
   readonly friendshipStatus = signal<FriendshipStatus | null>(null);
+
+  readonly bookedPassengers = computed(() => {
+    const points = this.existingPickupPoints();
+    const passengers: any[] = [];
+    points.forEach(point => {
+      point.passengers.forEach(p => {
+        // Avoid duplicates if multiple pickup points (unlikely but safe)
+        if (!passengers.some(existing => existing.email === p.email)) {
+          passengers.push(p);
+        }
+      });
+    });
+    return passengers;
+  });
 
   // Computed signals
   readonly isPastRide = computed(() => {
@@ -239,7 +254,7 @@ export class RideDetailsPage implements OnInit, OnDestroy {
 
   private createStripeCheckoutSession(pickupAddressId: number) {
     const baseUrl = window.location.origin;
-    
+
     const request: CheckoutSessionRequest = {
       driveId: this.driveId,
       pickupAddressId: pickupAddressId,
@@ -487,6 +502,11 @@ export class RideDetailsPage implements OnInit, OnDestroy {
         if (!this.isCurrentUserDriver() && !this.userBooking()) {
           this.loadPaymentMethods();
         }
+
+        // Check for auto-open chat query param
+        if (this.route.snapshot.queryParamMap.get('openChat') === 'true' && !this.isCurrentUserDriver()) {
+          this.navigateToChatWithDriver();
+        }
       },
       error: (error) => {
         console.error('Error loading drive details:', error);
@@ -533,6 +553,7 @@ export class RideDetailsPage implements OnInit, OnDestroy {
           const existing = locationMap.get(key);
 
           const passengerInfo = {
+            userId: booking.userId,
             firstName: booking.userFirstName,
             lastName: booking.userLastName,
             email: booking.userEmail,
@@ -797,7 +818,7 @@ export class RideDetailsPage implements OnInit, OnDestroy {
         zIndex: isUserPickup ? 1000 : undefined
       });
 
-      // Add click listener
+
       if (this.isDriverView) {
         // For driver: show passenger info in info window
         marker.addListener('click', () => {
@@ -864,8 +885,28 @@ export class RideDetailsPage implements OnInit, OnDestroy {
                 </span>
               </div>
             </div>
-            ${isPending ? `
-              <div style="display: flex; gap: 4px; padding-top: 4px;">
+            <div style="display: flex; gap: 4px; padding-top: 4px;">
+              <button
+                class="message-passenger-btn"
+                data-passenger-email="${passenger.email}"
+                style="
+                  flex: 1;
+                  padding: 5px 8px;
+                  font-size: 11px;
+                  font-weight: 600;
+                  color: white;
+                  background-color: #3B82F6;
+                  border: none;
+                  border-radius: 4px;
+                  cursor: pointer;
+                  transition: background-color 0.2s;
+                "
+                onmouseover="this.style.backgroundColor='#2563EB'"
+                onmouseout="this.style.backgroundColor='#3B82F6'"
+              >
+                Message
+              </button>
+              ${isPending ? `
                 <button
                   class="accept-passenger-btn"
                   data-passenger-email="${passenger.email}"
@@ -906,8 +947,8 @@ export class RideDetailsPage implements OnInit, OnDestroy {
                 >
                   ✕ Decline
                 </button>
-              </div>
-            ` : ''}
+              ` : ''}
+            </div>
           </div>
         </div>
       `;
@@ -931,6 +972,16 @@ export class RideDetailsPage implements OnInit, OnDestroy {
           const passenger = point.passengers.find(p => p.email === email);
           if (passenger) {
             this.handleAcceptPassenger(passenger);
+          }
+        });
+      });
+
+      document.querySelectorAll('.message-passenger-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const email = (e.target as HTMLElement).getAttribute('data-passenger-email');
+          const passenger = point.passengers.find(p => p.email === email);
+          if (passenger) {
+            this.navigateToChat(passenger.userId, passenger.firstName, passenger.lastName);
           }
         });
       });
@@ -1449,29 +1500,29 @@ export class RideDetailsPage implements OnInit, OnDestroy {
         };
 
         this.bookingService.requestRide(request).subscribe({
-      next: async (response) => {
-        this.requestingRide.set(false);
-        await this.showToast('Booking confirmed! Status: ' + response.status, 'success');
-        setTimeout(() => {
-          this.router.navigate(['/home']);
-        }, 1500);
-      },
-        error: async (error) => {
-          this.requestingRide.set(false);
-          console.error('Error booking ride:', error);
+          next: async (response) => {
+            this.requestingRide.set(false);
+            await this.showToast('Booking confirmed! Status: ' + response.status, 'success');
+            setTimeout(() => {
+              this.router.navigate(['/home']);
+            }, 1500);
+          },
+          error: async (error) => {
+            this.requestingRide.set(false);
+            console.error('Error booking ride:', error);
 
-          let errorMessage = 'Failed to book ride. Please try again.';
-          if (error.error?.message) {
-            errorMessage = error.error.message;
-          } else if (error.status === 400) {
-            errorMessage = 'Bad request. Please check your information.';
-          } else if (error.status === 404) {
-            errorMessage = 'Drive or user not found.';
+            let errorMessage = 'Failed to book ride. Please try again.';
+            if (error.error?.message) {
+              errorMessage = error.error.message;
+            } else if (error.status === 400) {
+              errorMessage = 'Bad request. Please check your information.';
+            } else if (error.status === 404) {
+              errorMessage = 'Drive or user not found.';
+            }
+
+            await this.showToast(errorMessage, 'danger');
           }
-
-          await this.showToast(errorMessage, 'danger');
-        }
-      });
+        });
       },
       error: async (error) => {
         this.requestingRide.set(false);
@@ -1495,6 +1546,7 @@ export class RideDetailsPage implements OnInit, OnDestroy {
             passengerCount: 1,
             passengerNames: [`${booking.userFirstName} ${booking.userLastName}`],
             passengers: [{
+              userId: booking.userId,
               firstName: booking.userFirstName,
               lastName: booking.userLastName,
               email: booking.userEmail,
@@ -1532,7 +1584,7 @@ export class RideDetailsPage implements OnInit, OnDestroy {
     // 3. Payment Validation (from Version 1)
     const acceptedTypes = this.acceptedDrivePaymentTypes();
     const requiresCard = acceptedTypes.includes('CARD') && !acceptedTypes.includes('CASH');
-    
+
     if (requiresCard && !this.selectedPaymentMethodId()) {
       await this.showToast('Please select a payment method', 'warning');
       return;
@@ -1543,7 +1595,7 @@ export class RideDetailsPage implements OnInit, OnDestroy {
     const pickupLocation = this.getPickupLocation();
     const destination = this.getToLocation();
     const price = this.formatPrice();
-    
+
     const alert = await this.alertController.create({
       header: 'Confirm Booking',
       message: `Driver: ${driverName}\nPickup: ${pickupLocation}\nDestination: ${destination}\nPrice: ${price}`,
@@ -1623,6 +1675,28 @@ export class RideDetailsPage implements OnInit, OnDestroy {
       }
     }
   }
+
+  navigateToChat(userId: number, firstName: string, lastName: string) {
+    console.log('Navigating to chat:', userId, firstName, lastName);
+    this.router.navigate(['/messages/chat'], {
+      queryParams: {
+        userId: userId,
+        name: `${firstName} ${lastName}`,
+        driveId: this.driveId
+      }
+    }).then(success => console.log('Navigation success:', success))
+      .catch(err => console.error('Navigation error:', err));
+  }
+
+  navigateToChatWithDriver() {
+    console.log('navigateToChatWithDriver called', this.drive);
+    if (this.drive) {
+      this.navigateToChat(this.drive.driverId, this.drive.driverFirstName, this.drive.driverLastName);
+    } else {
+      console.error('Drive is null, cannot navigate to chat');
+    }
+  }
+
 
   private cleanupMap() {
     if (this.currentInfoWindow) {

@@ -3,5 +3,11 @@
   "integrations": {
     "capacitor": {}
   },
-  "type": "angular-standalone"
+  "type": "angular-standalone",
+  "proxies": [
+    {
+      "path": "/ws",
+      "proxyUrl": "http://localhost:8080/ws"
+    }
+  ]
 }

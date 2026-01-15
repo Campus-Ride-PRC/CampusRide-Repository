@@ -3,14 +3,14 @@ import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
   IonContent,
-  IonIcon, IonSpinner,
+  IonIcon, IonSpinner, IonButton,
   IonRefresher, IonRefresherContent, IonList, IonItem, IonLabel, IonAvatar
 } from '@ionic/angular/standalone';
 import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
 import {
   personOutline, mailOutline, schoolOutline,
-  notificationsOffOutline
+  notificationsOffOutline, chatbubbleOutline
 } from 'ionicons/icons';
 import { AppHeaderComponent } from 'src/app/shared/components/header/app-header.component';
 import { SidePanelComponent } from 'src/app/shared/components/panel/side-panel.component';
@@ -25,7 +25,7 @@ import { FriendService, Friend } from 'src/app/core/services/friend.service';
   standalone: true,
   imports: [
     IonContent,
-    IonIcon, IonSpinner,
+    IonIcon, IonSpinner, IonButton,
     IonRefresher, IonRefresherContent,
     IonList, IonItem, IonLabel, IonAvatar,
     CommonModule, FormsModule,
@@ -48,7 +48,7 @@ export class FriendsPage implements OnInit {
   ) {
     addIcons({
       personOutline, mailOutline, schoolOutline,
-      notificationsOffOutline
+      notificationsOffOutline, chatbubbleOutline
     });
   }
 
@@ -120,7 +120,7 @@ export class FriendsPage implements OnInit {
   onMenuItemClick(item: string) {
     console.log('Menu item clicked:', item);
 
-    switch(item) {
+    switch (item) {
       case 'home':
         this.router.navigate(['/home']);
         break;
@@ -154,6 +154,17 @@ export class FriendsPage implements OnInit {
   onRideClick(rideId: number) {
     this.router.navigate(['/ride-details', rideId], {
       queryParams: { driverMode: 'true' }
+    });
+  }
+
+  openChat(event: Event, friend: Friend) {
+    event.stopPropagation();
+    console.log('Opening chat with friend:', friend);
+    this.router.navigate(['/messages/chat'], {
+      queryParams: {
+        userId: friend.id,
+        name: friend.firstName + ' ' + friend.lastName
+      }
     });
   }
 

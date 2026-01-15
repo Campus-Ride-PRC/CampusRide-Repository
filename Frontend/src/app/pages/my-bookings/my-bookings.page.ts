@@ -14,7 +14,7 @@ import { addIcons } from 'ionicons';
 import {
   carOutline, locationOutline, timeOutline, cashOutline,
   closeCircleOutline, checkmarkCircleOutline, hourglassOutline,
-  mailOutline
+  mailOutline, chatbubbleEllipsesOutline
 } from 'ionicons/icons';
 import { AppHeaderComponent } from 'src/app/shared/components/header/app-header.component';
 import { SidePanelComponent } from 'src/app/shared/components/panel/side-panel.component';
@@ -55,7 +55,7 @@ export class MyBookingsPage implements OnInit {
     addIcons({
       carOutline, locationOutline, timeOutline, cashOutline,
       closeCircleOutline, checkmarkCircleOutline, hourglassOutline,
-      mailOutline
+      mailOutline, chatbubbleEllipsesOutline
     });
   }
 
@@ -160,6 +160,17 @@ export class MyBookingsPage implements OnInit {
     });
   }
 
+  contactDriver(booking: BookingResponse) {
+    const userId = this.authService.getCurrentUserId();
+    this.router.navigate(['/ride-details', booking.driveId], {
+      queryParams: {
+        returnTo: 'my-bookings',
+        userId: userId,
+        openChat: 'true'
+      }
+    });
+  }
+
   getStatusColor(status: BookingStatus): string {
     switch (status) {
       case BookingStatus.PENDING: return 'warning';
@@ -231,7 +242,7 @@ export class MyBookingsPage implements OnInit {
   onMenuItemClick(item: string) {
     console.log('Menu item clicked:', item);
 
-    switch(item) {
+    switch (item) {
       case 'home':
         this.router.navigate(['/home']);
         break;

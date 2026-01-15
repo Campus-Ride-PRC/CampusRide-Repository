@@ -1,7 +1,4 @@
-<app-header
-  menuTitle="My Ride Requests"
-  (menuClick)="onMenuOpen()"
-  (notificationClick)="onNotificationOpen()">
+<app-header menuTitle="My Ride Requests" (menuClick)="onMenuOpen()" (notificationClick)="onNotificationOpen()">
 </app-header>
 
 <ion-content>
@@ -17,13 +14,15 @@
       <p>You haven't requested any bookings yet. Browse available rides and book your next trip!</p>
     </div>
 
-    <div *ngIf="!loading && bookings.length > 0" style="display: flex; flex-direction: column; gap: 12px; padding-bottom: 16px;">
+    <div *ngIf="!loading && bookings.length > 0"
+      style="display: flex; flex-direction: column; gap: 12px; padding-bottom: 16px;">
       <div *ngFor="let booking of bookings" style="max-width: 358px; width: 100%; margin: 0 auto;">
         <div [style.background-color]="getStatusBackgroundColor(booking.status)"
-             style="padding: 8px 16px; text-align: center; font-weight: 600; font-size: 14px; color: white; border-radius: 12px 12px 0 0;">
+          style="padding: 8px 16px; text-align: center; font-weight: 600; font-size: 14px; color: white; border-radius: 12px 12px 0 0;">
           {{getStatusLabel(booking.status)}}
         </div>
-        <ion-card class="booking-card" style="margin: 0; border-radius: 0 0 12px 12px; cursor: pointer;" (click)="viewRideDetails(booking.driveId)">
+        <ion-card class="booking-card" style="margin: 0; border-radius: 0 0 12px 12px; cursor: pointer;"
+          (click)="viewRideDetails(booking.driveId)">
           <ion-card-header>
             <div class="card-header">
               <div class="title-section">
@@ -33,67 +32,62 @@
             </div>
           </ion-card-header>
 
-        <ion-card-content>
-          <div class="booking-details">
-            <div class="detail-row">
-              <ion-icon name="person-outline"></ion-icon>
-              <span>Driver: {{booking.driverFirstName}} {{booking.driverLastName}}</span>
-            </div>
+          <ion-card-content>
+            <div class="booking-details">
+              <div class="detail-row" style="display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <ion-icon name="person-outline"></ion-icon>
+                  <span>Driver: {{booking.driverFirstName}} {{booking.driverLastName}}</span>
+                </div>
+                <ion-button fill="clear" size="small" (click)="contactDriver(booking)">
+                  <ion-icon name="chatbubble-ellipses-outline"></ion-icon>
+                </ion-button>
+              </div>
 
-            <div class="detail-row">
-              <ion-icon name="mail-outline"></ion-icon>
-              <span>{{booking.driverEmail}}</span>
-            </div>
+              <div class="detail-row">
+                <ion-icon name="mail-outline"></ion-icon>
+                <span>{{booking.driverEmail}}</span>
+              </div>
 
-            <div class="detail-row">
-              <ion-icon name="time-outline"></ion-icon>
-              <span>Requested: {{formatDate(booking.requestedAt)}}</span>
-            </div>
+              <div class="detail-row">
+                <ion-icon name="time-outline"></ion-icon>
+                <span>Requested: {{formatDate(booking.requestedAt)}}</span>
+              </div>
 
-            <div class="detail-row">
-              <ion-icon name="time-outline"></ion-icon>
-              <span>Updated: {{formatDate(booking.updatedAt)}}</span>
-            </div>
+              <div class="detail-row">
+                <ion-icon name="time-outline"></ion-icon>
+                <span>Updated: {{formatDate(booking.updatedAt)}}</span>
+              </div>
 
-            <div class="actions" *ngIf="canCancel(booking)">
-              <ion-button
-                class="cancel-button"
-                fill="outline"
-                size="small"
-                (click)="cancelBooking(booking)">
-                <ion-icon name="close-circle-outline" slot="start"></ion-icon>
-                Cancel Booking
-              </ion-button>
-            </div>
+              <div class="actions" *ngIf="canCancel(booking)">
+                <ion-button class="cancel-button" fill="outline" size="small" (click)="cancelBooking(booking)">
+                  <ion-icon name="close-circle-outline" slot="start"></ion-icon>
+                  Cancel Booking
+                </ion-button>
+              </div>
 
-            <div class="status-message canceled" *ngIf="booking.status === 'CANCELED' || booking.status === 'DECLINED'">
-              <ion-icon name="information-circle-outline"></ion-icon>
-              <span>This booking has been {{booking.status.toLowerCase()}}</span>
-            </div>
+              <div class="status-message canceled"
+                *ngIf="booking.status === 'CANCELED' || booking.status === 'DECLINED'">
+                <ion-icon name="information-circle-outline"></ion-icon>
+                <span>This booking has been {{booking.status.toLowerCase()}}</span>
+              </div>
 
-            <div class="status-message accepted" *ngIf="booking.status === 'ACCEPTED'">
-              <ion-icon name="checkmark-circle-outline"></ion-icon>
-              <span>Your booking has been accepted! See you soon.</span>
+              <div class="status-message accepted" *ngIf="booking.status === 'ACCEPTED'">
+                <ion-icon name="checkmark-circle-outline"></ion-icon>
+                <span>Your booking has been accepted! See you soon.</span>
+              </div>
             </div>
-          </div>
-        </ion-card-content>
-      </ion-card>
+          </ion-card-content>
+        </ion-card>
       </div>
     </div>
   </div>
 </ion-content>
 
 <div class="fixed inset-0 z-[1000] pointer-events-none">
-  <app-side-panel
-    [isOpen]="isPanelOpen"
-    [userFirstName]="user?.firstName || 'Guest'"
+  <app-side-panel [isOpen]="isPanelOpen" [userFirstName]="user?.firstName || 'Guest'"
     [userAvatar]="user ? 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + user.firstName : ''"
-    [friendsCount]="friendsCount"
-    [ridesCount]="ridesCount"
-    [currentRoute]="'/my-bookings'"
-    (closed)="onPanelClosed()"
-    (itemClicked)="onMenuItemClick($event)"
-    (rideClicked)="onRideClick($event)"
-    class="pointer-events-auto">
+    [friendsCount]="friendsCount" [ridesCount]="ridesCount" [currentRoute]="'/my-bookings'" (closed)="onPanelClosed()"
+    (itemClicked)="onMenuItemClick($event)" (rideClicked)="onRideClick($event)" class="pointer-events-auto">
   </app-side-panel>
 </div>

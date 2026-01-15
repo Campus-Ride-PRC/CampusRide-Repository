@@ -1,3 +1,4 @@
+@use 'sass:color';
 // ==========================================
 // Uber-like Dark Mode Styling - Add Ride Page
 // ==========================================
@@ -531,7 +532,7 @@ $transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     &:active {
-      background: darken(#30d158, 10%);
+      background: color.adjust(#30d158, $lightness: -10%);
     }
   }
 
