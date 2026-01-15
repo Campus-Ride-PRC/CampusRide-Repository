@@ -8,5 +8,8 @@ import {IonApp, IonIcon, IonRouterOutlet} from '@ionic/angular/standalone';
   imports: [IonApp, IonRouterOutlet,HttpClientModule],
 })
 export class AppComponent {
-  constructor() {}
+  constructor() {
+
+  }
+
 }
