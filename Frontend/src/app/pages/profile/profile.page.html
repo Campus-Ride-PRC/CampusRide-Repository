@@ -22,6 +22,13 @@
         </button>
       </div>
     </div>
+
+    <!-- Manage Payment Methods Button -->
+    <div class="button-section" style="padding-inline: 8px !important; padding-bottom: 8px !important;">
+      <button class="add-ride-btn" routerLink="/payment-methods">
+        Manage Payment Methods
+      </button>
+    </div>
     <div class="button-section" style="padding-inline: 8px !important; padding-bottom: 8px !important;">
       <p class="title-b text-center">My Bookings</p>
       <app-booking-card *ngFor="let booking of myBookings" [booking]="booking"
@@ -54,25 +61,14 @@
       </button>
     </div>
 
-    <!-- Payment Methods Section -->
-    <div class="button-section" style="padding-inline: 8px !important; padding-bottom: 8px !important;">
-      <p class="title-b text-center">Account</p>
-      <button class="add-ride-btn" routerLink="/payment-methods">
-        Manage Payment Methods
-      </button>
-    </div>
+
   </div>
 </ion-content>
 
 <div class="fixed inset-0 z-[1000] pointer-events-none">
   <app-side-panel [isOpen]="isPanelOpen" [userFirstName]="user?.firstName || 'Guest'"
     [userAvatar]="user ? 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + user.firstName : ''"
-    [friendsCount]="friendsCount"
-    [ridesCount]="ridesCount"
-    [currentRoute]="'/profile'"
-    (closed)="onPanelClosed()"
-    (itemClicked)="onMenuItemClick($event)"
-    (rideClicked)="onRideClick($event)"
-    class="pointer-events-auto">
+    [friendsCount]="friendsCount" [ridesCount]="ridesCount" [currentRoute]="'/profile'" (closed)="onPanelClosed()"
+    (itemClicked)="onMenuItemClick($event)" (rideClicked)="onRideClick($event)" class="pointer-events-auto">
   </app-side-panel>
 </div>

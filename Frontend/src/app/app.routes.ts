@@ -98,6 +98,11 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/payment-success/payment-success.page').then(m => m.PaymentSuccessPage),
     canActivate: [authGuard]
   },
+  {
+    path: 'profile/add-card',
+    loadComponent: () => import('./pages/profile/add-card/add-card.page').then( m => m.AddCardPage)
+  },
+
 
   {
     path: 'messages/chat',
