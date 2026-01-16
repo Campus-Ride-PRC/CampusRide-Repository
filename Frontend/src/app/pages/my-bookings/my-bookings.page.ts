@@ -253,6 +253,9 @@ export class MyBookingsPage implements OnInit {
       case 'profile':
         this.router.navigate(['/profile']);
         break;
+      case 'communities':
+        this.router.navigate(['/communities']);
+        break;
       case 'logout':
         this.logout();
         break;

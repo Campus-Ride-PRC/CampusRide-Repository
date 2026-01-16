@@ -1,0 +1,28 @@
+<app-header 
+  menuTitle="Communities" 
+  (menuClick)="togglePanel()"
+  (notificationClick)="goToNotifications()"
+></app-header>
+
+<ion-content>
+  <div class="communities-container">
+    <div class="coming-soon">
+      <h2>Communities</h2>
+      <p>Coming soon...</p>
+    </div>
+  </div>
+</ion-content>
+
+<div class="fixed inset-0 z-[1000] pointer-events-none">
+  <app-side-panel 
+    [isOpen]="isPanelOpen()" 
+    [userFirstName]="user?.firstName || 'Guest'"
+    [userAvatar]="user ? 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + user.firstName : ''"
+    [friendsCount]="friendsCount"
+    [ridesCount]="ridesCount"
+    [currentRoute]="'/communities'"
+    (closed)="closePanel()"
+    (itemClicked)="onMenuItemClick($event)"
+    class="pointer-events-auto">
+  </app-side-panel>
+</div>
