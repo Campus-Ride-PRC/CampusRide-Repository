@@ -24,8 +24,8 @@ export class RedirectService {
             case 'home':
                 this.router.navigate(['/home']);
                 break;
-            case 'drives':
-                this.router.navigate(['/add-drive']);
+            case 'add-drives':
+                this.router.navigate(['/add-drives']);
                 break;
             case 'my-bookings':
                 this.router.navigate(['/my-bookings']);
@@ -35,6 +35,9 @@ export class RedirectService {
                 break;
             case 'driver-requests':
                 this.router.navigate(['/driver-requests']);
+                break;
+            case 'friends':
+                this.router.navigate(['/friends']);
                 break;
             case 'settings':
                 // TODO: Navigate to settings page when implemented
