@@ -93,7 +93,8 @@ export const routes: Routes = [
   },
   {
     path: 'profile',
-    loadComponent: () => import('./pages/profile/profile.page').then(m => m.ProfilePage)
+    loadComponent: () => import('./pages/profile/profile.page').then( m => m.ProfilePage),
+    canActivate: [authGuard]
   },
   {
     path: 'payment-methods',
@@ -114,7 +115,16 @@ export const routes: Routes = [
     path: 'profile/add-card',
     loadComponent: () => import('./pages/profile/add-card/add-card.page').then( m => m.AddCardPage)
   },
-
+  {
+    path: 'communities',
+    loadComponent: () => import('./pages/communities/communities.page').then( m => m.CommunitiesPage),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'communities/:id',
+    loadComponent: () => import('./pages/community-detail/community-detail.page').then( m => m.CommunityDetailPage),
+    canActivate: [authGuard]
+  }
 
   {
     path: 'messages/chat',

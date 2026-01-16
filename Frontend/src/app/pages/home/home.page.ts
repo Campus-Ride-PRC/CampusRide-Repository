@@ -232,7 +232,10 @@ export class HomePage implements OnInit {
         console.log('Settings feature coming soon');
         break;
       case 'profile':
-        this.router.navigate(['/profile']);
+            this.router.navigate(['/profile']);
+            break;
+      case 'communities':
+        this.router.navigate(['/communities']);
         break;
       case 'logout':
         this.logout();

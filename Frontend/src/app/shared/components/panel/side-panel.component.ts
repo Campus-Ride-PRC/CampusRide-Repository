@@ -128,6 +128,7 @@ export class SidePanelComponent implements OnInit {
   rideRequestsIcon!: SafeHtml;
   myRidesIcon!: SafeHtml;
   myBookingsIcon!: SafeHtml;
+  communitiesIcon!: SafeHtml;
 
   /** Butoanele principale și secundare */
   mainItems: PanelItem[] = [];
@@ -202,9 +203,16 @@ export class SidePanelComponent implements OnInit {
       </svg>
     `);
 
+    this.communitiesIcon = this.sanitizer.bypassSecurityTrustHtml(`
+      <svg class="w-[24px] h-[24px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M8 7h8M8 11h8M5 17h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2zm0 0l-1 3m0 0h16m-16 0a1 1 0 001 1h14a1 1 0 001-1M8 17v3m8-3v3"/>
+      </svg>
+    `);
+
     this.mainItems = [
       {id: 'home', label: 'Home', icon: this.homeIcon, iconPosition: 'left', textAlign: 'start'},
-      {id: 'friends', label: 'Friends', icon: this.friendsIcon, iconPosition: 'left', textAlign: 'start'},
+      {id: 'communities', label: 'Communities', icon: this.communitiesIcon, iconPosition: 'left', textAlign: 'start'},
       {id: 'add-ride', label: 'Add a Ride', icon: this.addRideIcon, iconPosition: 'left', textAlign: 'start'},
       {id: 'ride-requests', label: 'Ride Requests', icon: this.rideRequestsIcon, iconPosition: 'left', textAlign: 'start'},
       {id: 'my-rides', label: 'My Rides', icon: this.myRidesIcon, iconPosition: 'left', textAlign: 'start'},
@@ -213,6 +221,7 @@ export class SidePanelComponent implements OnInit {
 
     this.secondaryItems = [
       {id: 'profile', label: 'Profile', icon: this.profileIcon, iconPosition: 'left', textAlign: 'start'},
+      {id: 'friends', label: 'Friends', icon: this.friendsIcon, iconPosition: 'left', textAlign: 'start'},
       {id: 'settings', label: 'Settings', icon: this.settingsIcon, iconPosition: 'left', textAlign: 'start'},
       {id: 'logout', label: 'Log out', icon: this.logoutIcon, iconPosition: 'left', textAlign: 'start'}
     ];
@@ -232,7 +241,8 @@ export class SidePanelComponent implements OnInit {
       '/my-rides': 'my-rides',
       '/my-bookings': 'my-bookings',
       '/profile': 'profile',
-      '/settings': 'settings'
+      '/settings': 'settings',
+      '/communities': 'communities'
     };
 
     return routeMap[this.currentRoute] === itemId;
