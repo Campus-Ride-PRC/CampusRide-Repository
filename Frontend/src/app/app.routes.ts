@@ -35,6 +35,18 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/authentication/register/result/result.page').then((m) => m.ResultPage),
   },
   {
+    path: 'forgot-password/email',
+    loadComponent: () => import('./pages/authentication/forgot-password/email/forgot-password-email.page').then((m) => m.ForgotPasswordEmailPage),
+  },
+  {
+    path: 'forgot-password/code',
+    loadComponent: () => import('./pages/authentication/forgot-password/code/forgot-password-code.page').then((m) => m.ForgotPasswordCodePage),
+  },
+  {
+    path: 'forgot-password/reset',
+    loadComponent: () => import('./pages/authentication/forgot-password/reset/forgot-password-reset.page').then((m) => m.ForgotPasswordResetPage),
+  },
+  {
     path: 'home',
     loadComponent: () => import('./pages/home/home.page').then((m) => m.HomePage),
     canActivate: [authGuard]
@@ -70,14 +82,52 @@ export const routes: Routes = [
     canActivate: [authGuard]
   },
   {
+    path: 'friends',
+    loadComponent: () => import('./pages/friends/friends.page').then((m) => m.FriendsPage),
+    canActivate: [authGuard]
+  },
+  {
     path: '',
     redirectTo: 'welcome',
     pathMatch: 'full',
   },
   {
     path: 'profile',
-    loadComponent: () => import('./pages/profile/profile.page').then( m => m.ProfilePage)
+    loadComponent: () => import('./pages/profile/profile.page').then( m => m.ProfilePage),
+    canActivate: [authGuard]
   },
-
-
+  {
+    path: 'payment-methods',
+    loadComponent: () => import('./pages/payment-methods/payment-methods.page').then(m => m.PaymentMethodsPage),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'payment-selection',
+    loadComponent: () => import('./pages/payment-selection/payment-selection.page').then(m => m.PaymentSelectionPage),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'payment-success',
+    loadComponent: () => import('./pages/payment-success/payment-success.page').then(m => m.PaymentSuccessPage),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'profile/add-card',
+    loadComponent: () => import('./pages/profile/add-card/add-card.page').then( m => m.AddCardPage)
+  },
+  {
+    path: 'communities',
+    loadComponent: () => import('./pages/communities/communities.page').then( m => m.CommunitiesPage),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'communities/:id',
+    loadComponent: () => import('./pages/community-detail/community-detail.page').then( m => m.CommunityDetailPage),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'messages/chat',
+    loadComponent: () => import('./pages/messages/chat/chat.page').then(m => m.ChatPage),
+    canActivate: [authGuard]
+  },
 ];

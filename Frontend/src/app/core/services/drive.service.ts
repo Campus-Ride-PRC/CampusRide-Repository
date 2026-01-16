@@ -11,14 +11,14 @@ import { DriveDetails } from '../models/drive-details.model';
 export class DriveService {
   private apiUrl = `${environment.apiUrl}/drives`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getDriveCards(page: number = 0, size: number = 10, sort: string = 'time,asc'): Observable<DriveCardPage> {
     const params = new HttpParams()
       .set('page', page.toString())
       .set('size', size.toString())
       .set('sort', sort);
-    
+
     return this.http.get<DriveCardPage>(this.apiUrl, { params });
   }
 
@@ -39,12 +39,16 @@ export class DriveService {
       .set('page', page.toString())
       .set('size', size.toString())
       .set('sort', sort);
-    
+
     return this.http.get<DriveCardPage>(`${this.apiUrl}/upcoming`, { params });
   }
 
-  addDrive(drive : any) : Observable<any> {
-    return this.http.post<any>(this.apiUrl,drive);
+  addDrive(drive: any): Observable<any> {
+    return this.http.post<any>(this.apiUrl, drive);
+  }
+
+  getMyDrivesCount(): Observable<number> {
+    return this.http.get<number>(`${this.apiUrl}/my-drives/count`);
   }
 }
 

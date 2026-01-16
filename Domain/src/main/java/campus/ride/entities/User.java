@@ -25,8 +25,8 @@ public class User {
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
     private Vehicle vehicle;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "facultyid", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "facultyid", nullable = true)
     private Faculty faculty;
 
     @Column(nullable = false, unique = true)

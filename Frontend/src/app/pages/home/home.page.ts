@@ -10,6 +10,7 @@ import { AuthService } from 'src/app/core/services/auth.service';
 import { DriveCard } from 'src/app/core/models/drive-card.model';
 import { Profile } from 'src/app/core/services/profile';
 import { UserResponse } from 'src/app/core/models/userResponse';
+import { FriendService } from 'src/app/core/services/friend.service';
 
 @Component({
   selector: 'app-home',
@@ -27,17 +28,22 @@ export class HomePage implements OnInit {
   pageSize = 5;
   isLastPage = false;
   user: UserResponse | null = null;
+  friendsCount: number = 0;
+  ridesCount: number = 0;
 
   constructor(
     private router: Router,
     private driveService: DriveService,
     private authService: AuthService,
-    private profileService: Profile
-  ) {}
+    private profileService: Profile,
+    private friendService: FriendService
+  ) { }
 
   ngOnInit() {
     this.loadDrives();
     this.loadUser();
+    this.loadFriendCount();
+    this.loadRidesCount();
   }
 
   loadUser() {
@@ -47,6 +53,28 @@ export class HomePage implements OnInit {
       },
       error: (err) => {
         console.error('Error loading user:', err);
+      }
+    });
+  }
+
+  loadFriendCount() {
+    this.friendService.getFriendCount().subscribe({
+      next: (count) => {
+        this.friendsCount = count;
+      },
+      error: (err) => {
+        console.error('Error loading friend count:', err);
+      }
+    });
+  }
+
+  loadRidesCount() {
+    this.driveService.getMyDrivesCount().subscribe({
+      next: (count) => {
+        this.ridesCount = count;
+      },
+      error: (err) => {
+        console.error('Error loading rides count:', err);
       }
     });
   }
@@ -106,16 +134,16 @@ export class HomePage implements OnInit {
 
   getToLocation(drive: DriveCard): string {
     const addr = drive.toAddress;
-    
+
     if (addr.neighborhood) {
       return addr.neighborhood;
     }
-    
+
     const locationName = addr.locationName;
     if (locationName && !this.looksLikeStreetNumber(locationName) && !locationName.includes(',')) {
       return locationName;
     }
-    
+
     return addr.street || 'Unknown';
   }
 
@@ -165,6 +193,8 @@ export class HomePage implements OnInit {
 
   onMenuOpen() {
     this.isPanelOpen = true;
+    this.loadFriendCount();
+    this.loadRidesCount();
   }
 
   onPanelClosed() {
@@ -178,11 +208,11 @@ export class HomePage implements OnInit {
   onMenuItemClick(item: string) {
     console.log('Menu item clicked:', item);
 
-    switch(item) {
+    switch (item) {
       case 'home':
         // Already on home
         break;
-      case 'drives':
+      case 'add-ride':
         this.router.navigate(['/add-drive']);
         break;
       case 'my-bookings':
@@ -191,8 +221,11 @@ export class HomePage implements OnInit {
       case 'my-rides':
         this.router.navigate(['/my-rides']);
         break;
-      case 'driver-requests':
+      case 'ride-requests':
         this.router.navigate(['/driver-requests']);
+        break;
+      case 'friends':
+        this.router.navigate(['/friends']);
         break;
       case 'settings':
         // TODO: Navigate to settings page when implemented
@@ -201,6 +234,9 @@ export class HomePage implements OnInit {
       case 'profile':
             this.router.navigate(['/profile']);
             break;
+      case 'communities':
+        this.router.navigate(['/communities']);
+        break;
       case 'logout':
         this.logout();
         break;

@@ -2,17 +2,17 @@ package campus.ride.useCases;
 
 import campus.ride.config.JwtUtil;
 import campus.ride.contracts.faculty.FacultyRepository;
+import campus.ride.contracts.friend.FriendRepository;
 import campus.ride.contracts.user.UserRepository;
 import campus.ride.entities.Faculty;
+import campus.ride.entities.Friend;
 import campus.ride.entities.User;
 import campus.ride.exception.BadRequestException;
 import campus.ride.exception.ResourceNotFoundException;
 import campus.ride.exception.UserAlreadyExistsException;
 import campus.ride.interfaces.EmailService;
 import campus.ride.interfaces.UserService;
-import campus.ride.transfer.dtos.user.CreateUserRequestDto;
-import campus.ride.transfer.dtos.user.UserResponseDto;
-import campus.ride.transfer.dtos.user.VerificationRequestDto;
+import campus.ride.transfer.dtos.user.*;
 import campus.ride.transfer.mappings.FacultyMapper;
 import campus.ride.transfer.mappings.UserMapper;
 import org.apache.logging.log4j.LogManager;
@@ -36,6 +36,7 @@ public class UserServiceImpl implements UserService {
     private static final Logger logger = LogManager.getLogger(UserServiceImpl.class);
     
     private final UserRepository userRepository;
+    private final FriendRepository friendRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final Cache verificationCache;
@@ -43,13 +44,14 @@ public class UserServiceImpl implements UserService {
     private final JwtUtil jwtUtil;
 
     public UserServiceImpl(UserRepository userRepository,
-                             PasswordEncoder passwordEncoder,
+                             FriendRepository friendRepository, PasswordEncoder passwordEncoder,
                              EmailService emailService,
                              CacheManager cacheManager,
                              FacultyRepository facultyRepository,
                              JwtUtil jwtUtil) {
 
         this.userRepository = userRepository;
+        this.friendRepository = friendRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
         this.verificationCache = cacheManager.getCache("verificationCache");
@@ -198,6 +200,229 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList()));
     }
 
+    @Override
+    @Async
+    @Transactional
+    public CompletableFuture<Void> sendFriendRequest(FriendRequestDto request) {
+        String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User sender = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        User receiver = userRepository.findById(Long.valueOf(request.getReceiverId()))
+                .orElseThrow(() -> new ResourceNotFoundException("Receiver not found"));
+
+        if (sender.getId().equals(receiver.getId())) {
+            throw new BadRequestException("You cannot send a friend request to yourself.");
+        }
+
+        friendRepository.findBySenderAndReceiver(sender, receiver).ifPresent(friend -> {
+            throw new BadRequestException("Friend request already sent.");
+        });
+
+        Friend friend = new Friend();
+        friend.setSender(sender);
+        friend.setReceiver(receiver);
+        friend.setStatus("PENDING");
+
+        friendRepository.save(friend);
+        return CompletableFuture.completedFuture(null);
+    }
+
+    @Override
+    @Async
+    @Transactional(readOnly = true)
+    public CompletableFuture<Long> getFriendCount() {
+        String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        return CompletableFuture.completedFuture(friendRepository.countAcceptedFriends(user));
+    }
+
+    @Override
+    @Async
+    @Transactional(readOnly = true)
+    public CompletableFuture<List<FriendRequestResponseDto>> getPendingFriendRequests() {
+        String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        List<Friend> pendingRequests = friendRepository.findPendingRequestsByReceiver(user);
+
+        List<FriendRequestResponseDto> dtos = pendingRequests.stream()
+                .map(friend -> new FriendRequestResponseDto(
+                        friend.getId(),
+                        friend.getSender().getId(),
+                        friend.getSender().getFirstName(),
+                        friend.getSender().getLastName(),
+                        friend.getSender().getEmail(),
+                        friend.getCreatedAt()
+                ))
+                .collect(Collectors.toList());
+
+        return CompletableFuture.completedFuture(dtos);
+    }
+
+    @Override
+    @Async
+    @Transactional
+    public CompletableFuture<Void> acceptFriendRequest(Long requestId) {
+        Friend friend = friendRepository.findById(requestId)
+                .orElseThrow(() -> new ResourceNotFoundException("Friend request not found"));
+
+        String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!friend.getReceiver().getEmail().equals(email)) {
+            throw new BadRequestException("You are not authorized to accept this request");
+        }
+
+        friend.setStatus("ACCEPTED");
+        friendRepository.save(friend);
+        return CompletableFuture.completedFuture(null);
+    }
+
+    @Override
+    @Async
+    @Transactional
+    public CompletableFuture<Void> declineFriendRequest(Long requestId) {
+        Friend friend = friendRepository.findById(requestId)
+                .orElseThrow(() -> new ResourceNotFoundException("Friend request not found"));
+
+        String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!friend.getReceiver().getEmail().equals(email)) {
+            throw new BadRequestException("You are not authorized to decline this request");
+        }
+
+        friend.setStatus("DECLINED");
+        friendRepository.save(friend);
+        return CompletableFuture.completedFuture(null);
+    }
+
+    @Override
+    @Async
+    @Transactional(readOnly = true)
+    public CompletableFuture<List<FriendRequestStatusDto>> getFriendRequestStatus() {
+        String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        List<Friend> requests = friendRepository.findCompletedRequestsBySender(user);
+
+        List<FriendRequestStatusDto> dtos = requests.stream()
+                .map(friend -> new FriendRequestStatusDto(
+                        friend.getId(),
+                        friend.getReceiver().getId(),
+                        friend.getReceiver().getFirstName(),
+                        friend.getReceiver().getLastName(),
+                        friend.getStatus(),
+                        friend.getUpdatedAt()
+                ))
+                .collect(Collectors.toList());
+
+        return CompletableFuture.completedFuture(dtos);
+    }
+
+    @Override
+    @Async
+    @Transactional(readOnly = true)
+    public CompletableFuture<List<FriendDto>> getFriends() {
+        String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        List<Friend> friends = friendRepository.findAcceptedFriends(user);
+
+        List<FriendDto> dtos = friends.stream()
+                .map(friend -> {
+                    User friendUser = friend.getSender().getId().equals(user.getId()) ? friend.getReceiver() : friend.getSender();
+                    return new FriendDto(
+                            friendUser.getId(),
+                            friendUser.getFirstName(),
+                            friendUser.getLastName(),
+                            friendUser.getEmail(),
+                            friendUser.getFaculty() != null ? friendUser.getFaculty().getName() : null
+                    );
+                })
+                .collect(Collectors.toList());
+
+        return CompletableFuture.completedFuture(dtos);
+    }
+
+    @Override
+    @Async
+    @Transactional(readOnly = true)
+    public CompletableFuture<FriendshipStatusDto> getFriendshipStatus(Long otherUserId) {
+        String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        User otherUser = userRepository.findById(otherUserId)
+                .orElseThrow(() -> new ResourceNotFoundException("Other user not found"));
+
+        Optional<Friend> friendship = friendRepository.findFriendship(currentUser, otherUser);
+
+        if (friendship.isEmpty()) {
+            return CompletableFuture.completedFuture(new FriendshipStatusDto("NONE", false));
+        }
+
+        Friend friend = friendship.get();
+        boolean isSender = friend.getSender().getId().equals(currentUser.getId());
+
+        return CompletableFuture.completedFuture(new FriendshipStatusDto(friend.getStatus(), isSender));
+    }
+
+    @Override
+    public CompletableFuture<String> forgotPasswordVerifyCode(EmailRequestDto request) {
+        logger.info("Attempting to reset password for email: {}", request.getEmail());
+
+        String email = request.getEmail().trim();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+
+        String verificationCode = generateVerificationCode();
+        PendingUserChangeData pendingData = new PendingUserChangeData(
+                email,
+                verificationCode,
+                null
+        );
+
+        verificationCache.put(email, pendingData);
+        emailService.sendVerificationEmailResetPassword(email, verificationCode, user.getFirstName(), user.getLastName());
+
+        logger.info("Successfully sent verification code to: {}", email);
+        return CompletableFuture.completedFuture("Sent verification code. Please check your email.");
+    }
+
+    @Override
+    public CompletableFuture<ResetPasswordRequestDto> verifyVerificationCode(VerificationRequestDto request){
+        logger.info("Attempting to verify password reset for email: {}", request.getEmail());
+        String email = request.getEmail().trim();
+        PendingUserChangeData pendingData = verificationCache.get(email, PendingUserChangeData.class);
+        if (pendingData == null) {
+            throw new BadRequestException("Invalid or expired verification code.");
+        }
+
+        logger.info("Successfully verified password reset for email: {}", email);
+        return CompletableFuture.completedFuture(new ResetPasswordRequestDto(
+                pendingData.getEmail(),
+                null
+        ));
+    }
+
+    @Override
+    public CompletableFuture<UserResponseDto> resetPassword(ResetPasswordRequestDto request){
+        logger.info("Attempting to reset password for email: {}", request.getEmail());
+        String email = request.getEmail().trim();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+        String hashedPassword = passwordEncoder.encode(request.getNewPassword());
+        user.setPassword(hashedPassword);
+        User updatedUser = userRepository.save(user);
+        verificationCache.evict(email);
+        logger.info("Successfully reset password for email: {}", email);
+        return CompletableFuture.completedFuture(UserMapper.toDto(updatedUser));
+    }
+
+
     private static class PendingUserData implements java.io.Serializable {
         private String hashedPassword;
         private String verificationCode;
@@ -224,10 +449,28 @@ public class UserServiceImpl implements UserService {
         public Faculty getFaculty() { return faculty; }
     }
 
+    private class PendingUserChangeData implements  java.io.Serializable{
+        private String email;
+        private String verificationCode;
+        private String password;
+
+        public PendingUserChangeData(String email, String verificationCode, String password) {
+            this.email = email;
+            this.verificationCode = verificationCode;
+            this.password = password;
+        }
+
+        public String getEmail() { return email; }
+        public String getVerificationCode() { return verificationCode; }
+        public String getPassword() { return password; }
+    }
+
     private String generateVerificationCode() {
         java.util.Random random = new java.util.Random();
         int code = 100000 + random.nextInt(900000);
         return String.valueOf(code);
     }
+
+
 
 }

@@ -14,4 +14,5 @@ export interface DriveDetails {
   vehicleModel: string;
   vehicleLicencePlate: string;
   vehicleColor: string;
+  acceptedPaymentTypes: string[];
 }

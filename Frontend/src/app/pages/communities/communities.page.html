@@ -1,0 +1,151 @@
+<app-header 
+  menuTitle="Communities" 
+  (menuClick)="togglePanel()"
+  (notificationClick)="goToNotifications()"
+></app-header>
+
+<ion-content>
+  <div class="communities-container">
+    <div style="padding-inline: 20px;">
+      <h2 style="font-style: bold;">Your Communities</h2>
+      
+      <div *ngIf="userCommunities.length === 0" class="empty-message">
+        <p>You didn't join any communities yet, join one now or create a new one!</p>
+      </div>
+      
+      <div *ngIf="userCommunities.length > 0" class="communities-list">
+        <div *ngFor="let community of userCommunities" class="community-card" (click)="router.navigate(['/communities', community.id], { state: { community: community } })">
+          <h3 class="community-title">{{ community.name }}</h3>
+        </div>
+      </div>
+
+      <button class="add-community-btn" (click)="onAddCommunity()">
+        Create New Community
+      </button>
+
+      <h2 style="margin-top: 32px;">Discover Communities</h2>
+      
+      <div *ngIf="newCommunities.length === 0" class="empty-message">
+        <p>No new communities available at the moment.</p>
+      </div>
+      
+      <div *ngIf="newCommunities.length > 0" class="communities-list">
+        <div *ngFor="let community of newCommunities" class="community-card new-community-card">
+          <div class="card-content" (click)="showCommunityDetails(community)">
+            <h3 class="community-title">{{ community.name }}</h3>
+          </div>
+          <div class="join-action" (click)="showJoinConfirmation(community.id, community.name)">
+            <span class="plus-icon">+</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</ion-content>
+
+<!-- Add Community Modal -->
+<div class="modal-overlay" *ngIf="showAddModal" (click)="closeAddModal()"></div>
+<div class="bottom-modal" [class.show]="showAddModal">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Create New Community</h2>
+      <button class="close-btn" (click)="closeAddModal()">×</button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="communityName">Community Name</label>
+        <input 
+          id="communityName"
+          type="text" 
+          [(ngModel)]="newCommunityName"
+          placeholder="Enter community name"
+          class="form-input"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="communityDescription">Description</label>
+        <textarea 
+          id="communityDescription"
+          [(ngModel)]="newCommunityDescription"
+          placeholder="Enter community description"
+          class="form-textarea"
+          rows="4"
+        ></textarea>
+      </div>
+
+      <button class="create-btn" (click)="createCommunity()">
+        Create Community
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Success Animation Overlay -->
+<div class="success-overlay" *ngIf="showSuccessAnimation">
+  <div class="success-animation">
+    <div class="checkmark-circle">
+      <svg class="checkmark" viewBox="0 0 52 52">
+        <circle class="checkmark-circle-path" cx="26" cy="26" r="25" fill="none"/>
+        <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+      </svg>
+    </div>
+    <p class="success-text">{{ successAnimationText }}</p>
+  </div>
+</div>
+
+<!-- iOS-style Join Confirmation Modal -->
+<div class="ios-modal-overlay" *ngIf="showJoinModal" (click)="cancelJoin()">
+  <div class="ios-modal" (click)="$event.stopPropagation()">
+    <div class="ios-modal-header">
+      <h3>Join Community</h3>
+    </div>
+    <div class="ios-modal-message">
+      <p>Do you want to join "{{ selectedCommunityName }}"?</p>
+    </div>
+    <div class="ios-modal-actions">
+      <button class="ios-btn ios-btn-cancel" (click)="cancelJoin()">Cancel</button>
+      <button class="ios-btn ios-btn-confirm" (click)="confirmJoin()">Yes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Community Details Modal -->
+<div class="modal-overlay" *ngIf="showDetailsModal" (click)="closeDetailsModal()"></div>
+<div class="bottom-modal" [class.show]="showDetailsModal">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ selectedCommunity?.name }}</h2>
+      <button class="close-btn" (click)="closeDetailsModal()">×</button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="community-detail-info">
+        <p class="member-info">👥 {{ selectedCommunity?.memberCount || 1 }} Members</p>
+        <div class="description-section">
+          <h3>Description</h3>
+          <p class="description-text">{{ selectedCommunity?.description || 'No description available' }}</p>
+        </div>
+      </div>
+
+      <button class="create-btn" (click)="$event.stopPropagation(); joinFromDetails()">
+        Join Community
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="fixed inset-0 z-[1000] pointer-events-none">
+  <app-side-panel 
+    [isOpen]="isPanelOpen()" 
+    [userFirstName]="user?.firstName || 'Guest'"
+    [userAvatar]="user ? 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + user.firstName : ''"
+    [friendsCount]="friendsCount"
+    [ridesCount]="ridesCount"
+    [currentRoute]="'/communities'"
+    (closed)="closePanel()"
+    (itemClicked)="onMenuItemClick($event)"
+    class="pointer-events-auto">
+  </app-side-panel>
+</div>

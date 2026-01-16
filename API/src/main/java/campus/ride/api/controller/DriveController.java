@@ -37,253 +37,198 @@ import java.util.concurrent.CompletableFuture;
 @Tag(name = "Drive", description = "Drive/Ride management APIs for creating and viewing available rides")
 public class DriveController {
 
-    private final DriveService driveService;
-    private final AddressService addressService;
-    private final VehicleService vehicleService;
+        private final DriveService driveService;
+        private final AddressService addressService;
+        private final VehicleService vehicleService;
 
-    public DriveController(DriveService driveService,
-                           AddressService addressService,
-                           VehicleService vehicleService) {
-        this.driveService = driveService;
-        this.addressService = addressService;
-        this.vehicleService = vehicleService;
-    }
-
-    @Operation(
-            summary = "Get all drives",
-            description = "Retrieves a paginated list of all available drives"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Successfully retrieved drives",
-                    content = @Content(schema = @Schema(implementation = Page.class))
-            )
-    })
-    @GetMapping
-    public CompletableFuture<ResponseEntity<Page<DriveCardDto>>> getAll(
-            @Parameter(description = "Pagination parameters (page, size, sort)")
-            Pageable pageable) {
-        return driveService.getDriverCards(pageable)
-                .thenApply(ResponseEntity::ok);
-    }
-
-
-
-    @Operation(
-            summary = "Get drive by ID",
-            description = "Retrieves detailed information about a specific drive"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Drive found successfully",
-                    content = @Content(schema = @Schema(implementation = DrivePageDto.class))
-            ),
-            @ApiResponse(responseCode = "404", description = "Drive not found")
-    })
-    @GetMapping("/{id}")
-    public CompletableFuture<ResponseEntity<DrivePageDto>> getById(
-            @Parameter(description = "Drive ID") @PathVariable Long id) {
-        return driveService.getDrivePageById(id)
-                .thenApply(ResponseEntity::ok);
-    }
-
-    @Operation(
-            summary = "Get drive cards",
-            description = "Retrieves a paginated list of drive summary cards for display"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Successfully retrieved drive cards",
-                    content = @Content(schema = @Schema(implementation = Page.class))
-            )
-    })
-    @GetMapping("/cards")
-    public CompletableFuture<ResponseEntity<Page<DriveCardDto>>> getCards(
-            @Parameter(description = "Pagination parameters (page, size, sort)")
-            Pageable pageable) {
-        return driveService.getDriverCards(pageable)
-                .thenApply(ResponseEntity::ok);
-    }
-
-    @Operation(
-            summary = "Get drives by driver ID",
-            description = "Retrieves all drives for a specific driver"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Successfully retrieved driver's drives",
-                    content = @Content(schema = @Schema(implementation = DriveCardDto.class))
-            )
-    })
-    @GetMapping("/driver/{driverId}")
-    public CompletableFuture<ResponseEntity<java.util.List<DriveCardDto>>> getDrivesByDriver(
-            @Parameter(description = "Driver ID") @PathVariable Long driverId) {
-        return driveService.getDrivesByDriverId(driverId)
-                .thenApply(ResponseEntity::ok);
-    }
-
-    @Operation(
-            summary = "Get my drives",
-            description = "Retrieves all drives for the current authenticated user (driver)"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Successfully retrieved my drives",
-                    content = @Content(schema = @Schema(implementation = DriveCardDto.class))
-            )
-    })
-    @GetMapping("/my-drives")
-    public CompletableFuture<ResponseEntity<java.util.List<DriveCardDto>>> getMyDrives() {
-        return driveService.getMyDrives()
-                .thenApply(ResponseEntity::ok);
-    }
-
-    @Operation(
-            summary = "Get my recent rides",
-            description = "Retrieves all past/completed drives for the current authenticated user where departure time is before current timestamp"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Successfully retrieved recent rides",
-                    content = @Content(schema = @Schema(implementation = DriveCardDto.class))
-            )
-    })
-    @GetMapping("/my-recent-rides")
-    public CompletableFuture<ResponseEntity<java.util.List<DriveCardDto>>> getMyRecentRides() {
-        return driveService.getMyRecentRides()
-                .thenApply(ResponseEntity::ok);
-    }
-
-    @Operation(
-            summary = "Get upcoming drives",
-            description = "Retrieves all available drives with departure times in the future for the home page. Public endpoint."
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Successfully retrieved upcoming drives",
-                    content = @Content(schema = @Schema(implementation = Page.class))
-            )
-    })
-    @GetMapping("/upcoming")
-    public CompletableFuture<ResponseEntity<Page<DriveCardDto>>> getUpcomingDrives(
-            @Parameter(description = "Pagination parameters (page, size, sort)")
-            Pageable pageable) {
-        return driveService.getUpcomingDrives(pageable)
-                .thenApply(ResponseEntity::ok);
-    }
-
-    @Operation(
-            summary = "Create new drive",
-            description = "Creates a new ride/drive listing with origin, destination, time, and vehicle details"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Drive created successfully",
-                    content = @Content(schema = @Schema(implementation = DriveDto.class))
-            ),
-            @ApiResponse(responseCode = "400", description = "Invalid drive data"),
-            @ApiResponse(responseCode = "422", description = "Validation failed")
-    })
-    @PostMapping
-    public CompletableFuture<ResponseEntity<DriveDto>> create(@RequestBody DriveCreateRequest req) {
-        DriveValidator.validateForCreate(req);
-
-        AddressValidator.requireCore(req.getFromAddress().getStreet(), req.getFromAddress().getNumber(), req.getFromAddress().getNeighborhood());
-        AddressValidator.requireCore(req.getToAddress().getStreet(),   req.getToAddress().getNumber(),   req.getToAddress().getNeighborhood());
-
-        VehicleValidator.softValidate(req.getVehicleModel(), req.getVehicleLicencePlate(), req.getVehicleColor());
-
-        LocalDateTime time = LocalDateTime.of(req.getDay(), req.getHour());
-
-        CompletableFuture<AddressDto> fromFuture = addressService.getOrCreate(
-                req.getFromAddress().getStreet(),
-                req.getFromAddress().getNumber(),
-                req.getFromAddress().getNeighborhood(),
-                req.getFromAddress().getLocationName(),
-                req.getFromAddress().getCity(),
-                req.getFromAddress().getLatitude(),
-                req.getFromAddress().getLongitude()
-        );
-        
-        CompletableFuture<AddressDto> toFuture = addressService.getOrCreate(
-                req.getToAddress().getStreet(),
-                req.getToAddress().getNumber(),
-                req.getToAddress().getNeighborhood(),
-                req.getToAddress().getLocationName(),
-                req.getToAddress().getCity(),
-                req.getToAddress().getLatitude(),
-                req.getToAddress().getLongitude()
-        );
-
-        CompletableFuture<VehicleDto> vehicleFuture = vehicleService.getOrCreate(
-                req.getVehicleModel(), req.getVehicleLicencePlate(), req.getVehicleColor(), null
-        );
-
-        return CompletableFuture.allOf(fromFuture, toFuture, vehicleFuture)
-                .thenCompose(v -> {
-                    AddressDto from = fromFuture.join();
-                    AddressDto to = toFuture.join();
-                    VehicleDto vehicle = vehicleFuture.join();
-
-                    if (from.getId() != null && to.getId() != null && from.getId().equals(to.getId())) {
-                        throw new IllegalArgumentException("From and To addresses must be different.");
-                    }
-
-                    DriveDto dto = new DriveDto(
-                            null,
-                            from.getId(),
-                            to.getId(),
-                            req.getPrice(),
-                            time,
-                            req.getTotalNoSeats(),
-                            req.getTotalNoSeats(),
-                            null,
-                            null,
-                            vehicle.getId()
-                    );
-
-                    return driveService.add(dto).thenApply(ResponseEntity::ok);
-                });
-    }
-
-    @Operation(
-            summary = "Update drive",
-            description = "Updates an existing drive with new details"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Drive updated successfully",
-                    content = @Content(schema = @Schema(implementation = DriveDto.class))
-            ),
-            @ApiResponse(responseCode = "400", description = "Invalid drive data"),
-            @ApiResponse(responseCode = "404", description = "Drive not found")
-    })
-    @PutMapping()
-    public CompletableFuture<ResponseEntity<DriveDto>> update(@RequestBody @Valid DriveUpdateRequestDto req) {
-        // Validate address components if provided
-        if (req.getFromStreet() != null) {
-            AddressValidator.requireCore(req.getFromStreet(), req.getFromNumber(), req.getFromNeighborhood());
-        }
-        if (req.getToStreet() != null) {
-            AddressValidator.requireCore(req.getToStreet(), req.getToNumber(), req.getToNeighborhood());
+        public DriveController(DriveService driveService,
+                        AddressService addressService,
+                        VehicleService vehicleService) {
+                this.driveService = driveService;
+                this.addressService = addressService;
+                this.vehicleService = vehicleService;
         }
 
-        return driveService.update(req.getId(), req)
-                .thenApply(ResponseEntity::ok);
-    }
+        @Operation(summary = "Get all drives", description = "Retrieves a paginated list of all available drives")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Successfully retrieved drives", content = @Content(schema = @Schema(implementation = Page.class)))
+        })
+        @GetMapping
+        public CompletableFuture<ResponseEntity<Page<DriveCardDto>>> getAll(
+                        @Parameter(description = "Pagination parameters (page, size, sort)") Pageable pageable) {
+                return driveService.getDriverCards(pageable)
+                                .thenApply(ResponseEntity::ok);
+        }
 
-    @DeleteMapping("/{id}")
-    public CompletableFuture<ResponseEntity<Void>> delete(@PathVariable Long id) {
-        return driveService.delete(id)
-                .thenApply(v -> ResponseEntity.noContent().build());
-    }
+        @Operation(summary = "Get drive by ID", description = "Retrieves detailed information about a specific drive")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Drive found successfully", content = @Content(schema = @Schema(implementation = DrivePageDto.class))),
+                        @ApiResponse(responseCode = "404", description = "Drive not found")
+        })
+        @GetMapping("/{id}")
+        public CompletableFuture<ResponseEntity<DrivePageDto>> getById(
+                        @Parameter(description = "Drive ID") @PathVariable Long id) {
+                return driveService.getDrivePageById(id)
+                                .thenApply(ResponseEntity::ok);
+        }
+
+        @Operation(summary = "Get drive cards", description = "Retrieves a paginated list of drive summary cards for display")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Successfully retrieved drive cards", content = @Content(schema = @Schema(implementation = Page.class)))
+        })
+        @GetMapping("/cards")
+        public CompletableFuture<ResponseEntity<Page<DriveCardDto>>> getCards(
+                        @Parameter(description = "Pagination parameters (page, size, sort)") Pageable pageable) {
+                return driveService.getDriverCards(pageable)
+                                .thenApply(ResponseEntity::ok);
+        }
+
+        @Operation(summary = "Get drives by driver ID", description = "Retrieves all drives for a specific driver")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Successfully retrieved driver's drives", content = @Content(schema = @Schema(implementation = DriveCardDto.class)))
+        })
+        @GetMapping("/driver/{driverId}")
+        public CompletableFuture<ResponseEntity<java.util.List<DriveCardDto>>> getDrivesByDriver(
+                        @Parameter(description = "Driver ID") @PathVariable Long driverId) {
+                return driveService.getDrivesByDriverId(driverId)
+                                .thenApply(ResponseEntity::ok);
+        }
+
+        @Operation(summary = "Get my drives", description = "Retrieves all drives for the current authenticated user (driver)")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Successfully retrieved my drives", content = @Content(schema = @Schema(implementation = DriveCardDto.class)))
+        })
+        @GetMapping("/my-drives")
+        public CompletableFuture<ResponseEntity<java.util.List<DriveCardDto>>> getMyDrives() {
+                return driveService.getMyDrives()
+                                .thenApply(ResponseEntity::ok);
+        }
+
+        @Operation(summary = "Get my recent rides", description = "Retrieves all past/completed drives for the current authenticated user where departure time is before current timestamp")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Successfully retrieved recent rides", content = @Content(schema = @Schema(implementation = DriveCardDto.class)))
+        })
+        @GetMapping("/my-recent-rides")
+        public CompletableFuture<ResponseEntity<java.util.List<DriveCardDto>>> getMyRecentRides() {
+                return driveService.getMyRecentRides()
+                                .thenApply(ResponseEntity::ok);
+        }
+
+        @Operation(summary = "Get my drives count", description = "Returns the total count of drives created by the current authenticated user")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Successfully retrieved drives count")
+        })
+        @GetMapping("/my-drives/count")
+        public CompletableFuture<ResponseEntity<Long>> getMyDrivesCount() {
+                return driveService.getMyDrivesCount()
+                                .thenApply(ResponseEntity::ok);
+        }
+
+        @Operation(summary = "Get upcoming drives", description = "Retrieves all available drives with departure times in the future for the home page. Public endpoint.")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Successfully retrieved upcoming drives", content = @Content(schema = @Schema(implementation = Page.class)))
+        })
+        @GetMapping("/upcoming")
+        public CompletableFuture<ResponseEntity<Page<DriveCardDto>>> getUpcomingDrives(
+                        @Parameter(description = "Pagination parameters (page, size, sort)") Pageable pageable) {
+                return driveService.getUpcomingDrives(pageable)
+                                .thenApply(ResponseEntity::ok);
+        }
+
+        @Operation(summary = "Create new drive", description = "Creates a new ride/drive listing with origin, destination, time, and vehicle details")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Drive created successfully", content = @Content(schema = @Schema(implementation = DriveDto.class))),
+                        @ApiResponse(responseCode = "400", description = "Invalid drive data"),
+                        @ApiResponse(responseCode = "422", description = "Validation failed")
+        })
+        @PostMapping
+        public CompletableFuture<ResponseEntity<DriveDto>> create(@RequestBody DriveCreateRequest req) {
+                DriveValidator.validateForCreate(req);
+
+                AddressValidator.requireCore(req.getFromAddress().getStreet(), req.getFromAddress().getNumber(),
+                                req.getFromAddress().getNeighborhood());
+                AddressValidator.requireCore(req.getToAddress().getStreet(), req.getToAddress().getNumber(),
+                                req.getToAddress().getNeighborhood());
+
+                VehicleValidator.softValidate(req.getVehicleModel(), req.getVehicleLicencePlate(),
+                                req.getVehicleColor());
+
+                LocalDateTime time = LocalDateTime.of(req.getDay(), req.getHour());
+
+                CompletableFuture<AddressDto> fromFuture = addressService.getOrCreate(
+                                req.getFromAddress().getStreet(),
+                                req.getFromAddress().getNumber(),
+                                req.getFromAddress().getNeighborhood(),
+                                req.getFromAddress().getLocationName(),
+                                req.getFromAddress().getCity(),
+                                req.getFromAddress().getLatitude(),
+                                req.getFromAddress().getLongitude());
+
+                CompletableFuture<AddressDto> toFuture = addressService.getOrCreate(
+                                req.getToAddress().getStreet(),
+                                req.getToAddress().getNumber(),
+                                req.getToAddress().getNeighborhood(),
+                                req.getToAddress().getLocationName(),
+                                req.getToAddress().getCity(),
+                                req.getToAddress().getLatitude(),
+                                req.getToAddress().getLongitude());
+
+                CompletableFuture<VehicleDto> vehicleFuture = vehicleService.getOrCreate(
+                                req.getVehicleModel(), req.getVehicleLicencePlate(), req.getVehicleColor(), null);
+
+                return CompletableFuture.allOf(fromFuture, toFuture, vehicleFuture)
+                                .thenCompose(v -> {
+                                        AddressDto from = fromFuture.join();
+                                        AddressDto to = toFuture.join();
+                                        VehicleDto vehicle = vehicleFuture.join();
+
+                                        if (from.getId() != null && to.getId() != null
+                                                        && from.getId().equals(to.getId())) {
+                                                throw new IllegalArgumentException(
+                                                                "From and To addresses must be different.");
+                                        }
+
+                                        DriveDto dto = new DriveDto(
+                                                        null,
+                                                        from.getId(),
+                                                        to.getId(),
+                                                        req.getPrice(),
+                                                        time,
+                                                        req.getTotalNoSeats(),
+                                                        req.getTotalNoSeats(),
+                                                        null,
+                                                        null,
+                                                        vehicle.getId());
+                                        dto.setAcceptedPaymentTypes(req.getAcceptedPaymentTypes());
+
+                                        return driveService.add(dto).thenApply(ResponseEntity::ok);
+                                });
+        }
+
+        @Operation(summary = "Update drive", description = "Updates an existing drive with new details")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Drive updated successfully", content = @Content(schema = @Schema(implementation = DriveDto.class))),
+                        @ApiResponse(responseCode = "400", description = "Invalid drive data"),
+                        @ApiResponse(responseCode = "404", description = "Drive not found")
+        })
+        @PutMapping()
+        public CompletableFuture<ResponseEntity<DriveDto>> update(@RequestBody @Valid DriveUpdateRequestDto req) {
+                // Validate address components if provided
+                if (req.getFromStreet() != null) {
+                        AddressValidator.requireCore(req.getFromStreet(), req.getFromNumber(),
+                                        req.getFromNeighborhood());
+                }
+                if (req.getToStreet() != null) {
+                        AddressValidator.requireCore(req.getToStreet(), req.getToNumber(), req.getToNeighborhood());
+                }
+
+                return driveService.update(req.getId(), req)
+                                .thenApply(ResponseEntity::ok);
+        }
+
+        @DeleteMapping("/{id}")
+        public CompletableFuture<ResponseEntity<Void>> delete(@PathVariable Long id) {
+                return driveService.delete(id)
+                                .thenApply(v -> ResponseEntity.noContent().build());
+        }
 }

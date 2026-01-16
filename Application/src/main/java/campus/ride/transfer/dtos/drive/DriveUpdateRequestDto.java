@@ -31,10 +31,7 @@ public class DriveUpdateRequestDto {
 
     private LocalDate day;
 
-    @Schema(
-            type = "string",
-            pattern = "HH:mm"
-    )
+    @Schema(type = "string", pattern = "HH:mm")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
     private LocalTime hour;
 
@@ -44,8 +41,10 @@ public class DriveUpdateRequestDto {
     @Min(value = 0, message = "Price cannot be negative.")
     private BigDecimal price;
 
+    private java.util.List<String> acceptedPaymentTypes;
 
-    public DriveUpdateRequestDto() {}
+    public DriveUpdateRequestDto() {
+    }
 
     public Long getId() {
         return id;
@@ -165,5 +164,13 @@ public class DriveUpdateRequestDto {
 
     public void setToCity(String toCity) {
         this.toCity = toCity;
+    }
+
+    public java.util.List<String> getAcceptedPaymentTypes() {
+        return acceptedPaymentTypes;
+    }
+
+    public void setAcceptedPaymentTypes(java.util.List<String> acceptedPaymentTypes) {
+        this.acceptedPaymentTypes = acceptedPaymentTypes;
     }
 }
