@@ -1,0 +1,156 @@
+.add-card-section {
+  margin-bottom: 20px;
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.loading-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}
+
+.empty-state {
+  text-align: center;
+  margin-top: 50px;
+  color: var(--campus-ride-text-secondary);
+
+  ion-icon {
+    font-size: 64px;
+    margin-bottom: 16px;
+  }
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.payment-item {
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+}
+
+.card-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 30px;
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.input-card {
+  width: min(420px, 92vw);
+  min-width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+
+  ion-label {
+    color: var(--campus-ride-text-secondary);
+    font-size: 14px;
+    margin-left: 4px;
+  }
+}
+
+/* wrapperul e "input-ul" real: border + radius + padding */
+.input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  border: 1px solid var(--campus-ride-border);
+  border-radius: 12px;
+
+  padding: 10px 12px;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+  background: var(--campus-ride-bg-card);
+}
+
+/* hover/focus pe tot câmpul */
+.input-wrapper:hover {
+  border-color: var(--campus-ride-primary);
+}
+
+.input-wrapper:focus-within {
+  border-color: var(--campus-ride-primary);
+  box-shadow: 0 0 0 4px var(--campus-ride-success-bg);
+}
+
+/* input: fără border, ia tot spațiul */
+.input-wrapper ion-input {
+  flex: 1;
+  border: none !important;
+  --highlight-color-focused: transparent;
+  --highlight-color-valid: transparent;
+  --highlight-color-invalid: transparent;
+  --background: transparent;
+  --color: var(--campus-ride-text-primary);
+  --placeholder-color: var(--campus-ride-text-muted);
+  --placeholder-opacity: 0.6;
+
+  --padding-top: 0;
+  --padding-bottom: 0;
+  --padding-start: 0;
+  --padding-end: 0;
+}
+
+/* placeholder fallback */
+.input-wrapper ion-input::part(native)::placeholder {
+  color: var(--campus-ride-text-muted);
+  opacity: 0.6;
+}
+
+.input-wrapper .input-icon,
+.input-wrapper ion-icon {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  color: var(--campus-ride-text-secondary);
+}
+
+.input-wrapper .select {
+  flex: 1;
+  min-width: 0;
+  --placeholder-color: var(--campus-ride-text-muted);
+  --placeholder-opacity: 0.6;
+  color: var(--campus-ride-text-primary);
+}
+
+/* ajustează înălțime/padding ca să se potrivească cu input-ul */
+.input-wrapper .select::part(container) {
+  padding: 0;
+}
+
+.input-wrapper .select::part(text) {
+  font-size: 15px;
+  color: var(--campus-ride-text-primary);
+}
+
+/* opțional: să fie separare vizuală între cele două select-uri */
+.input-wrapper .select+.select {
+  border-left: 1px solid var(--campus-ride-border);
+  padding-left: 10px;
+}

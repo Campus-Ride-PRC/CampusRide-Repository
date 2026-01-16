@@ -37,12 +37,13 @@ export class HomePage implements OnInit {
     private authService: AuthService,
     private profileService: Profile,
     private friendService: FriendService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.loadDrives();
     this.loadUser();
     this.loadFriendCount();
+    this.loadRidesCount();
   }
 
   loadUser() {
@@ -63,6 +64,17 @@ export class HomePage implements OnInit {
       },
       error: (err) => {
         console.error('Error loading friend count:', err);
+      }
+    });
+  }
+
+  loadRidesCount() {
+    this.driveService.getMyDrivesCount().subscribe({
+      next: (count) => {
+        this.ridesCount = count;
+      },
+      error: (err) => {
+        console.error('Error loading rides count:', err);
       }
     });
   }
@@ -182,6 +194,7 @@ export class HomePage implements OnInit {
   onMenuOpen() {
     this.isPanelOpen = true;
     this.loadFriendCount();
+    this.loadRidesCount();
   }
 
   onPanelClosed() {
@@ -195,7 +208,7 @@ export class HomePage implements OnInit {
   onMenuItemClick(item: string) {
     console.log('Menu item clicked:', item);
 
-    switch(item) {
+    switch (item) {
       case 'home':
         // Already on home
         break;

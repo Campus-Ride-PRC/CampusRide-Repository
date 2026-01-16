@@ -97,6 +97,25 @@ export const routes: Routes = [
     canActivate: [authGuard]
   },
   {
+    path: 'payment-methods',
+    loadComponent: () => import('./pages/payment-methods/payment-methods.page').then(m => m.PaymentMethodsPage),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'payment-selection',
+    loadComponent: () => import('./pages/payment-selection/payment-selection.page').then(m => m.PaymentSelectionPage),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'payment-success',
+    loadComponent: () => import('./pages/payment-success/payment-success.page').then(m => m.PaymentSuccessPage),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'profile/add-card',
+    loadComponent: () => import('./pages/profile/add-card/add-card.page').then( m => m.AddCardPage)
+  },
+  {
     path: 'communities',
     loadComponent: () => import('./pages/communities/communities.page').then( m => m.CommunitiesPage),
     canActivate: [authGuard]
@@ -105,6 +124,10 @@ export const routes: Routes = [
     path: 'communities/:id',
     loadComponent: () => import('./pages/community-detail/community-detail.page').then( m => m.CommunityDetailPage),
     canActivate: [authGuard]
-  }
-
+  },
+  {
+    path: 'messages/chat',
+    loadComponent: () => import('./pages/messages/chat/chat.page').then(m => m.ChatPage),
+    canActivate: [authGuard]
+  },
 ];

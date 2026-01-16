@@ -33,23 +33,23 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf(csrf -> csrf.disable())
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                // Public endpoints - no authentication required
-                .requestMatchers("/api/user/login", "/api/user/register/**", "/api/user/exists", "/api/user/email", "api/user/reset/password/**").permitAll()
-                .requestMatchers("/api/faculties/**").permitAll()
-                .requestMatchers("api/communities/**").permitAll()
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        // Public endpoints - no authentication required
+                        .requestMatchers("/api/user/login", "/api/user/register/**", "/api/user/exists", "/api/user/email", "api/user/reset/password/**").permitAll()
+                        .requestMatchers("/api/faculties/**").permitAll()
+                        .requestMatchers("api/communities/**").permitAll()
                 // Swagger/OpenAPI endpoints
-                .requestMatchers("/swagger-ui/**", "/swagger-ui.html").permitAll()
-                .requestMatchers("/v3/api-docs/**", "/v3/api-docs.yaml", "/v3/api-docs").permitAll()
-                .requestMatchers("/swagger-resources/**", "/webjars/**").permitAll()
-                // All other endpoints require authentication
-                .anyRequest().authenticated()
-            )
-            .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
-
+                        .requestMatchers("/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/v3/api-docs.yaml", "/v3/api-docs").permitAll()
+                        .requestMatchers("/swagger-resources/**", "/webjars/**").permitAll()
+                        // WebSocket endpoint
+                        .requestMatchers("/ws/**").permitAll()
+                        // All other endpoints require authentication
+                        .anyRequest().authenticated())
+                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
@@ -61,7 +61,7 @@ public class WebSecurityConfig {
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
         configuration.setAllowCredentials(false);
-        
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;

@@ -18,14 +18,17 @@ public class DrivePageDto {
     private String vehicleModel;
     private String vehicleLicencePlate;
     private String vehicleColor;
+    private java.util.List<String> acceptedPaymentTypes;
 
-    public DrivePageDto() {}
+    public DrivePageDto() {
+    }
 
     public DrivePageDto(Long id, LocalDateTime time, BigDecimal price,
-                        Integer availableSeats, Integer totalNoSeats,
-                        AddressDto fromAddress, AddressDto toAddress,
-                        Long driverId, String driverFirstName, String driverLastName,
-                        String vehicleModel, String vehicleLicencePlate, String vehicleColor) {
+            Integer availableSeats, Integer totalNoSeats,
+            AddressDto fromAddress, AddressDto toAddress,
+            Long driverId, String driverFirstName, String driverLastName,
+            String vehicleModel, String vehicleLicencePlate, String vehicleColor,
+            java.util.List<String> acceptedPaymentTypes) {
         this.id = id;
         this.time = time;
         this.price = price;
@@ -39,45 +42,118 @@ public class DrivePageDto {
         this.vehicleModel = vehicleModel;
         this.vehicleLicencePlate = vehicleLicencePlate;
         this.vehicleColor = vehicleColor;
+        this.acceptedPaymentTypes = acceptedPaymentTypes;
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
 
-    public LocalDateTime getTime() { return time; }
-    public void setTime(LocalDateTime time) { this.time = time; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public BigDecimal getPrice() { return price; }
-    public void setPrice(BigDecimal price) { this.price = price; }
+    public LocalDateTime getTime() {
+        return time;
+    }
 
-    public Integer getAvailableSeats() { return availableSeats; }
-    public void setAvailableSeats(Integer availableSeats) { this.availableSeats = availableSeats; }
+    public void setTime(LocalDateTime time) {
+        this.time = time;
+    }
 
-    public Integer getTotalNoSeats() { return totalNoSeats; }
-    public void setTotalNoSeats(Integer totalNoSeats) { this.totalNoSeats = totalNoSeats; }
+    public BigDecimal getPrice() {
+        return price;
+    }
 
-    public AddressDto getFromAddress() { return fromAddress; }
-    public void setFromAddress(AddressDto fromAddress) { this.fromAddress = fromAddress; }
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
 
-    public AddressDto getToAddress() { return toAddress; }
-    public void setToAddress(AddressDto toAddress) { this.toAddress = toAddress; }
+    public Integer getAvailableSeats() {
+        return availableSeats;
+    }
 
-    public String getDriverFirstName() { return driverFirstName; }
-    public void setDriverFirstName(String driverFirstName) { this.driverFirstName = driverFirstName; }
+    public void setAvailableSeats(Integer availableSeats) {
+        this.availableSeats = availableSeats;
+    }
 
-    public String getDriverLastName() { return driverLastName; }
-    public void setDriverLastName(String driverLastName) { this.driverLastName = driverLastName; }
+    public Integer getTotalNoSeats() {
+        return totalNoSeats;
+    }
 
-    public Long getDriverId() { return driverId; }
-    public void setDriverId(Long driverId) { this.driverId = driverId; }
+    public void setTotalNoSeats(Integer totalNoSeats) {
+        this.totalNoSeats = totalNoSeats;
+    }
 
-    public String getVehicleModel() { return vehicleModel; }
-    public void setVehicleModel(String vehicleModel) { this.vehicleModel = vehicleModel; }
+    public AddressDto getFromAddress() {
+        return fromAddress;
+    }
 
-    public String getVehicleLicencePlate() { return vehicleLicencePlate; }
-    public void setVehicleLicencePlate(String vehicleLicencePlate) { this.vehicleLicencePlate = vehicleLicencePlate; }
+    public void setFromAddress(AddressDto fromAddress) {
+        this.fromAddress = fromAddress;
+    }
 
-    public String getVehicleColor() { return vehicleColor; }
-    public void setVehicleColor(String vehicleColor) { this.vehicleColor = vehicleColor; }
+    public AddressDto getToAddress() {
+        return toAddress;
+    }
+
+    public void setToAddress(AddressDto toAddress) {
+        this.toAddress = toAddress;
+    }
+
+    public String getDriverFirstName() {
+        return driverFirstName;
+    }
+
+    public void setDriverFirstName(String driverFirstName) {
+        this.driverFirstName = driverFirstName;
+    }
+
+    public String getDriverLastName() {
+        return driverLastName;
+    }
+
+    public void setDriverLastName(String driverLastName) {
+        this.driverLastName = driverLastName;
+    }
+
+    public Long getDriverId() {
+        return driverId;
+    }
+
+    public void setDriverId(Long driverId) {
+        this.driverId = driverId;
+    }
+
+    public String getVehicleModel() {
+        return vehicleModel;
+    }
+
+    public void setVehicleModel(String vehicleModel) {
+        this.vehicleModel = vehicleModel;
+    }
+
+    public String getVehicleLicencePlate() {
+        return vehicleLicencePlate;
+    }
+
+    public void setVehicleLicencePlate(String vehicleLicencePlate) {
+        this.vehicleLicencePlate = vehicleLicencePlate;
+    }
+
+    public String getVehicleColor() {
+        return vehicleColor;
+    }
+
+    public void setVehicleColor(String vehicleColor) {
+        this.vehicleColor = vehicleColor;
+    }
+
+    public java.util.List<String> getAcceptedPaymentTypes() {
+        return acceptedPaymentTypes;
+    }
+
+    public void setAcceptedPaymentTypes(java.util.List<String> acceptedPaymentTypes) {
+        this.acceptedPaymentTypes = acceptedPaymentTypes;
+    }
 }
-
