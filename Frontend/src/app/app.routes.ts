@@ -124,8 +124,7 @@ export const routes: Routes = [
     path: 'communities/:id',
     loadComponent: () => import('./pages/community-detail/community-detail.page').then( m => m.CommunityDetailPage),
     canActivate: [authGuard]
-  }
-
+  },
   {
     path: 'messages/chat',
     loadComponent: () => import('./pages/messages/chat/chat.page').then(m => m.ChatPage),
