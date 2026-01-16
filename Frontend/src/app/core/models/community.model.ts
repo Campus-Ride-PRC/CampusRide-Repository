@@ -4,6 +4,7 @@ export interface Community {
     id: number;
     name: string;
     description: string;
-    creadedAt: Date;
+    createdAt: Date;
     createdBy: UserResponse;
+    memberCount: number;
 }

@@ -8,9 +8,11 @@
 <ion-content>
   <div class="community-detail-container">
     <div class="header-section">
-      <h1>Community {{ communityId }}</h1>
-      <p class="subtitle">This is a mock community page with a very and generous description</p> <!-- placeholder description -->
-      <p class="subtitle" style="padding-top: 4px;">1 Member</p>
+      <h1>{{ community?.name || 'Community ' + communityId }}</h1>
+      <p class="subtitle">{{ community?.description || 'No description available' }}</p>
+      <p class="subtitle" style="padding-top: 4px;">
+        {{ community?.memberCount ?? 0 }} Member{{ (community?.memberCount ?? 0) !== 1 ? 's' : '' }}
+      </p>
     </div>
 
     <!-- Mock Post -->

@@ -32,6 +32,7 @@ export class CommunitiesPage implements OnInit {
   newCommunityName: string = '';
   newCommunityDescription: string = '';
   showSuccessAnimation: boolean = false;
+  successAnimationText: string = 'Community Created!';
   createdCommunityId: number | null = null;
   
   showJoinModal: boolean = false;
@@ -185,6 +186,7 @@ export class CommunitiesPage implements OnInit {
         this.createdCommunityId = community.id;
         
         // Show success animation
+        this.successAnimationText = 'Community Created!';
         this.showSuccessAnimation = true;
         
         // After animation, redirect to community page
@@ -228,31 +230,68 @@ export class CommunitiesPage implements OnInit {
   }
 
   confirmJoin() {
-    if (this.selectedCommunityId) {
-      this.joinCommunity(this.selectedCommunityId);
+    if (this.selectedCommunityId && this.user) {
+      const joinedCommunityId = this.selectedCommunityId;
+      const joinedCommunity = this.newCommunities.find(c => c.id === joinedCommunityId);
+      
+      this.communityService.joinCommunity(this.selectedCommunityId, this.user.id).subscribe({
+        next: () => {
+          console.log('Successfully joined community:', joinedCommunityId);
+          
+          // Show success animation
+          this.successAnimationText = 'Community Joined!';
+          this.showSuccessAnimation = true;
+          
+          // After animation, navigate to community details page
+          setTimeout(() => {
+            this.showSuccessAnimation = false;
+            this.router.navigate(['/communities', joinedCommunityId], {
+              state: { community: joinedCommunity }
+            });
+            // Reload communities lists
+            this.loadUserCommunities();
+            this.loadNewCommunities();
+          }, 2450);
+        },
+        error: (err) => {
+          console.error('Error joining community:', err);
+          // TODO: Show error message
+        }
+      });
     }
     this.cancelJoin();
   }
 
   showCommunityDetails(community: Community) {
+    console.log('showCommunityDetails called with:', community);
     this.selectedCommunity = community;
     this.showDetailsModal = true;
   }
 
   closeDetailsModal() {
     this.showDetailsModal = false;
-    this.selectedCommunity = null;
-  }
-
-  getMockMemberCount(): number {
-    // Mock data - random member count between 10-500
-    return Math.floor(Math.random() * 490) + 10;
+    // Don't set selectedCommunity to null immediately - keep it for join action
+    setTimeout(() => {
+      this.selectedCommunity = null;
+    }, 500);
   }
 
   joinFromDetails() {
-    if (this.selectedCommunity) {
-      this.closeDetailsModal();
-      this.showJoinConfirmation(this.selectedCommunity.id, this.selectedCommunity.name);
+    console.log('joinFromDetails called', this.selectedCommunity);
+    if (!this.selectedCommunity) {
+      console.error('No selected community');
+      return;
     }
+    
+    const communityId = this.selectedCommunity.id;
+    const communityName = this.selectedCommunity.name;
+    
+    console.log('Closing details modal and showing join confirmation');
+    this.closeDetailsModal();
+    
+    // Use setTimeout to ensure modal is closed before showing confirmation
+    setTimeout(() => {
+      this.showJoinConfirmation(communityId, communityName);
+    }, 100);
   }
 }

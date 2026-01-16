@@ -14,11 +14,8 @@
       </div>
       
       <div *ngIf="userCommunities.length > 0" class="communities-list">
-        <div *ngFor="let community of userCommunities" class="community-card" (click)="router.navigate(['/communities', community.id])">
+        <div *ngFor="let community of userCommunities" class="community-card" (click)="router.navigate(['/communities', community.id], { state: { community: community } })">
           <h3 class="community-title">{{ community.name }}</h3>
-          <!-- <div class="community-meta">
-            <span class="member-count">{{ community.memberCount || 1 }} Member{{ (community.memberCount || 1) > 1 ? 's' : '' }}</span>
-          </div> -->
         </div>
       </div>
 
@@ -36,9 +33,6 @@
         <div *ngFor="let community of newCommunities" class="community-card new-community-card">
           <div class="card-content" (click)="showCommunityDetails(community)">
             <h3 class="community-title">{{ community.name }}</h3>
-            <!-- <div class="community-meta">
-              <span class="member-count">{{ community.memberCount || 1 }} Member{{ (community.memberCount || 1) > 1 ? 's' : '' }}</span>
-            </div> -->
           </div>
           <div class="join-action" (click)="showJoinConfirmation(community.id, community.name)">
             <span class="plus-icon">+</span>
@@ -97,7 +91,7 @@
         <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
       </svg>
     </div>
-    <p class="success-text">Community Created!</p>
+    <p class="success-text">{{ successAnimationText }}</p>
   </div>
 </div>
 
@@ -128,14 +122,14 @@
     
     <div class="modal-body">
       <div class="community-detail-info">
-        <p class="member-info">👥 {{ getMockMemberCount() }} Members</p>
+        <p class="member-info">👥 {{ selectedCommunity?.memberCount || 1 }} Members</p>
         <div class="description-section">
           <h3>Description</h3>
           <p class="description-text">{{ selectedCommunity?.description || 'No description available' }}</p>
         </div>
       </div>
 
-      <button class="create-btn" (click)="joinFromDetails()">
+      <button class="create-btn" (click)="$event.stopPropagation(); joinFromDetails()">
         Join Community
       </button>
     </div>

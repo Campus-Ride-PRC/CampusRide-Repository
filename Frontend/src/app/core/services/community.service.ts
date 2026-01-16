@@ -28,4 +28,11 @@ export class CommunityService {
       creator: { id: creatorId } 
     });
   }
+
+  joinCommunity(communityId: number, userId: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/add-member`, { 
+      communityId, 
+      userId 
+    });
+  }
 }
