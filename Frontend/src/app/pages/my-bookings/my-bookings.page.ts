@@ -14,14 +14,14 @@ import { addIcons } from 'ionicons';
 import {
   carOutline, locationOutline, timeOutline, cashOutline,
   closeCircleOutline, checkmarkCircleOutline, hourglassOutline,
-  mailOutline
+  mailOutline, chatbubbleEllipsesOutline
 } from 'ionicons/icons';
 import { AppHeaderComponent } from 'src/app/shared/components/header/app-header.component';
 import { SidePanelComponent } from 'src/app/shared/components/panel/side-panel.component';
 import { Profile } from 'src/app/core/services/profile';
 import { UserResponse } from 'src/app/core/models/userResponse';
 import { FriendService } from 'src/app/core/services/friend.service';
-
+import { DriveService } from 'src/app/core/services/drive.service';
 @Component({
   selector: 'app-my-bookings',
   templateUrl: './my-bookings.page.html',
@@ -50,12 +50,13 @@ export class MyBookingsPage implements OnInit {
     private router: Router,
     private location: Location,
     private profileService: Profile,
-    private friendService: FriendService
+    private friendService: FriendService,
+    private driveService: DriveService
   ) {
     addIcons({
       carOutline, locationOutline, timeOutline, cashOutline,
       closeCircleOutline, checkmarkCircleOutline, hourglassOutline,
-      mailOutline
+      mailOutline, chatbubbleEllipsesOutline
     });
   }
 
@@ -63,6 +64,7 @@ export class MyBookingsPage implements OnInit {
     this.loadBookings();
     this.loadUser();
     this.loadFriendCount();
+    this.loadRidesCount();
   }
 
   loadUser() {
@@ -118,6 +120,17 @@ export class MyBookingsPage implements OnInit {
     });
   }
 
+  loadRidesCount() {
+    this.driveService.getMyDrivesCount().subscribe({
+      next: (count) => {
+        this.ridesCount = count;
+      },
+      error: (err) => {
+        console.error('Error loading rides count:', err);
+      }
+    });
+  }
+
   cancelBooking(booking: BookingResponse) {
     const userId = this.authService.getCurrentUserId();
 
@@ -157,6 +170,17 @@ export class MyBookingsPage implements OnInit {
     const userId = this.authService.getCurrentUserId();
     this.router.navigate(['/ride-details', driveId], {
       queryParams: { returnTo: 'my-bookings', userId: userId }
+    });
+  }
+
+  contactDriver(booking: BookingResponse) {
+    const userId = this.authService.getCurrentUserId();
+    this.router.navigate(['/ride-details', booking.driveId], {
+      queryParams: {
+        returnTo: 'my-bookings',
+        userId: userId,
+        openChat: 'true'
+      }
     });
   }
 
@@ -231,7 +255,7 @@ export class MyBookingsPage implements OnInit {
   onMenuItemClick(item: string) {
     console.log('Menu item clicked:', item);
 
-    switch(item) {
+    switch (item) {
       case 'home':
         this.router.navigate(['/home']);
         break;

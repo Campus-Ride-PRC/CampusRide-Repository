@@ -1,3 +1,4 @@
+@use 'sass:color';
 // ==========================================
 // Uber-like Dark Mode Styling - Add Ride Page
 // ==========================================
@@ -71,7 +72,7 @@ $transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   z-index: 100;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  transition: transform $transition-fast, background $transition-fast;
+  transition: trans $transition-fast, background $transition-fast;
 
   ion-icon {
     font-size: 24px;
@@ -523,15 +524,15 @@ $transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     ion-icon {
       font-size: 24px;
-      color: $accent-blue;
+      --ionicon-stroke-width: 32px;
     }
 
     &:hover {
-      background: rgba(10, 132, 255, 0.1);
+      background: $accent-green;
     }
 
     &:active {
-      background: rgba(10, 132, 255, 0.2);
+      background: color.adjust(#30d158, $lightness: -10%);
     }
   }
 
@@ -587,14 +588,14 @@ $transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       &.departure .marker-dot {
         width: 10px;
         height: 10px;
-        background: $text-primary;
+        background: $accent-green;
         border-radius: 50%;
       }
 
       &.destination .marker-square {
         width: 8px;
         height: 8px;
-        background: $text-primary;
+        background: $accent-red;
       }
     }
 
@@ -633,9 +634,12 @@ $transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 // ==========================================
 
 .form-section {
+  margin-bottom: 24px;
+
   .section-title {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     font-size: 16px;
     font-weight: 600;
     color: $text-primary;
@@ -649,7 +653,6 @@ $transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .badge {
-      margin-left: auto;
       font-size: 11px;
       font-weight: 600;
       color: $accent-green;
@@ -658,6 +661,21 @@ $transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       border-radius: 4px;
       text-transform: uppercase;
     }
+  }
+}
+
+// Payment Methods Section
+.payment-methods-container {
+  ion-list {
+    background: transparent;
+    padding: 0;
+  }
+
+  ion-item {
+    --background: transparent;
+    --border-color: transparent;
+    --padding-start: 0;
+    --inner-padding-end: 0;
   }
 }
 
@@ -699,7 +717,7 @@ $transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     &:focus-within {
       background: $bg-input;
-      box-shadow: 0 0 0 2px rgba($accent-blue, 0.3);
+      box-shadow: 0 0 0 2px rgba($accent-green, 0.3);
     }
 
     &.disabled {

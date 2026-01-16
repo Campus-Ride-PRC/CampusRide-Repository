@@ -20,10 +20,14 @@ export interface Address {
 export class AddressService {
   private apiUrl = `${environment.apiUrl}/addresses`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   createAddress(address: Address): Observable<Address> {
     return this.http.post<Address>(this.apiUrl, address);
+  }
+
+  getOrCreate(address: Address): Observable<Address> {
+    return this.createAddress(address);
   }
 
   getAddressById(id: number): Observable<Address> {

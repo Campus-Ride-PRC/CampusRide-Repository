@@ -1,7 +1,4 @@
-<app-header
-  menuTitle="My Rides"
-  (menuClick)="onMenuOpen()"
-  (notificationClick)="onNotificationOpen()">
+<app-header menuTitle="My Rides" (menuClick)="onMenuOpen()" (notificationClick)="onNotificationOpen()">
 </app-header>
 
 <ion-content>
@@ -22,31 +19,20 @@
     </div>
 
     <div *ngIf="!loading && myRides.length > 0" class="rides-list">
-      <app-ride-card
-        *ngFor="let ride of myRides"
-        [userName]="ride.driverFirstName + ' ' + ride.driverLastName"
-        [userAvatar]="'https://api.dicebear.com/7.x/avataaars/svg?seed=' + ride.driverFirstName"
-        [rating]="4.5"
-        [fromLocation]="getLocationName(ride.fromAddress)"
-        [toLocation]="getLocationName(ride.toAddress)"
-        [departureTime]="formatDate(ride.time)"
-        [seatsAvailable]="ride.availableSeats"
-        [totalSeats]="ride.totalNoSeats"
-        [price]="ride.price + ' RON'"
-        (cardClick)="viewRideDetails(ride.id)">
+      <app-ride-card *ngFor="let ride of myRides" [userName]="ride.driverFirstName + ' ' + ride.driverLastName"
+        [userAvatar]="'https://api.dicebear.com/7.x/avataaars/svg?seed=' + ride.driverFirstName" [rating]="4.5"
+        [fromLocation]="getLocationName(ride.fromAddress)" [toLocation]="getLocationName(ride.toAddress)"
+        [departureTime]="formatDate(ride.time)" [seatsAvailable]="ride.availableSeats" [totalSeats]="ride.totalNoSeats"
+        [price]="ride.price + ' RON'" (cardClick)="viewRideDetails(ride.id)">
       </app-ride-card>
     </div>
   </div>
 </ion-content>
 
 <div class="fixed inset-0 z-[1000] pointer-events-none">
-  <app-side-panel
-    [isOpen]="isPanelOpen"
-    [userFirstName]="user?.firstName || 'Guest'"
+  <app-side-panel [isOpen]="isPanelOpen" [userFirstName]="user?.firstName || 'Guest'"
     [userAvatar]="user ? 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + user.firstName : ''"
-    (closed)="onPanelClosed()"
-    (itemClicked)="onMenuItemClick($event)"
-    (rideClicked)="onRideClick($event)"
-    class="pointer-events-auto">
+    [friendsCount]="friendsCount" [ridesCount]="ridesCount" [currentRoute]="'/my-rides'" (closed)="onPanelClosed()"
+    (itemClicked)="onMenuItemClick($event)" (rideClicked)="onRideClick($event)" class="pointer-events-auto">
   </app-side-panel>
 </div>

@@ -11,4 +11,5 @@ export interface DriveCreateRequest {
   vehicleLicencePlate: string;
   vehicleColor: string;
   userId: number;
+  acceptedPaymentTypes: string[];
 }

@@ -1,7 +1,4 @@
-<app-header
-  menuTitle="Passenger Requests"
-  (menuClick)="onMenuOpen()"
-  (notificationClick)="onNotificationOpen()">
+<app-header menuTitle="Passenger Requests" (menuClick)="onMenuOpen()" (notificationClick)="onNotificationOpen()">
 </app-header>
 
 <ion-content>
@@ -27,7 +24,8 @@
           <div class="drive-header">
             <div class="route-section">
               <ion-icon name="location-outline"></ion-icon>
-              <ion-card-title>{{getLocationName(item.drive.fromAddress)}} → {{getLocationName(item.drive.toAddress)}}</ion-card-title>
+              <ion-card-title>{{getLocationName(item.drive.fromAddress)}} →
+                {{getLocationName(item.drive.toAddress)}}</ion-card-title>
             </div>
             <div class="drive-info">
               <span class="info-item">
@@ -52,7 +50,7 @@
               <h3>Pending Requests</h3>
               <ion-badge class="count-badge">{{item.pendingBookings.length}}</ion-badge>
             </div>
-            
+
             <div *ngFor="let booking of item.pendingBookings" class="request-item">
               <div class="user-info">
                 <ion-icon name="person-circle-outline" class="user-icon"></ion-icon>
@@ -68,20 +66,14 @@
                   </small>
                 </div>
               </div>
-              
+
               <div class="actions">
-                <ion-button 
-                  class="accept-button"
-                  fill="solid" 
-                  size="small"
+                <ion-button class="accept-button" fill="solid" size="small"
                   (click)="$event.stopPropagation(); acceptBooking(booking)">
                   <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
                   Accept
                 </ion-button>
-                <ion-button 
-                  class="decline-button"
-                  fill="outline" 
-                  size="small"
+                <ion-button class="decline-button" fill="outline" size="small"
                   (click)="$event.stopPropagation(); declineBooking(booking)">
                   <ion-icon name="close-circle-outline" slot="start"></ion-icon>
                   Decline
@@ -96,13 +88,10 @@
 </ion-content>
 
 <div class="fixed inset-0 z-[1000] pointer-events-none">
-  <app-side-panel
-    [isOpen]="isPanelOpen"
-    [userFirstName]="user?.firstName || 'Guest'"
+  <app-side-panel [isOpen]="isPanelOpen" [userFirstName]="user?.firstName || 'Guest'"
     [userAvatar]="user ? 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + user.firstName : ''"
-    (closed)="onPanelClosed()"
-    (itemClicked)="onMenuItemClick($event)"
-    (rideClicked)="onRideClick($event)"
+    [friendsCount]="friendsCount" [ridesCount]="ridesCount" [currentRoute]="'/driver-requests'"
+    (closed)="onPanelClosed()" (itemClicked)="onMenuItemClick($event)" (rideClicked)="onRideClick($event)"
     class="pointer-events-auto">
   </app-side-panel>
 </div>
