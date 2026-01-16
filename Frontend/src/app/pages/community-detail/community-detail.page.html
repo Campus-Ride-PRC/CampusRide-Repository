@@ -1,0 +1,199 @@
+<app-header 
+  menuTitle="Community Details" 
+  [showBackArrow]="true"
+  (backClick)="goBack()"
+  (notificationClick)="goToNotifications()"
+></app-header>
+
+<ion-content>
+  <div class="community-detail-container">
+    <div class="header-section">
+      <h1>Community {{ communityId }}</h1>
+      <p class="subtitle">This is a mock community page with a very and generous description</p> <!-- placeholder description -->
+      <p class="subtitle" style="padding-top: 4px;">1 Member</p>
+    </div>
+
+    <!-- Mock Post -->
+    <div>
+        <h2 class="posts-heading">Posts</h2>
+
+        <div class="post-card">
+      <!-- Post Header -->
+      <div class="post-header">
+        <img 
+          src="https://api.dicebear.com/7.x/avataaars/svg?seed=JohnDoe" 
+          alt="User" 
+          class="post-avatar"
+        />
+        <div class="post-user-info">
+          <span class="post-username">John Doe</span>
+          <span class="post-time">2 hours ago</span>
+        </div>
+      </div>
+
+      <!-- Post Content -->
+      <div class="post-content">
+        <p>Just joined this amazing community! Looking forward to connecting with everyone and sharing rides. 🚗✨</p>
+      </div>
+
+      <!-- Comments Section -->
+      <div class="comments-section">
+        <div class="comments-header">
+          <span>3 Comments</span>
+        </div>
+
+        <!-- Comment 1 -->
+        <div class="comment-item">
+          <img 
+            src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah" 
+            alt="Commenter" 
+            class="comment-avatar"
+          />
+          <div class="comment-content">
+            <div class="comment-bubble">
+              <span class="comment-username">Sarah Wilson</span>
+              <p class="comment-text">Welcome! This community is great for finding rides around campus.</p>
+            </div>
+            <span class="comment-time">1 hour ago</span>
+          </div>
+        </div>
+
+        <!-- Comment 2 -->
+        <div class="comment-item">
+          <img 
+            src="https://api.dicebear.com/7.x/avataaars/svg?seed=Mike" 
+            alt="Commenter" 
+            class="comment-avatar"
+          />
+          <div class="comment-content">
+            <div class="comment-bubble">
+              <span class="comment-username">Mike Chen</span>
+              <p class="comment-text">Happy to have you here! 🎉</p>
+            </div>
+            <span class="comment-time">45 minutes ago</span>
+          </div>
+        </div>
+
+        <!-- Comment 3 -->
+        <div class="comment-item">
+          <img 
+            src="https://api.dicebear.com/7.x/avataaars/svg?seed=Emma" 
+            alt="Commenter" 
+            class="comment-avatar"
+          />
+          <div class="comment-content">
+            <div class="comment-bubble">
+              <span class="comment-username">Emma Brown</span>
+              <p class="comment-text">Let me know if you need any help getting started!</p>
+            </div>
+            <span class="comment-time">30 minutes ago</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add Comment Section -->
+      <div class="add-comment-section">
+        <img 
+          src="https://api.dicebear.com/7.x/avataaars/svg?seed=Guest" 
+          alt="Your Avatar" 
+          class="comment-avatar"
+        />
+        <textarea 
+          placeholder="Add a comment..." 
+          class="comment-input"
+          rows="1"
+        ></textarea>
+      </div>
+    </div>
+
+    <div class="post-card">
+      <!-- Post Header -->
+      <div class="post-header">
+        <img 
+          src="https://api.dicebear.com/7.x/avataaars/svg?seed=JohnDoe" 
+          alt="User" 
+          class="post-avatar"
+        />
+        <div class="post-user-info">
+          <span class="post-username">John Doe</span>
+          <span class="post-time">2 hours ago</span>
+        </div>
+      </div>
+
+      <!-- Post Content -->
+      <div class="post-content">
+        <p>Just joined this amazing community! Looking forward to connecting with everyone and sharing rides. 🚗✨</p>
+      </div>
+
+      <!-- Comments Section -->
+      <div class="comments-section">
+        <div class="comments-header">
+          <span>3 Comments</span>
+        </div>
+
+        <!-- Comment 1 -->
+        <div class="comment-item">
+          <img 
+            src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah" 
+            alt="Commenter" 
+            class="comment-avatar"
+          />
+          <div class="comment-content">
+            <div class="comment-bubble">
+              <span class="comment-username">Sarah Wilson</span>
+              <p class="comment-text">Welcome! This community is great for finding rides around campus.</p>
+            </div>
+            <span class="comment-time">1 hour ago</span>
+          </div>
+        </div>
+
+        <!-- Comment 2 -->
+        <div class="comment-item">
+          <img 
+            src="https://api.dicebear.com/7.x/avataaars/svg?seed=Mike" 
+            alt="Commenter" 
+            class="comment-avatar"
+          />
+          <div class="comment-content">
+            <div class="comment-bubble">
+              <span class="comment-username">Mike Chen</span>
+              <p class="comment-text">Happy to have you here! 🎉</p>
+            </div>
+            <span class="comment-time">45 minutes ago</span>
+          </div>
+        </div>
+
+        <!-- Comment 3 -->
+        <div class="comment-item">
+          <img 
+            src="https://api.dicebear.com/7.x/avataaars/svg?seed=Emma" 
+            alt="Commenter" 
+            class="comment-avatar"
+          />
+          <div class="comment-content">
+            <div class="comment-bubble">
+              <span class="comment-username">Emma Brown</span>
+              <p class="comment-text">Let me know if you need any help getting started!</p>
+            </div>
+            <span class="comment-time">30 minutes ago</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add Comment Section -->
+      <div class="add-comment-section">
+        <img 
+          src="https://api.dicebear.com/7.x/avataaars/svg?seed=Guest" 
+          alt="Your Avatar" 
+          class="comment-avatar"
+        />
+        <textarea 
+          placeholder="Add a comment..." 
+          class="comment-input"
+          rows="1"
+        ></textarea>
+      </div>
+    </div>
+    </div>
+  </div>
+</ion-content>
