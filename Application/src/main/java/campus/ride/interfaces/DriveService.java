@@ -13,26 +13,15 @@ import java.util.concurrent.CompletableFuture;
 
 public interface DriveService {
     CompletableFuture<Page<DriveDto>> getAll(Pageable pageable);
-
     CompletableFuture<DriveDto> getById(Long id);
-
     CompletableFuture<DrivePageDto> getDrivePageById(Long id);
-
     CompletableFuture<DriveDto> add(DriveDto dto);
-
     CompletableFuture<DriveDto> update(Long id, DriveUpdateRequestDto dto);
-
     CompletableFuture<Void> delete(Long id);
 
     CompletableFuture<Page<DriveCardDto>> getDriverCards(Pageable pageable);
-
     CompletableFuture<List<DriveCardDto>> getDrivesByDriverId(Long driverId);
-
     CompletableFuture<List<DriveCardDto>> getMyDrives();
-
-    CompletableFuture<Long> getMyDrivesCount();
-
     CompletableFuture<List<DriveCardDto>> getMyRecentRides();
-
     CompletableFuture<Page<DriveCardDto>> getUpcomingDrives(Pageable pageable);
 }

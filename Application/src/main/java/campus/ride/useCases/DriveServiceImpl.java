@@ -47,12 +47,12 @@ public class DriveServiceImpl implements DriveService {
     @PersistenceContext
     private EntityManager em;
 
-    public DriveServiceImpl(DriveRepository driveRepo,
-            DriveQueryRepository driveQueryRepo,
-            BookingRepository bookingRepository,
-            UserRepository userRepository,
-            VehicleRepository vehicleRepository,
-            AddressRepository addressRepository) {
+    public DriveServiceImpl(DriveRepository driveRepo, 
+                           DriveQueryRepository driveQueryRepo,
+                           BookingRepository bookingRepository,
+                           UserRepository userRepository,
+                           VehicleRepository vehicleRepository,
+                           AddressRepository addressRepository) {
         this.driveRepo = driveRepo;
         this.driveQueryRepo = driveQueryRepo;
         this.bookingRepository = bookingRepository;
@@ -83,10 +83,10 @@ public class DriveServiceImpl implements DriveService {
     public CompletableFuture<DrivePageDto> getDrivePageById(Long id) {
         Drive d = driveRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Drive not found: " + id));
-
+        
         Address fromAddr = d.getFrom();
         Address toAddr = d.getTo();
-
+        
         AddressDto fromAddressDto = new AddressDto(
                 fromAddr.getId(),
                 fromAddr.getStreet(),
@@ -95,8 +95,9 @@ public class DriveServiceImpl implements DriveService {
                 fromAddr.getNeighborhood(),
                 fromAddr.getCity(),
                 fromAddr.getLatitude(),
-                fromAddr.getLongitude());
-
+                fromAddr.getLongitude()
+        );
+        
         AddressDto toAddressDto = new AddressDto(
                 toAddr.getId(),
                 toAddr.getStreet(),
@@ -105,8 +106,9 @@ public class DriveServiceImpl implements DriveService {
                 toAddr.getNeighborhood(),
                 toAddr.getCity(),
                 toAddr.getLatitude(),
-                toAddr.getLongitude());
-
+                toAddr.getLongitude()
+        );
+        
         return CompletableFuture.completedFuture(new DrivePageDto(
                 d.getId(),
                 d.getTime(),
@@ -120,8 +122,8 @@ public class DriveServiceImpl implements DriveService {
                 d.getDriver().getLastName(),
                 d.getVehicle().getVehicleModel(),
                 d.getVehicle().getVehicleLicencePlate(),
-                d.getVehicle().getVehicleColor(),
-                d.getAcceptedPaymentTypes()));
+                d.getVehicle().getVehicleColor()
+        ));
     }
 
     @Override
@@ -129,7 +131,7 @@ public class DriveServiceImpl implements DriveService {
     @Transactional
     public CompletableFuture<DriveDto> add(DriveDto dto) {
         Address from = mustFindAddress(dto.getFromAddressId());
-        Address to = mustFindAddress(dto.getToAddressId());
+        Address to   = mustFindAddress(dto.getToAddressId());
 
         if (from.getId().equals(to.getId())) {
             throw new IllegalArgumentException("From and To addresses must be different.");
@@ -142,7 +144,7 @@ public class DriveServiceImpl implements DriveService {
         Vehicle vehicle = null;
         if (dto.getVehicleId() != null) {
             vehicle = vehicleRepository.findById(dto.getVehicleId())
-                    .orElseThrow(() -> new IllegalArgumentException("Vehicle not found: " + dto.getVehicleId()));
+                .orElseThrow(() -> new IllegalArgumentException("Vehicle not found: " + dto.getVehicleId()));
         }
 
         if (vehicle == null) {
@@ -150,9 +152,6 @@ public class DriveServiceImpl implements DriveService {
         }
 
         Drive entity = DriveMapper.toEntity(dto, from, to);
-        if (dto.getAcceptedPaymentTypes() != null) {
-            entity.setAcceptedPaymentTypes(dto.getAcceptedPaymentTypes());
-        }
 
         if (entity.getCreatedAt() == null) {
             entity.setCreatedAt(LocalDateTime.now());
@@ -163,15 +162,16 @@ public class DriveServiceImpl implements DriveService {
         // Create driver booking with ACCEPTED status
         LocalDateTime now = LocalDateTime.now();
         Booking driverBooking = new Booking(
-                saved.getId(),
-                driver.getId(),
-                saved,
-                driver,
-                BookingStatus.ACCEPTED,
-                BookingRole.DRIVER,
-                now,
-                now,
-                null);
+            saved.getId(),
+            driver.getId(),
+            saved,
+            driver,
+            BookingStatus.ACCEPTED,
+            BookingRole.DRIVER,
+            now,
+            now,
+            null
+        );
         bookingRepository.save(driverBooking);
 
         return CompletableFuture.completedFuture(DriveMapper.toDto(saved));
@@ -192,13 +192,13 @@ public class DriveServiceImpl implements DriveService {
             throw new IllegalArgumentException("Only the driver can update the drive");
         }
 
+
         // Update addresses if provided
         if (dto.getFromStreet() != null) {
             Address from = addressRepository.findByStreetAndNumberAndNeighborhood(
                     dto.getFromStreet(), dto.getFromNumber(), dto.getFromNeighborhood())
                     .orElseGet(() -> addressRepository.save(new Address(
-                            dto.getFromStreet(), dto.getFromNumber(), dto.getFromNeighborhood(),
-                            dto.getFromLocationName(), dto.getFromCity(), null, null)));
+                            dto.getFromStreet(), dto.getFromNumber(), dto.getFromNeighborhood(), dto.getFromLocationName(), dto.getFromCity(), null, null)));
             d.setFrom(from);
         }
 
@@ -206,24 +206,17 @@ public class DriveServiceImpl implements DriveService {
             Address to = addressRepository.findByStreetAndNumberAndNeighborhood(
                     dto.getToStreet(), dto.getToNumber(), dto.getToNeighborhood())
                     .orElseGet(() -> addressRepository.save(new Address(
-                            dto.getToStreet(), dto.getToNumber(), dto.getToNeighborhood(), dto.getToLocationName(),
-                            dto.getToCity(), null, null)));
+                            dto.getToStreet(), dto.getToNumber(), dto.getToNeighborhood(), dto.getToLocationName(), dto.getToCity(), null, null)));
             d.setTo(to);
         }
 
-        if (dto.getPrice() != null)
-            d.setPrice(dto.getPrice());
-
+        if (dto.getPrice() != null) d.setPrice(dto.getPrice());
+        
         if (dto.getDay() != null && dto.getHour() != null) {
             d.setTime(LocalDateTime.of(dto.getDay(), dto.getHour()));
         }
-
-        if (dto.getTotalNoSeats() != null)
-            d.setTotalNoSeats(dto.getTotalNoSeats());
-
-        if (dto.getAcceptedPaymentTypes() != null) {
-            d.setAcceptedPaymentTypes(dto.getAcceptedPaymentTypes());
-        }
+        
+        if (dto.getTotalNoSeats() != null) d.setTotalNoSeats(dto.getTotalNoSeats());
 
         if (d.getFrom() != null && d.getTo() != null && d.getFrom().getId().equals(d.getTo().getId())) {
             throw new IllegalArgumentException("From and To addresses must be different.");
@@ -266,7 +259,8 @@ public class DriveServiceImpl implements DriveService {
                     r.getFrom_Neighborhood(),
                     null,
                     null,
-                    null);
+                    null
+            );
             AddressDto toAddress = new AddressDto(
                     null,
                     r.getTo_Street(),
@@ -275,13 +269,15 @@ public class DriveServiceImpl implements DriveService {
                     r.getTo_Neighborhood(),
                     null,
                     null,
-                    null);
+                    null
+            );
             return new DriveCardDto(
                     r.getId(), r.getTime(), r.getPrice(),
                     r.getAvailableSeats(), r.getTotalNoSeats(),
                     fromAddress, toAddress,
                     r.getDriver_FirstName(), r.getDriver_LastName(),
-                    r.getVehicle_Model());
+                    r.getVehicle_Model()
+            );
         }));
     }
 
@@ -300,7 +296,8 @@ public class DriveServiceImpl implements DriveService {
                             r.getFrom_Neighborhood(),
                             null,
                             null,
-                            null);
+                            null
+                    );
                     AddressDto toAddress = new AddressDto(
                             null,
                             r.getTo_Street(),
@@ -309,14 +306,16 @@ public class DriveServiceImpl implements DriveService {
                             r.getTo_Neighborhood(),
                             null,
                             null,
-                            null);
+                            null
+                    );
                     return new DriveCardDto(
                             r.getId(), r.getTime(), r.getPrice(),
                             r.getAvailableSeats(),
                             r.getTotalNoSeats(),
                             fromAddress, toAddress,
                             r.getDriver_FirstName(), r.getDriver_LastName(),
-                            r.getVehicle_Model());
+                            r.getVehicle_Model()
+                    );
                 })
                 .collect(java.util.stream.Collectors.toList()));
     }
@@ -335,18 +334,6 @@ public class DriveServiceImpl implements DriveService {
     @Override
     @Async
     @Transactional(readOnly = true)
-    public CompletableFuture<Long> getMyDrivesCount() {
-        String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + email));
-
-        List<DriveRow> rows = driveQueryRepo.findAllByDriverId(user.getId());
-        return CompletableFuture.completedFuture((long) rows.size());
-    }
-
-    @Override
-    @Async
-    @Transactional(readOnly = true)
     public CompletableFuture<List<DriveCardDto>> getMyRecentRides() {
         String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userRepository.findByEmail(email)
@@ -354,7 +341,7 @@ public class DriveServiceImpl implements DriveService {
 
         LocalDateTime currentTime = LocalDateTime.now();
         List<DriveRow> rows = driveQueryRepo.findPastDrivesByDriverId(user.getId(), currentTime);
-
+        
         return CompletableFuture.completedFuture(rows.stream()
                 .map(r -> {
                     AddressDto fromAddress = new AddressDto(
@@ -365,7 +352,8 @@ public class DriveServiceImpl implements DriveService {
                             r.getFrom_Neighborhood(),
                             null,
                             null,
-                            null);
+                            null
+                    );
                     AddressDto toAddress = new AddressDto(
                             null,
                             r.getTo_Street(),
@@ -374,14 +362,16 @@ public class DriveServiceImpl implements DriveService {
                             r.getTo_Neighborhood(),
                             null,
                             null,
-                            null);
+                            null
+                    );
                     return new DriveCardDto(
                             r.getId(), r.getTime(), r.getPrice(),
                             r.getAvailableSeats(),
                             r.getTotalNoSeats(),
                             fromAddress, toAddress,
                             r.getDriver_FirstName(), r.getDriver_LastName(),
-                            r.getVehicle_Model());
+                            r.getVehicle_Model()
+                    );
                 })
                 .collect(java.util.stream.Collectors.toList()));
     }
@@ -396,7 +386,7 @@ public class DriveServiceImpl implements DriveService {
 
         LocalDateTime currentTime = LocalDateTime.now();
         Page<DriveRow> rows = driveQueryRepo.findUpcomingDrives(user.getId(), currentTime, pageable);
-
+        
         return CompletableFuture.completedFuture(rows.map(r -> {
             AddressDto fromAddress = new AddressDto(
                     null,
@@ -406,7 +396,8 @@ public class DriveServiceImpl implements DriveService {
                     r.getFrom_Neighborhood(),
                     null,
                     null,
-                    null);
+                    null
+            );
             AddressDto toAddress = new AddressDto(
                     null,
                     r.getTo_Street(),
@@ -415,14 +406,16 @@ public class DriveServiceImpl implements DriveService {
                     r.getTo_Neighborhood(),
                     null,
                     null,
-                    null);
+                    null
+            );
             return new DriveCardDto(
                     r.getId(), r.getTime(), r.getPrice(),
                     r.getAvailableSeats(),
                     r.getTotalNoSeats(),
                     fromAddress, toAddress,
                     r.getDriver_FirstName(), r.getDriver_LastName(),
-                    r.getVehicle_Model());
+                    r.getVehicle_Model()
+            );
         }));
     }
 
@@ -431,8 +424,7 @@ public class DriveServiceImpl implements DriveService {
             throw new IllegalArgumentException("Address ID cannot be null");
         }
         Address a = em.find(Address.class, id);
-        if (a == null)
-            throw new IllegalArgumentException("Address not found: " + id);
+        if (a == null) throw new IllegalArgumentException("Address not found: " + id);
         return a;
     }
 }

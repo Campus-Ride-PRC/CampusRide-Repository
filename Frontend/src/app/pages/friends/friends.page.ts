@@ -2,22 +2,21 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
-  IonContent,
-  IonIcon, IonSpinner, IonButton,
+  IonContent, IonButton,
+  IonIcon, IonSpinner,
   IonRefresher, IonRefresherContent, IonList, IonItem, IonLabel, IonAvatar
 } from '@ionic/angular/standalone';
 import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
 import {
   personOutline, mailOutline, schoolOutline,
-  notificationsOffOutline, chatbubbleOutline
+  notificationsOffOutline
 } from 'ionicons/icons';
 import { AppHeaderComponent } from 'src/app/shared/components/header/app-header.component';
 import { SidePanelComponent } from 'src/app/shared/components/panel/side-panel.component';
 import { Profile } from 'src/app/core/services/profile';
 import { UserResponse } from 'src/app/core/models/userResponse';
 import { FriendService, Friend } from 'src/app/core/services/friend.service';
-import { DriveService } from 'src/app/core/services/drive.service';
 
 @Component({
   selector: 'app-friends',
@@ -26,7 +25,8 @@ import { DriveService } from 'src/app/core/services/drive.service';
   standalone: true,
   imports: [
     IonContent,
-    IonIcon, IonSpinner, IonButton,
+    IonButton,
+    IonIcon, IonSpinner,
     IonRefresher, IonRefresherContent,
     IonList, IonItem, IonLabel, IonAvatar,
     CommonModule, FormsModule,
@@ -45,12 +45,11 @@ export class FriendsPage implements OnInit {
     private router: Router,
     private location: Location,
     private profileService: Profile,
-    private friendService: FriendService,
-    private driveService: DriveService
+    private friendService: FriendService
   ) {
     addIcons({
       personOutline, mailOutline, schoolOutline,
-      notificationsOffOutline, chatbubbleOutline
+      notificationsOffOutline
     });
   }
 
@@ -58,7 +57,6 @@ export class FriendsPage implements OnInit {
     this.loadData();
     this.loadUser();
     this.loadFriendCount();
-    this.loadRidesCount();
   }
 
   loadUser() {
@@ -97,18 +95,6 @@ export class FriendsPage implements OnInit {
         if (event) event.target.complete();
       }
     });
-    this.loadRidesCount();
-  }
-
-  loadRidesCount() {
-    this.driveService.getMyDrivesCount().subscribe({
-      next: (count) => {
-        this.ridesCount = count;
-      },
-      error: (err) => {
-        console.error('Error loading rides count:', err);
-      }
-    });
   }
 
   handleRefresh(event: any) {
@@ -135,7 +121,7 @@ export class FriendsPage implements OnInit {
   onMenuItemClick(item: string) {
     console.log('Menu item clicked:', item);
 
-    switch (item) {
+    switch(item) {
       case 'home':
         this.router.navigate(['/home']);
         break;
@@ -169,17 +155,6 @@ export class FriendsPage implements OnInit {
   onRideClick(rideId: number) {
     this.router.navigate(['/ride-details', rideId], {
       queryParams: { driverMode: 'true' }
-    });
-  }
-
-  openChat(event: Event, friend: Friend) {
-    event.stopPropagation();
-    console.log('Opening chat with friend:', friend);
-    this.router.navigate(['/messages/chat'], {
-      queryParams: {
-        userId: friend.id,
-        name: friend.firstName + ' ' + friend.lastName
-      }
     });
   }
 

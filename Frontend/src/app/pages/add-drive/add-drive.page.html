@@ -1,7 +1,7 @@
 <!-- Map Container (Full Screen Background) -->
 <div class="map-wrapper">
   <div #mapContainer class="map-container"></div>
-
+  
   <!-- Loading Overlay -->
   <div class="loading-overlay" *ngIf="!mapLoaded() && !mapError()">
     <div class="loading-content">
@@ -21,7 +21,7 @@
   </div>
 
   <button (click)="goBack()" class="back-button">
-    <img src="assets/icon/arrow-back.svg" alt="Back" width="20" height="20" />
+        <img src="assets/icon/arrow-back.svg" alt="Back" width="20" height="20" />
   </button>
 
   <!-- Geocoding Loading Indicator -->
@@ -31,29 +31,53 @@
 </div>
 
 <!-- Bottom Sheet Panel -->
-<div class="bottom-sheet" #bottomSheet [style.height.%]="sheetHeight()" [class.dragging]="isDragging()"
-  [class.expanded]="isExpanded()">
+<div 
+  class="bottom-sheet"
+  #bottomSheet
+  [style.height.%]="sheetHeight()"
+  [class.dragging]="isDragging()"
+  [class.expanded]="isExpanded()"
+>
   <!-- Drag Handle -->
-  <div class="drag-handle-area" (touchstart)="onDragStart($event)" (mousedown)="onDragStart($event)">
+  <div 
+    class="drag-handle-area"
+    (touchstart)="onDragStart($event)"
+    (mousedown)="onDragStart($event)"
+  >
     <div class="drag-handle"></div>
   </div>
 
   <!-- Step 1: Location Selection -->
   <div class="sheet-content location-step" *ngIf="currentStep() === 'location'">
     <h2 class="sheet-title">Plan your ride</h2>
-
+    
     <!-- Location Inputs -->
     <div class="location-inputs">
       <!-- Departure Input -->
-      <div class="location-input-row" [class.active]="currentMode() === 'departure'" (click)="selectDepartureMode()">
+      <div 
+        class="location-input-row"
+        [class.active]="currentMode() === 'departure'"
+        (click)="selectDepartureMode()"
+      >
         <div class="location-marker departure" aria-label="Pickup marker">
           <div class="marker-dot"></div>
         </div>
         <div class="input-wrapper">
-          <input #departureInput type="text" placeholder="Where from?" (focus)="onInputFocus('departure')"
-            (blur)="onInputBlur('departure')" (input)="onDepartureInput($event)" autocomplete="off" />
-          <ion-icon *ngIf="departureAddress()" name="close-circle" class="clear-icon"
-            (click)="clearDeparture(); $event.stopPropagation()"></ion-icon>
+          <input
+            #departureInput
+            type="text"
+            placeholder="Where from?"
+            (focus)="onInputFocus('departure')"
+            (blur)="onInputBlur('departure')"
+            (input)="onDepartureInput($event)"
+            autocomplete="off"
+          />
+          <ion-icon
+            *ngIf="departureAddress()"
+            name="close-circle"
+            class="clear-icon"
+            (click)="clearDeparture(); $event.stopPropagation()"
+          ></ion-icon>
         </div>
       </div>
 
@@ -63,24 +87,41 @@
       </div>
 
       <!-- Destination Input -->
-      <div class="location-input-row" [class.active]="currentMode() === 'destination'"
-        (click)="selectDestinationMode()">
+      <div 
+        class="location-input-row"
+        [class.active]="currentMode() === 'destination'"
+        (click)="selectDestinationMode()"
+      >
         <div class="location-marker destination" aria-label="Destination marker">
           <div class="marker-square"></div>
         </div>
         <div class="input-wrapper">
-          <input #destinationInput type="text" placeholder="Where to?" (focus)="onInputFocus('destination')"
-            (blur)="onInputBlur('destination')" (input)="onDestinationInput($event)" autocomplete="off" />
-          <ion-icon *ngIf="destinationAddress()" name="close-circle" class="clear-icon"
-            (click)="clearDestination(); $event.stopPropagation()"></ion-icon>
+          <input
+            #destinationInput
+            type="text"
+            placeholder="Where to?"
+            (focus)="onInputFocus('destination')"
+            (blur)="onInputBlur('destination')"
+            (input)="onDestinationInput($event)"
+            autocomplete="off"
+          />
+          <ion-icon
+            *ngIf="destinationAddress()"
+            name="close-circle"
+            class="clear-icon"
+            (click)="clearDestination(); $event.stopPropagation()"
+          ></ion-icon>
         </div>
       </div>
     </div>
 
     <!-- Departure Suggestions -->
     <div class="suggestions-list" *ngIf="showDepartureSuggestions() && departureSuggestions().length > 0">
-      <div class="suggestion-item" *ngFor="let suggestion of departureSuggestions()"
-        (click)="selectSuggestion(suggestion, 'departure')">
+      <div 
+        class="suggestion-item"
+        *ngFor="let suggestion of departureSuggestions()"
+        (click)="selectSuggestion(suggestion, 'departure')"
+      >
         <ion-icon name="time-outline" class="suggestion-icon"></ion-icon>
         <div class="suggestion-text">
           <span class="main-text">{{ suggestion.mainText }}</span>
@@ -92,8 +133,11 @@
 
     <!-- Destination Suggestions -->
     <div class="suggestions-list" *ngIf="showDestinationSuggestions() && destinationSuggestions().length > 0">
-      <div class="suggestion-item" *ngFor="let suggestion of destinationSuggestions()"
-        (click)="selectSuggestion(suggestion, 'destination')">
+      <div 
+        class="suggestion-item"
+        *ngFor="let suggestion of destinationSuggestions()"
+        (click)="selectSuggestion(suggestion, 'destination')"
+      >
         <ion-icon name="time-outline" class="suggestion-icon"></ion-icon>
         <div class="suggestion-text">
           <span class="main-text">{{ suggestion.mainText }}</span>
@@ -112,7 +156,11 @@
 
     <!-- Continue Button -->
     <div class="action-button-container">
-      <button class="action-button primary" [disabled]="!canProceedToDetails()" (click)="proceedToDetails()">
+      <button
+        class="action-button primary"
+        [disabled]="!canProceedToDetails()"
+        (click)="proceedToDetails()"
+      >
         Continue
       </button>
     </div>
@@ -131,7 +179,7 @@
     <!-- Scrollable Form Content -->
     <div class="details-scroll-content">
       <form [formGroup]="driveForm" (ngSubmit)="confirmRide()">
-
+        
         <!-- Route Summary Card -->
         <div class="route-summary-card">
           <div class="route-point">
@@ -160,61 +208,62 @@
           <h3 class="section-title">
             Trip Information
           </h3>
-
+          
           <div class="form-row two-columns">
             <div class="form-field">
               <label>Price (RON)</label>
               <div class="input-container">
                 <ion-icon name="cash-outline" class="field-icon" style="padding-inline-start: 10px;"></ion-icon>
-                <input type="number" formControlName="price" placeholder="0.00" step="0.01" min="0" />
+                <input 
+                  type="number" 
+                  formControlName="price" 
+                  placeholder="0.00"
+                  step="0.01"
+                  min="0"
+                />
               </div>
               <span class="error-message" *ngIf="getErrorMessage('price')">{{ getErrorMessage('price') }}</span>
             </div>
-
+            
             <div class="form-field">
               <label>Available Seats</label>
               <div class="input-container">
                 <ion-icon name="people-outline" class="field-icon"></ion-icon>
-                <input type="number" formControlName="totalNoSeats" placeholder="1" min="1" max="8" />
+                <input 
+                  type="number" 
+                  formControlName="totalNoSeats" 
+                  placeholder="1"
+                  min="1"
+                  max="8"
+                />
               </div>
-              <span class="error-message" *ngIf="getErrorMessage('totalNoSeats')">{{ getErrorMessage('totalNoSeats')
-                }}</span>
+              <span class="error-message" *ngIf="getErrorMessage('totalNoSeats')">{{ getErrorMessage('totalNoSeats') }}</span>
             </div>
           </div>
 
           <div class="form-row two-columns">
             <div class="form-field">
-              <app-custom-date-picker label="Date" formControlName="day" presentation="date" [min]="getTodayDate()"
-                helperText="Select your trip date"></app-custom-date-picker>
+              <app-custom-date-picker
+                label="Date"
+                formControlName="day"
+                presentation="date"
+                [min]="getTodayDate()"
+                helperText="Select your trip date"
+              ></app-custom-date-picker>
               <span class="error-message" *ngIf="getErrorMessage('day')">{{ getErrorMessage('day') }}</span>
             </div>
-
+            
             <div class="form-field">
               <label>Time</label>
               <div class="input-container">
                 <ion-icon name="time-outline" class="field-icon" style="padding-inline-start: 10px;"></ion-icon>
-                <input type="time" formControlName="hour" />
+                <input 
+                  type="time" 
+                  formControlName="hour"
+                />
               </div>
               <span class="error-message" *ngIf="getErrorMessage('hour')">{{ getErrorMessage('hour') }}</span>
             </div>
-          </div>
-        </div>
-
-        <!-- Payment Methods Section -->
-        <div class="form-section">
-          <h3 class="section-title">
-            Accepted Payment Methods
-          </h3>
-          <div class="payment-methods-container">
-            <ion-list>
-              <ion-item>
-                <ion-checkbox value="CASH" [checked]="true"
-                  (ionChange)="onPaymentMethodChange($event, 'CASH')">Cash</ion-checkbox>
-              </ion-item>
-              <ion-item>
-                <ion-checkbox value="CARD" (ionChange)="onPaymentMethodChange($event, 'CARD')">Card</ion-checkbox>
-              </ion-item>
-            </ion-list>
           </div>
         </div>
 
@@ -224,7 +273,7 @@
             Vehicle Details
             <span class="badge" *ngIf="hasVehicle()">Registered</span>
           </h3>
-
+          
           <div class="form-field">
             <label>Vehicle Model</label>
             <div class="input-container" [class.disabled]="hasVehicle()">
@@ -235,8 +284,7 @@
                 placeholder="e.g., Toyota Corolla"
               />
             </div>
-            <span class="error-message" *ngIf="getErrorMessage('vehicleModel')">{{ getErrorMessage('vehicleModel')
-              }}</span>
+            <span class="error-message" *ngIf="getErrorMessage('vehicleModel')">{{ getErrorMessage('vehicleModel') }}</span>
           </div>
 
           <div class="form-row two-columns">
@@ -244,28 +292,38 @@
               <label>License Plate</label>
               <div class="input-container" [class.disabled]="hasVehicle()">
                 <ion-icon name="document-text-outline" class="field-icon"></ion-icon>
-                <input type="text" formControlName="vehicleLicencePlate" placeholder="CJ-01-ABC"
-                  style="text-transform: uppercase;" />
+                <input 
+                  type="text" 
+                  formControlName="vehicleLicencePlate" 
+                  placeholder="CJ-01-ABC"
+                  style="text-transform: uppercase;"
+                />
               </div>
-              <span class="error-message" *ngIf="getErrorMessage('vehicleLicencePlate')">{{
-                getErrorMessage('vehicleLicencePlate') }}</span>
+              <span class="error-message" *ngIf="getErrorMessage('vehicleLicencePlate')">{{ getErrorMessage('vehicleLicencePlate') }}</span>
             </div>
-
+            
             <div class="form-field">
               <label>Color</label>
               <div class="input-container" [class.disabled]="hasVehicle()">
                 <ion-icon name="color-palette-outline" class="field-icon"></ion-icon>
-                <input type="text" formControlName="vehicleColor" placeholder="e.g., Black" />
+                <input 
+                  type="text" 
+                  formControlName="vehicleColor" 
+                  placeholder="e.g., Black"
+                />
               </div>
-              <span class="error-message" *ngIf="getErrorMessage('vehicleColor')">{{ getErrorMessage('vehicleColor')
-                }}</span>
+              <span class="error-message" *ngIf="getErrorMessage('vehicleColor')">{{ getErrorMessage('vehicleColor') }}</span>
             </div>
           </div>
         </div>
 
         <!-- Submit Button -->
         <div class="action-button-container">
-          <button type="submit" class="action-button primary" [disabled]="isSubmitting() || driveForm.invalid">
+          <button
+            type="submit"
+            class="action-button primary"
+            [disabled]="isSubmitting() || driveForm.invalid"
+          >
             <ion-spinner *ngIf="isSubmitting()" name="crescent"></ion-spinner>
             <span *ngIf="!isSubmitting()">
               Confirm Ride

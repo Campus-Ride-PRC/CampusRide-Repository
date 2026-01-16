@@ -14,7 +14,6 @@ import { SidePanelComponent } from 'src/app/shared/components/panel/side-panel.c
 import { RideCardComponent } from 'src/app/shared/components/cards/ride-card.component';
 import { Profile } from 'src/app/core/services/profile';
 import { UserResponse } from 'src/app/core/models/userResponse';
-import { FriendService } from 'src/app/core/services/friend.service';
 import { addIcons } from 'ionicons';
 import {
   carOutline, locationOutline, timeOutline, cashOutline, peopleOutline
@@ -35,16 +34,13 @@ export class MyRidesPage implements OnInit {
   myRides: DriveCard[] = [];
   loading = true;
   isPanelOpen = false;
-  friendsCount: number = 0;
-  ridesCount: number = 0;
   user: UserResponse | null = null;
 
   constructor(
     private driveService: DriveService,
     private authService: AuthService,
     private router: Router,
-    private profileService: Profile,
-    private friendService: FriendService
+    private profileService: Profile
   ) {
     addIcons({
       carOutline, locationOutline, timeOutline, cashOutline, peopleOutline
@@ -54,8 +50,6 @@ export class MyRidesPage implements OnInit {
   ngOnInit() {
     this.loadMyRides();
     this.loadUser();
-    this.loadFriendCount();
-    this.loadRidesCount();
   }
 
   ionViewWillEnter() {
@@ -69,28 +63,6 @@ export class MyRidesPage implements OnInit {
       },
       error: (err) => {
         console.error('Error loading user:', err);
-      }
-    });
-  }
-
-  loadFriendCount() {
-    this.friendService.getFriendCount().subscribe({
-      next: (count) => {
-        this.friendsCount = count;
-      },
-      error: (err) => {
-        console.error('Error loading friend count:', err);
-      }
-    });
-  }
-
-  loadRidesCount() {
-    this.driveService.getMyDrivesCount().subscribe({
-      next: (count) => {
-        this.ridesCount = count;
-      },
-      error: (err) => {
-        console.error('Error loading rides count:', err);
       }
     });
   }
@@ -164,8 +136,6 @@ export class MyRidesPage implements OnInit {
 
   onMenuOpen() {
     this.isPanelOpen = true;
-    this.loadFriendCount();
-    this.loadRidesCount();
   }
 
   onPanelClosed() {
@@ -181,13 +151,13 @@ export class MyRidesPage implements OnInit {
       case 'home':
         this.router.navigate(['/home']);
         break;
-      case 'add-ride':
+      case 'drives':
         this.router.navigate(['/add-drive']);
         break;
       case 'my-bookings':
         this.router.navigate(['/my-bookings']);
         break;
-      case 'ride-requests':
+      case 'driver-requests':
         this.router.navigate(['/driver-requests']);
         break;
       case 'my-rides':

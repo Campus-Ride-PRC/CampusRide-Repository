@@ -17,11 +17,6 @@ import campus.ride.interfaces.BookingService;
 import campus.ride.transfer.dtos.booking.BookingRequestDto;
 import campus.ride.transfer.dtos.booking.BookingResponseDto;
 import campus.ride.transfer.mappings.BookingMapper;
-import campus.ride.contracts.payment.PaymentMethodRepository;
-import campus.ride.contracts.payment.PaymentRepository;
-import campus.ride.entities.Payment;
-import campus.ride.entities.PaymentMethod;
-import campus.ride.enums.PaymentStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -39,21 +34,15 @@ public class BookingServiceImpl implements BookingService {
     private final DriveRepository driveRepository;
     private final UserRepository userRepository;
     private final AddressRepository addressRepository;
-    private final PaymentRepository paymentRepository;
-    private final PaymentMethodRepository paymentMethodRepository;
 
-    public BookingServiceImpl(BookingRepository bookingRepository,
-            DriveRepository driveRepository,
-            UserRepository userRepository,
-            AddressRepository addressRepository,
-            PaymentRepository paymentRepository,
-            PaymentMethodRepository paymentMethodRepository) {
+    public BookingServiceImpl(BookingRepository bookingRepository, 
+                             DriveRepository driveRepository,
+                             UserRepository userRepository,
+                             AddressRepository addressRepository) {
         this.bookingRepository = bookingRepository;
         this.driveRepository = driveRepository;
         this.userRepository = userRepository;
         this.addressRepository = addressRepository;
-        this.paymentRepository = paymentRepository;
-        this.paymentMethodRepository = paymentMethodRepository;
     }
 
     @Override
@@ -62,8 +51,7 @@ public class BookingServiceImpl implements BookingService {
     public CompletableFuture<BookingResponseDto> requestRide(BookingRequestDto requestDto) {
         // Validate drive exists
         Drive drive = driveRepository.findById(requestDto.getDriveId())
-                .orElseThrow(
-                        () -> new ResourceNotFoundException("Drive not found with id: " + requestDto.getDriveId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Drive not found with id: " + requestDto.getDriveId()));
 
         String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userRepository.findByEmail(email)
@@ -89,8 +77,7 @@ public class BookingServiceImpl implements BookingService {
         Address pickupAddress = null;
         if (requestDto.getPickupAddressId() != null) {
             pickupAddress = addressRepository.findById(requestDto.getPickupAddressId())
-                    .orElseThrow(() -> new ResourceNotFoundException(
-                            "Pickup address not found with id: " + requestDto.getPickupAddressId()));
+                    .orElseThrow(() -> new ResourceNotFoundException("Pickup address not found with id: " + requestDto.getPickupAddressId()));
         }
 
         // Create booking with PENDING status
@@ -104,31 +91,10 @@ public class BookingServiceImpl implements BookingService {
                 BookingRole.CLIENT,
                 now,
                 now,
-                pickupAddress);
+                pickupAddress
+        );
 
         Booking savedBooking = bookingRepository.save(booking);
-
-        // Process payment if method provided
-        if (requestDto.getPaymentMethodId() != null) {
-            PaymentMethod paymentMethod = paymentMethodRepository.findById(requestDto.getPaymentMethodId())
-                    .orElseThrow(() -> new ResourceNotFoundException(
-                            "Payment method not found: " + requestDto.getPaymentMethodId()));
-
-            if (!paymentMethod.getUser().getId().equals(user.getId())) {
-                throw new BadRequestException("Invalid payment method");
-            }
-
-            Payment payment = new Payment(
-                    savedBooking,
-                    paymentMethod,
-                    drive.getPrice(),
-                    PaymentStatus.PENDING,
-                    null,
-                    now);
-            payment.setCreatedAt(now);
-            paymentRepository.save(payment);
-        }
-
         return CompletableFuture.completedFuture(BookingMapper.toDto(savedBooking));
     }
 
@@ -264,11 +230,10 @@ public class BookingServiceImpl implements BookingService {
     @Async
     @Transactional(readOnly = true)
     public CompletableFuture<List<BookingResponseDto>> getPendingBookingsByDrive(Long driveId) {
-        return CompletableFuture
-                .completedFuture(bookingRepository.findByDriveIdAndStatus(driveId, BookingStatus.PENDING)
-                        .stream()
-                        .map(BookingMapper::toDto)
-                        .collect(Collectors.toList()));
+        return CompletableFuture.completedFuture(bookingRepository.findByDriveIdAndStatus(driveId, BookingStatus.PENDING)
+                .stream()
+                .map(BookingMapper::toDto)
+                .collect(Collectors.toList()));
     }
 
     @Override

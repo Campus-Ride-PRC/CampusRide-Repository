@@ -35,11 +35,7 @@
                 "output": "assets"
               }
             ],
-            "styles": [
-              "src/global.scss",
-              "src/theme/variables.scss",
-              "src/tailwind.css"
-            ],
+            "styles": ["src/global.scss", "src/theme/variables.scss",  "src/tailwind.css"],
             "scripts": [],
             "browser": "src/main.ts"
           },
@@ -79,9 +75,6 @@
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
-          "options": {
-            "proxyConfig": "proxy.conf.json"
-          },
           "configurations": {
             "production": {
               "buildTarget": "app:build:production"
@@ -120,7 +113,7 @@
               "src/styles.scss",
               "src/global.scss",
               "src/theme/variables.scss"
-            ],
+          ],
             "scripts": []
           },
           "configurations": {
@@ -133,10 +126,7 @@
         "lint": {
           "builder": "@angular-eslint/builder:lint",
           "options": {
-            "lintFilePatterns": [
-              "src/**/*.ts",
-              "src/**/*.html"
-            ]
+            "lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
           }
         }
       }

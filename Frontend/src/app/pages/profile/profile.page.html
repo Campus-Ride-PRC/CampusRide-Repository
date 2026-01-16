@@ -1,14 +1,20 @@
-<app-header menuTitle="Profile" (menuClick)="onMenuOpen()" (notificationClick)="onNotificationOpen()">
+<app-header
+  menuTitle="Profile"
+  (menuClick)="onMenuOpen()"
+  (notificationClick)="onNotificationOpen()">
 </app-header>
 
 <ion-content [fullscreen]="true" class="profile-page">
   <div *ngIf="user_state === 'ready' && drives_state === 'ready' && booking__state === 'ready' && user"
-    class="profile-wrapper">
+       class="profile-wrapper">
 
     <div class="profile-header">
       <div class="avatar-wrapper">
-        <img [src]="'https://api.dicebear.com/7.x/avataaars/svg?seed=' + user.firstName" [alt]="user.firstName"
-          class="avatar" />
+        <img
+          [src]="'https://api.dicebear.com/7.x/avataaars/svg?seed=' + user.firstName"
+          [alt]="user.firstName"
+          class="avatar"
+        />
       </div>
       <div class="profile-text">
         <h1 class="name">{{ user.firstName }} {{ user.lastName }}</h1>
@@ -16,27 +22,18 @@
           <span>{{ user.faculty.name }}</span>
         </div>
       </div>
-      <div>
+      <div >
         <button class="add-ride-btn">
           Edit
         </button>
       </div>
     </div>
-
-    <!-- Manage Payment Methods Button -->
-    <div class="button-section" style="padding-inline: 8px !important; padding-bottom: 8px !important;">
-      <button class="add-ride-btn" routerLink="/payment-methods">
-        Manage Payment Methods
-      </button>
-    </div>
     <div class="button-section" style="padding-inline: 8px !important; padding-bottom: 8px !important;">
       <p class="title-b text-center">My Bookings</p>
-      <app-booking-card *ngFor="let booking of myBookings" [booking]="booking"
-        (cardClick)="onBookingClick($event)"></app-booking-card>
+      <app-booking-card *ngFor="let booking of myBookings" [booking]="booking" (cardClick)="onBookingClick($event)"></app-booking-card>
       <p *ngIf="myBookings.length === 0" class="text-[#888] text-center py-4">You don't have any bookings yet</p>
     </div>
-    <div class="button-section" *ngIf="myBookings.length > 0"
-      style="padding-inline: 8px !important; padding-bottom: 8px !important;">
+    <div class="button-section" *ngIf="myBookings.length > 0" style="padding-inline: 8px !important; padding-bottom: 8px !important;">
       <button class="add-ride-btn" (click)="goToAllBookings()">
         See all bookings
       </button>
@@ -44,31 +41,42 @@
     <div class="button-section example" style="padding-inline: 8px !important; padding-bottom: 8px !important;">
       <p class="title-b text-center">My Recent Rides</p>
       <div class="drives-container">
-        <app-ride-card *ngFor="let drive of myDrives" [userName]="getDriverName(drive)"
-          [userAvatar]="'https://api.dicebear.com/7.x/avataaars/svg?seed=' + drive.driverFirstName" [rating]="4.8"
-          [fromLocation]="getFromLocation(drive)" [toLocation]="getToLocation(drive)"
-          [departureTime]="formatDepartureTime(drive.time)" [seatsAvailable]="drive.availableSeats"
-          [totalSeats]="drive.totalNoSeats" [price]="formatPrice(drive.price)" (cardClick)="onCardClick(drive)"
-          class="card-item"></app-ride-card>
+        <app-ride-card
+        *ngFor="let drive of myDrives"
+        [userName]="getDriverName(drive)"
+        [userAvatar]="'https://api.dicebear.com/7.x/avataaars/svg?seed=' + drive.driverFirstName"
+        [rating]="4.8"
+        [fromLocation]="getFromLocation(drive)"
+        [toLocation]="getToLocation(drive)"
+        [departureTime]="formatDepartureTime(drive.time)"
+        [seatsAvailable]="drive.availableSeats"
+        [totalSeats]="drive.totalNoSeats"
+        [price]="formatPrice(drive.price)"
+        (cardClick)="onCardClick(drive)"
+        class="card-item"
+      ></app-ride-card>
       </div>
-      <p *ngIf="myDrives.length === 0" class="text-[#888] text-center"
-        style="margin-top: 0px !important; margin-bottom: 0px !important;">You don't have any rides yet</p>
+      <p *ngIf="myDrives.length === 0" class="text-[#888] text-center" style="margin-top: 0px !important; margin-bottom: 0px !important;">You don't have any rides yet</p>
     </div>
-    <div class="button-section" *ngIf="myDrives.length > 0"
-      style="padding-inline: 8px !important; padding-bottom: 8px !important;">
+    <div class="button-section" *ngIf="myDrives.length > 0" style="padding-inline: 8px !important; padding-bottom: 8px !important;">
       <button class="add-ride-btn" (click)="goToAllDrives()">
         See all future rides
       </button>
     </div>
-
-
   </div>
 </ion-content>
 
 <div class="fixed inset-0 z-[1000] pointer-events-none">
-  <app-side-panel [isOpen]="isPanelOpen" [userFirstName]="user?.firstName || 'Guest'"
+  <app-side-panel
+    [isOpen]="isPanelOpen"
+    [userFirstName]="user?.firstName || 'Guest'"
     [userAvatar]="user ? 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + user.firstName : ''"
-    [friendsCount]="friendsCount" [ridesCount]="ridesCount" [currentRoute]="'/profile'" (closed)="onPanelClosed()"
-    (itemClicked)="onMenuItemClick($event)" (rideClicked)="onRideClick($event)" class="pointer-events-auto">
+    [friendsCount]="friendsCount"
+    [ridesCount]="ridesCount"
+    [currentRoute]="'/profile'"
+    (closed)="onPanelClosed()"
+    (itemClicked)="onMenuItemClick($event)"
+    (rideClicked)="onRideClick($event)"
+    class="pointer-events-auto">
   </app-side-panel>
 </div>

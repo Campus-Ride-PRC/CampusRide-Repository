@@ -10,20 +10,12 @@ import java.util.Optional;
 
 public interface BookingRepository {
     Booking save(Booking booking);
-
     Optional<Booking> findById(BookingId id);
-
     List<Booking> findByDriveId(Long driveId);
-
     List<Booking> findByUserId(Long userId);
-
     List<Booking> findByUserIdAndRole(Long userId, BookingRole role);
-
     List<Booking> findByDriveIdAndStatus(Long driveId, BookingStatus status);
-
     List<Booking> findByUserIdAndStatus(Long userId, BookingStatus status);
-
     boolean existsById(BookingId id);
-
     void deleteById(BookingId id);
 }

@@ -1,7 +1,7 @@
 export interface BookingRequest {
   driveId: number;
-  pickupAddressId: number;
-  paymentMethodId?: number;
+  userId: number;
+  pickupAddressId?: number;
 }
 
 export interface BookingResponse {

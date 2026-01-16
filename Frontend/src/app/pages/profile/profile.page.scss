@@ -1,3 +1,4 @@
+
 .toolbar-dark {
   --background: transparent;
   --color: #fff;
@@ -88,7 +89,6 @@
   font-size: 13px;
   color: #9ca3af;
 }
-
 .add-ride-btn {
   background: linear-gradient(135deg, #00C36C 0%, #00A859 100%);
   color: #FFFFFF;
@@ -113,8 +113,7 @@
     box-shadow: 0 2px 8px rgba(0, 195, 108, 0.2);
   }
 }
-
-.button-section {
+.button-section{
   padding: 10px 16px 24px 16px;
   align-items: center;
 }
@@ -123,14 +122,13 @@
   padding: 10px 16px 24px 16px;
 
 }
-
 .my-rides p {
   font-size: 22px;
   font-weight: 700;
   padding-left: 10px;
 }
 
-.title-b {
+.title-b{
   font-size: 22px;
   font-weight: 700;
   padding-left: 10px;
@@ -146,3 +144,6 @@
 .card-item {
   width: 100%;
 }
+
+
+
