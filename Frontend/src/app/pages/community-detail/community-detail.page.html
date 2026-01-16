@@ -15,187 +15,64 @@
       </p>
     </div>
 
-    <!-- Mock Post -->
-    <div>
-        <h2 class="posts-heading">Posts</h2>
+    <div class="posts-section">
+      <h2 class="posts-heading">Posts</h2>
 
-        <div class="post-card">
-      <!-- Post Header -->
-      <div class="post-header">
-        <img 
-          src="https://api.dicebear.com/7.x/avataaars/svg?seed=JohnDoe" 
-          alt="User" 
-          class="post-avatar"
-        />
-        <div class="post-user-info">
-          <span class="post-username">John Doe</span>
-          <span class="post-time">2 hours ago</span>
-        </div>
+      <!-- Loading state -->
+      <div *ngIf="isLoading" class="loading-container">
+        <div class="spinner"></div>
       </div>
 
-      <!-- Post Content -->
-      <div class="post-content">
-        <p>Just joined this amazing community! Looking forward to connecting with everyone and sharing rides. 🚗✨</p>
+      <!-- Empty state -->
+      <div *ngIf="!isLoading && posts.length === 0" class="empty-state">
+        <p class="empty-message">There are no posts yet.<br>Be the first to share something!</p>
       </div>
 
-      <!-- Comments Section -->
-      <div class="comments-section">
-        <div class="comments-header">
-          <span>3 Comments</span>
-        </div>
-
-        <!-- Comment 1 -->
-        <div class="comment-item">
-          <img 
-            src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah" 
-            alt="Commenter" 
-            class="comment-avatar"
-          />
-          <div class="comment-content">
-            <div class="comment-bubble">
-              <span class="comment-username">Sarah Wilson</span>
-              <p class="comment-text">Welcome! This community is great for finding rides around campus.</p>
-            </div>
-            <span class="comment-time">1 hour ago</span>
-          </div>
-        </div>
-
-        <!-- Comment 2 -->
-        <div class="comment-item">
-          <img 
-            src="https://api.dicebear.com/7.x/avataaars/svg?seed=Mike" 
-            alt="Commenter" 
-            class="comment-avatar"
-          />
-          <div class="comment-content">
-            <div class="comment-bubble">
-              <span class="comment-username">Mike Chen</span>
-              <p class="comment-text">Happy to have you here! 🎉</p>
-            </div>
-            <span class="comment-time">45 minutes ago</span>
-          </div>
-        </div>
-
-        <!-- Comment 3 -->
-        <div class="comment-item">
-          <img 
-            src="https://api.dicebear.com/7.x/avataaars/svg?seed=Emma" 
-            alt="Commenter" 
-            class="comment-avatar"
-          />
-          <div class="comment-content">
-            <div class="comment-bubble">
-              <span class="comment-username">Emma Brown</span>
-              <p class="comment-text">Let me know if you need any help getting started!</p>
-            </div>
-            <span class="comment-time">30 minutes ago</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Add Comment Section -->
-      <div class="add-comment-section">
-        <img 
-          src="https://api.dicebear.com/7.x/avataaars/svg?seed=Guest" 
-          alt="Your Avatar" 
-          class="comment-avatar"
-        />
-        <textarea 
-          placeholder="Add a comment..." 
-          class="comment-input"
-          rows="1"
-        ></textarea>
+      <!-- Posts list -->
+      <div *ngIf="!isLoading && posts.length > 0" class="posts-list">
+        <app-community-post 
+          *ngFor="let post of posts" 
+          [post]="post"
+        ></app-community-post>
       </div>
     </div>
+  </div>
 
-    <div class="post-card">
-      <!-- Post Header -->
-      <div class="post-header">
-        <img 
-          src="https://api.dicebear.com/7.x/avataaars/svg?seed=JohnDoe" 
-          alt="User" 
-          class="post-avatar"
-        />
-        <div class="post-user-info">
-          <span class="post-username">John Doe</span>
-          <span class="post-time">2 hours ago</span>
-        </div>
+  <!-- Sticky Add Post Button -->
+  <button class="add-post-btn-sticky" (click)="openAddPostModal()">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+    </svg>
+    <span>Add Post</span>
+  </button>
+
+  <!-- Add Post Modal -->
+  <div class="modal-overlay" *ngIf="showAddPostModal" (click)="closeAddPostModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Create Post</h3>
+        <button class="close-btn" (click)="closeAddPostModal()">×</button>
       </div>
-
-      <!-- Post Content -->
-      <div class="post-content">
-        <p>Just joined this amazing community! Looking forward to connecting with everyone and sharing rides. 🚗✨</p>
-      </div>
-
-      <!-- Comments Section -->
-      <div class="comments-section">
-        <div class="comments-header">
-          <span>3 Comments</span>
-        </div>
-
-        <!-- Comment 1 -->
-        <div class="comment-item">
-          <img 
-            src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah" 
-            alt="Commenter" 
-            class="comment-avatar"
-          />
-          <div class="comment-content">
-            <div class="comment-bubble">
-              <span class="comment-username">Sarah Wilson</span>
-              <p class="comment-text">Welcome! This community is great for finding rides around campus.</p>
-            </div>
-            <span class="comment-time">1 hour ago</span>
-          </div>
-        </div>
-
-        <!-- Comment 2 -->
-        <div class="comment-item">
-          <img 
-            src="https://api.dicebear.com/7.x/avataaars/svg?seed=Mike" 
-            alt="Commenter" 
-            class="comment-avatar"
-          />
-          <div class="comment-content">
-            <div class="comment-bubble">
-              <span class="comment-username">Mike Chen</span>
-              <p class="comment-text">Happy to have you here! 🎉</p>
-            </div>
-            <span class="comment-time">45 minutes ago</span>
-          </div>
-        </div>
-
-        <!-- Comment 3 -->
-        <div class="comment-item">
-          <img 
-            src="https://api.dicebear.com/7.x/avataaars/svg?seed=Emma" 
-            alt="Commenter" 
-            class="comment-avatar"
-          />
-          <div class="comment-content">
-            <div class="comment-bubble">
-              <span class="comment-username">Emma Brown</span>
-              <p class="comment-text">Let me know if you need any help getting started!</p>
-            </div>
-            <span class="comment-time">30 minutes ago</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Add Comment Section -->
-      <div class="add-comment-section">
-        <img 
-          src="https://api.dicebear.com/7.x/avataaars/svg?seed=Guest" 
-          alt="Your Avatar" 
-          class="comment-avatar"
-        />
+      
+      <div class="modal-body">
         <textarea 
-          placeholder="Add a comment..." 
-          class="comment-input"
-          rows="1"
+          [(ngModel)]="newPostContent"
+          placeholder="What's on your mind?"
+          class="post-textarea"
+          rows="6"
+          [disabled]="isSubmitting"
         ></textarea>
       </div>
-    </div>
+
+      <div class="modal-footer">
+        <button 
+          class="send-btn" 
+          (click)="submitPost()"
+          [disabled]="!newPostContent.trim() || isSubmitting"
+        >
+          {{ isSubmitting ? 'Sending...' : 'Send' }}
+        </button>
+      </div>
     </div>
   </div>
 </ion-content>

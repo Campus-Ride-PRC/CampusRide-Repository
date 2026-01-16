@@ -1,0 +1,79 @@
+<div class="post-card">
+  <!-- Post Header -->
+  <div class="post-header">
+    <img 
+      [src]="getUserAvatar(post.author.firstName)" 
+      [alt]="getFullName(post.author)" 
+      class="post-avatar"
+    />
+    <div class="post-user-info">
+      <span class="post-username">{{ getFullName(post.author) }}</span>
+      <span class="post-time">{{ getTimeAgo(post.createdAt) }}</span>
+    </div>
+  </div>
+
+  <!-- Post Content -->
+  <div class="post-content">
+    <p>{{ post.content }}</p>
+  </div>
+
+  <!-- Comments Preview -->
+  <div class="comments-preview" (click)="toggleComments()">
+    <span class="comment-count">
+      {{ post.commentCount }} Comment{{ post.commentCount !== 1 ? 's' : '' }}
+      <span class="toggle-icon">{{ showComments ? '▲' : '▼' }}</span>
+    </span>
+  </div>
+
+  <!-- Comments Section -->
+  <div class="comments-section" *ngIf="showComments">
+    <!-- Loading Comments -->
+    <div *ngIf="isLoadingComments" class="comments-loading">
+      <div class="mini-spinner"></div>
+    </div>
+
+    <!-- Comments List -->
+    <div *ngIf="!isLoadingComments && comments.length > 0" class="comments-list">
+      <div *ngFor="let comment of comments" class="comment-item">
+        <img 
+          [src]="getUserAvatar(comment.author.firstName)" 
+          [alt]="getFullName(comment.author)" 
+          class="comment-avatar"
+        />
+        <div class="comment-content">
+          <div class="comment-bubble">
+            <span class="comment-username">{{ getFullName(comment.author) }}</span>
+            <p class="comment-text">{{ comment.content }}</p>
+          </div>
+          <span class="comment-time">{{ getTimeAgo(comment.createdAt) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- No Comments -->
+    <div *ngIf="!isLoadingComments && comments.length === 0" class="no-comments">
+      <p>No comments yet. Be the first to comment!</p>
+    </div>
+
+    <!-- Add Comment -->
+    <div class="add-comment-section">
+      <textarea 
+        [(ngModel)]="newCommentContent"
+        placeholder="Write a comment..."
+        class="comment-input"
+        rows="1"
+        [disabled]="isSubmittingComment"
+        (keydown.enter)="$event.preventDefault(); submitComment()"
+      ></textarea>
+      <button 
+        class="send-comment-btn" 
+        (click)="submitComment()"
+        [disabled]="!newCommentContent.trim() || isSubmittingComment"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
