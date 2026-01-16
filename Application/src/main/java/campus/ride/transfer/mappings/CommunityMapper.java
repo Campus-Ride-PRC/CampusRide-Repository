@@ -15,6 +15,7 @@ public class CommunityMapper {
         dto.setName(community.getName());
         dto.setDescription(community.getDescription());
         dto.setCreator(UserMapper.toDto(community.getCreatedBy()));
+        dto.setMemberCount(community.getMemberCount());
         return dto;
     }
 
