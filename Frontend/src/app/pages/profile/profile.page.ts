@@ -240,6 +240,9 @@ export class ProfilePage implements OnInit {
       case 'profile':
         // Already on profile
         break;
+      case 'communities':
+        this.router.navigate(['/communities']);
+        break;
       case 'logout':
         this.logout();
         break;

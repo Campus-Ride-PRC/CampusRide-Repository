@@ -1,0 +1,78 @@
+<app-header 
+  menuTitle="Community Details" 
+  [showBackArrow]="true"
+  (backClick)="goBack()"
+  (notificationClick)="goToNotifications()"
+></app-header>
+
+<ion-content>
+  <div class="community-detail-container">
+    <div class="header-section">
+      <h1>{{ community?.name || 'Community ' + communityId }}</h1>
+      <p class="subtitle">{{ community?.description || 'No description available' }}</p>
+      <p class="subtitle" style="padding-top: 4px;">
+        {{ community?.memberCount ?? 0 }} Member{{ (community?.memberCount ?? 0) !== 1 ? 's' : '' }}
+      </p>
+    </div>
+
+    <div class="posts-section">
+      <h2 class="posts-heading">Posts</h2>
+
+      <!-- Loading state -->
+      <div *ngIf="isLoading" class="loading-container">
+        <div class="spinner"></div>
+      </div>
+
+      <!-- Empty state -->
+      <div *ngIf="!isLoading && posts.length === 0" class="empty-state">
+        <p class="empty-message">There are no posts yet.<br>Be the first to share something!</p>
+      </div>
+
+      <!-- Posts list -->
+      <div *ngIf="!isLoading && posts.length > 0" class="posts-list">
+        <app-community-post 
+          *ngFor="let post of posts" 
+          [post]="post"
+        ></app-community-post>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sticky Add Post Button -->
+  <button class="add-post-btn-sticky" (click)="openAddPostModal()">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+    </svg>
+    <span>Add Post</span>
+  </button>
+
+  <!-- Add Post Modal -->
+  <div class="modal-overlay" *ngIf="showAddPostModal" (click)="closeAddPostModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Create Post</h3>
+        <button class="close-btn" (click)="closeAddPostModal()">×</button>
+      </div>
+      
+      <div class="modal-body">
+        <textarea 
+          [(ngModel)]="newPostContent"
+          placeholder="What's on your mind?"
+          class="post-textarea"
+          rows="6"
+          [disabled]="isSubmitting"
+        ></textarea>
+      </div>
+
+      <div class="modal-footer">
+        <button 
+          class="send-btn" 
+          (click)="submitPost()"
+          [disabled]="!newPostContent.trim() || isSubmitting"
+        >
+          {{ isSubmitting ? 'Sending...' : 'Send' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</ion-content>

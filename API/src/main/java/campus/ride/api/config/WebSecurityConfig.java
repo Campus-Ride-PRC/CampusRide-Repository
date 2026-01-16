@@ -40,6 +40,7 @@ public class WebSecurityConfig {
                 // Public endpoints - no authentication required
                 .requestMatchers("/api/user/login", "/api/user/register/**", "/api/user/exists", "/api/user/email", "api/user/reset/password/**").permitAll()
                 .requestMatchers("/api/faculties/**").permitAll()
+                .requestMatchers("api/communities/**").permitAll()
                 // Swagger/OpenAPI endpoints
                 .requestMatchers("/swagger-ui/**", "/swagger-ui.html").permitAll()
                 .requestMatchers("/v3/api-docs/**", "/v3/api-docs.yaml", "/v3/api-docs").permitAll()
