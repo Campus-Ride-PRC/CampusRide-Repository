@@ -48,6 +48,117 @@ ion-content {
 
 .communities-list {
   margin: 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.community-card {
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.community-title {
+  font-family: var(--campus-ride-font-primary);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--campus-ride-text-primary, #fff);
+  margin: 0 0 8px 0;
+}
+
+.community-description {
+  font-family: var(--campus-ride-font-secondary);
+  font-size: 14px;
+  color: var(--campus-ride-text-secondary, #999);
+  margin: 0 0 12px 0;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.community-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.member-count {
+  font-family: var(--campus-ride-font-secondary);
+  font-size: 13px;
+  color: var(--campus-ride-text-secondary, #999);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  &::before {
+    content: "👥";
+    font-size: 14px;
+  }
+}
+
+// New community card with fixed green button on right
+.new-community-card {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  padding: 0;
+  cursor: default;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    transform: none;
+  }
+
+  .card-content {
+    flex: 1;
+    padding: 16px;
+  }
+
+  .join-action {
+    width: 60px;
+    background-color: var(--campus-ride-primary, #00B862);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    border-radius: 0 15px 15px 0;
+
+    .plus-icon {
+      color: white;
+      font-size: 28px;
+      font-weight: 300;
+      line-height: 1;
+    }
+
+    &:hover {
+      background-color: #009a52;
+    }
+
+    &:active {
+      background-color: #008847;
+    }
+  }
 }
 
 .modal-overlay {
@@ -187,6 +298,39 @@ ion-content {
   }
 }
 
+.community-detail-info {
+  margin-bottom: 20px;
+
+  .member-info {
+    font-family: var(--campus-ride-font-secondary);
+    font-size: 15px;
+    color: var(--campus-ride-text-secondary, #999);
+    margin: 0 0 24px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .description-section {
+    h3 {
+      font-family: var(--campus-ride-font-primary);
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--campus-ride-text-primary, #fff);
+      margin: 0 0 12px 0;
+    }
+
+    .description-text {
+      font-family: var(--campus-ride-font-secondary);
+      font-size: 15px;
+      color: var(--campus-ride-text-primary, #fff);
+      line-height: 1.6;
+      margin: 0;
+      white-space: pre-wrap;
+    }
+  }
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -312,5 +456,102 @@ ion-content {
     font-size: 1.1rem;
     margin: 0;
     color: var(--campus-ride-text-secondary);
+  }
+}
+
+// iOS-style Modal
+.ios-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease;
+  padding: 20px;
+}
+
+.ios-modal {
+  background-color: rgba(30, 30, 30, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 320px;
+  overflow: hidden;
+  animation: scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.ios-modal-header {
+  padding: 20px 16px 8px;
+  text-align: center;
+
+  h3 {
+    font-family: var(--campus-ride-font-primary);
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--campus-ride-text-primary, #fff);
+    margin: 0;
+  }
+}
+
+.ios-modal-message {
+  padding: 0 16px 20px;
+  text-align: center;
+
+  p {
+    font-family: var(--campus-ride-font-secondary);
+    font-size: 13px;
+    color: var(--campus-ride-text-secondary, #999);
+    margin: 0;
+    line-height: 1.4;
+  }
+}
+
+.ios-modal-actions {
+  display: flex;
+  border-top: 0.5px solid rgba(255, 255, 255, 0.15);
+}
+
+.ios-btn {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  background: none;
+  font-family: var(--campus-ride-font-primary);
+  font-size: 17px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+
+  &:active {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+
+  &:not(:last-child) {
+    border-right: 0.5px solid rgba(255, 255, 255, 0.15);
+  }
+}
+
+.ios-btn-cancel {
+  color: var(--campus-ride-text-secondary, #999);
+  font-weight: 400;
+}
+
+.ios-btn-confirm {
+  color: var(--campus-ride-primary, #00B862);
+  font-weight: 600;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
   }
 }

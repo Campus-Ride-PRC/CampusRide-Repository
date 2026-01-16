@@ -33,11 +33,18 @@ export class CommunitiesPage implements OnInit {
   newCommunityDescription: string = '';
   showSuccessAnimation: boolean = false;
   createdCommunityId: number | null = null;
+  
+  showJoinModal: boolean = false;
+  selectedCommunityId: number | null = null;
+  selectedCommunityName: string = '';
+  
+  showDetailsModal: boolean = false;
+  selectedCommunity: Community | null = null;
 
   constructor(
     private profileService: Profile,
     private authService: AuthService,
-    private router: Router,
+    public router: Router,
     private friendService: FriendService,
     private communityService: CommunityService
   ) { }
@@ -75,7 +82,7 @@ export class CommunitiesPage implements OnInit {
   loadUserCommunities() {
     if (!this.user) return;
     
-    this.communityService.getUserCommunities(this.user).subscribe({
+    this.communityService.getUserCommunities(this.user.id).subscribe({
       next: (communities) => {
         this.userCommunities = communities;
         console.log('User communities loaded:', communities);
@@ -89,7 +96,7 @@ export class CommunitiesPage implements OnInit {
   loadNewCommunities() {
     if (!this.user) return;
     
-    this.communityService.getNewCommunities(this.user).subscribe({
+    this.communityService.getNewCommunities(this.user.id).subscribe({
       next: (communities) => {
         this.newCommunities = communities;
         console.log('New communities loaded:', communities);
@@ -167,9 +174,12 @@ export class CommunitiesPage implements OnInit {
       return;
     }
 
-    // TODO: Uncomment when backend is ready
-    /*
-    this.communityService.createCommunity(this.newCommunityName, this.newCommunityDescription).subscribe({
+    if (!this.user) {
+      console.error('User not loaded');
+      return;
+    }
+
+    this.communityService.createCommunity(this.newCommunityName, this.newCommunityDescription, this.user.id).subscribe({
       next: (community) => {
         console.log('Community created:', community);
         this.createdCommunityId = community.id;
@@ -182,33 +192,67 @@ export class CommunitiesPage implements OnInit {
           this.showSuccessAnimation = false;
           this.closeAddModal();
           this.router.navigate(['/communities', community.id]);
-        }, 2000);
+          // Reload communities lists
+          this.loadUserCommunities();
+        }, 2450);
       },
       error: (err) => {
         console.error('Error creating community:', err);
         // TODO: Show error message
       }
     });
-    */
-
-    // Temporary mock for testing animation
-    console.log('Creating community:', {
-      name: this.newCommunityName,
-      description: this.newCommunityDescription
-    });
-    
-    this.createdCommunityId = 1; // Mock ID
-    this.showSuccessAnimation = true;
-    
-    setTimeout(() => {
-      this.showSuccessAnimation = false;
-      this.closeAddModal();
-      this.router.navigate(['/communities', this.createdCommunityId]);
-    }, 2450);
   }
 
   logout() {
     this.authService.logout();
     this.router.navigate(['/welcome']);
+  }
+
+  joinCommunity(communityId: number) {
+    console.log('Joining community:', communityId);
+    // TODO: Implement join community API call
+    // For now, just navigate to the community page
+    this.router.navigate(['/communities', communityId]);
+  }
+
+  showJoinConfirmation(communityId: number, communityName: string) {
+    this.selectedCommunityId = communityId;
+    this.selectedCommunityName = communityName;
+    this.showJoinModal = true;
+  }
+
+  cancelJoin() {
+    this.showJoinModal = false;
+    this.selectedCommunityId = null;
+    this.selectedCommunityName = '';
+  }
+
+  confirmJoin() {
+    if (this.selectedCommunityId) {
+      this.joinCommunity(this.selectedCommunityId);
+    }
+    this.cancelJoin();
+  }
+
+  showCommunityDetails(community: Community) {
+    this.selectedCommunity = community;
+    this.showDetailsModal = true;
+  }
+
+  closeDetailsModal() {
+    this.showDetailsModal = false;
+    this.selectedCommunity = null;
+  }
+
+  getMockMemberCount(): number {
+    // Mock data - random member count between 10-500
+    return Math.floor(Math.random() * 490) + 10;
+  }
+
+  joinFromDetails() {
+    if (this.selectedCommunity) {
+      this.closeDetailsModal();
+      this.showJoinConfirmation(this.selectedCommunity.id, this.selectedCommunity.name);
+    }
   }
 }

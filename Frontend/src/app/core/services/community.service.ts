@@ -13,15 +13,19 @@ export class CommunityService {
 
   constructor(private http: HttpClient) { }
 
-  getUserCommunities(user: UserResponse): Observable<Community[]> {
-    return this.http.post<Community[]>(`${this.apiUrl}/user-communities`, user);
+  getUserCommunities(userId: number): Observable<Community[]> {
+    return this.http.get<Community[]>(`${this.apiUrl}/user-communities/${userId}`);
   }
 
-  getNewCommunities(user: UserResponse): Observable<Community[]> {
-    return this.http.post<Community[]>(`${this.apiUrl}/new-communities`, user);
+  getNewCommunities(userId: number): Observable<Community[]> {
+    return this.http.get<Community[]>(`${this.apiUrl}/new-communities/${userId}`);
   }
 
-  createCommunity(name: string, description: string): Observable<Community> {
-    return this.http.post<Community>(`${this.apiUrl}/create`, { name, description });
+  createCommunity(name: string, description: string, creatorId: number): Observable<Community> {
+    return this.http.post<Community>(`${this.apiUrl}/create`, { 
+      name, 
+      description, 
+      creator: { id: creatorId } 
+    });
   }
 }
