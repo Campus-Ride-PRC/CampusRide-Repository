@@ -1,8 +1,10 @@
 package campus.ride.api.controller;
 
+import campus.ride.interfaces.CommunityMemberService;
 import campus.ride.interfaces.CommunityService;
 import campus.ride.transfer.dtos.address.AddressDto;
 import campus.ride.transfer.dtos.community.CommunityDto;
+import campus.ride.transfer.dtos.community.CommunityMemberDto;
 import campus.ride.transfer.dtos.user.UserResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -23,9 +25,11 @@ import java.util.concurrent.CompletableFuture;
 public class CommunityController {
 
     private final CommunityService communityService;
+    private final CommunityMemberService communityMemberService;
 
-    public CommunityController(CommunityService communityService) {
+    public CommunityController(CommunityService communityService, CommunityMemberService communityMemberService) {
         this.communityService = communityService;
+        this.communityMemberService = communityMemberService;
     }
 
     @PostMapping("/create")
@@ -58,6 +62,23 @@ public class CommunityController {
     public CompletableFuture<ResponseEntity<List<CommunityDto>>> getJoinedCommunities(@PathVariable Long userId) {
         return communityService.getNewCommunities(userId)
                 .thenApply(ResponseEntity::ok);
+    }
+
+    @PostMapping("/add-member")
+    @Operation(summary = "Join a community", description = "An user joins a community")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Join successfully",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = AddressDto.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid input data",
+                    content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal server error",
+                    content = @Content)
+    })
+    public CompletableFuture<ResponseEntity<CommunityMemberDto>> joinCommunity(@Valid @RequestBody CommunityMemberDto communityMemberDto){
+        return communityMemberService.addMemberToCommunity(
+                communityMemberDto.getCommunityId(),
+                communityMemberDto.getUserId()
+        ).thenApply(dto -> ResponseEntity.status(201).body(dto));
     }
 
 

@@ -7,6 +7,7 @@ public class CommunityDto {
     private String name;
     private String description;
     private UserResponseDto creator;
+    private Long memberCount;
 
     public CommunityDto() {
     }
@@ -48,5 +49,13 @@ public class CommunityDto {
 
     public void setCreator(UserResponseDto creator) {
         this.creator = creator;
+    }
+
+    public Long getMemberCount() {
+        return memberCount;
+    }
+
+    public void setMemberCount(Long memberCount) {
+        this.memberCount = memberCount;
     }
 }

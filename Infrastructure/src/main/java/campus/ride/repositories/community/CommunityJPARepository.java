@@ -16,7 +16,7 @@ public interface CommunityJPARepository extends JpaRepository<Communities, Long>
     @Query("SELECT DISTINCT c FROM Communities c " +
            "JOIN FETCH c.createdBy u " +
            "LEFT JOIN FETCH u.faculty f " +
-           "LEFT JOIN FETCH f.address a " + // Adăugăm fetch și pentru adresă
+           "LEFT JOIN FETCH f.address a " +
            "WHERE c.id NOT IN " +
            "(SELECT cm.id.communityId FROM CommunityMembers cm WHERE cm.id.userId = :userId)")
     List<Communities> getAllNewCommunities(@Param("userId") Long userId);
@@ -24,7 +24,7 @@ public interface CommunityJPARepository extends JpaRepository<Communities, Long>
     @Query("SELECT DISTINCT c FROM Communities c " +
            "JOIN FETCH c.createdBy u " +
            "LEFT JOIN FETCH u.faculty f " +
-           "LEFT JOIN FETCH f.address a " + // Adăugăm fetch și pentru adresă
+           "LEFT JOIN FETCH f.address a " +
            "JOIN CommunityMembers cm ON c.id = cm.id.communityId " +
            "WHERE cm.id.userId = :userId")
     List<Communities> getAllIncludedCommunities(@Param("userId") Long userId);

@@ -1,7 +1,7 @@
 package campus.ride.entities;
 
 import jakarta.persistence.*;
-
+import org.hibernate.annotations.Formula;
 import java.time.LocalDateTime;
 
 @Entity
@@ -24,6 +24,13 @@ public class Communities {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
+
+    @Formula("(SELECT count(*) FROM community_members cm WHERE cm.community_id = id)")
+    private Long memberCount;
+
+    public Long getMemberCount() {
+        return memberCount;
+    }
 
     public Communities(Long id, String name, String description, LocalDateTime createdAt, User createdBy) {
         this.id = id;
@@ -74,4 +81,5 @@ public class Communities {
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
+
 }
